@@ -88,38 +88,6 @@ Baseado na camisa do evento:
   - 400: `#facc15`
   - 500: `#eab308`
 
-## Armazenamento de Dados
-
-As inscrições são armazenadas no `localStorage` do navegador com a seguinte estrutura:
-
-\`\`\`javascript
-{
-  id: number,
-  numeroParticipante: string,
-  nome: string,
-  email: string,
-  telefone: string,
-  cpf: string,
-  dataNascimento: string,
-  cep: string,
-  endereco: string,
-  cidade: string,
-  estado: string,
-  modalidade: string,
-  tamanho: string,
-  foto: string (base64),
-  dataInscricao: string (ISO)
-}
-\`\`\`
-
-### Acessando os Dados
-
-Para visualizar as inscrições armazenadas, abra o Console do navegador e execute:
-
-\`\`\`javascript
-JSON.parse(localStorage.getItem('inscricoes'))
-\`\`\`
-
 ## Responsividade
 
 A aplicação foi desenvolvida com abordagem mobile-first e é totalmente responsiva:
@@ -127,14 +95,6 @@ A aplicação foi desenvolvida com abordagem mobile-first e é totalmente respon
 - 📱 Mobile: < 768px
 - 💻 Tablet: 768px - 1024px
 - 🖥️ Desktop: > 1024px
-
-## Validações Implementadas
-
-- ✅ CPF: Validação de formato e dígitos verificadores
-- ✅ Email: Validação de formato de email
-- ✅ Telefone: Mínimo 10 dígitos
-- ✅ Campos obrigatórios: Todos os campos do formulário
-- ✅ Foto: Upload obrigatório de imagem
 
 ## Melhorias Futuras
 
@@ -150,6 +110,3 @@ A aplicação foi desenvolvida com abordagem mobile-first e é totalmente respon
 
 Este projeto foi desenvolvido para a FARMACE.
 
-## Contato
-
-Para dúvidas ou sugestões sobre o evento, entre em contato com a organização da FARMACE.
