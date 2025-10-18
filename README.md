@@ -67,35 +67,6 @@ npm run dev
 - `npm run build` - Cria build de produção
 - `npm run preview` - Preview do build de produção
 
-## Estrutura do Projeto
-
-\`\`\`
-CorridaQualidade2/
-├── src/
-│   ├── components/
-│   │   └── ui/              # Componentes shadcn/ui
-│   │       ├── button.tsx
-│   │       ├── card.tsx
-│   │       ├── input.tsx
-│   │       └── label.tsx
-│   ├── lib/
-│   │   └── utils.ts         # Funções utilitárias
-│   ├── pages/
-│   │   ├── Home.tsx         # Landing page principal
-│   │   └── Inscricao.tsx    # Página de inscrição
-│   ├── App.tsx              # Componente principal com rotas
-│   ├── main.tsx             # Ponto de entrada da aplicação
-│   └── index.css            # Estilos globais e Tailwind
-├── screenshot/
-│   ├── Camisa.jpg           # Referência de cores
-│   └── ExemploInspiração.png # Layout de inspiração
-├── index.html
-├── package.json
-├── tailwind.config.js
-├── tsconfig.json
-└── vite.config.ts
-\`\`\`
-
 ## Design e Inspirações
 
 O design desta landing page foi inspirado em eventos esportivos de corrida de rua, com referências visuais de:
