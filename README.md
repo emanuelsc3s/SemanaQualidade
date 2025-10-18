@@ -96,6 +96,13 @@ CorridaQualidade2/
 └── vite.config.ts
 \`\`\`
 
+## Design e Inspirações
+
+O design desta landing page foi inspirado em eventos esportivos de corrida de rua, com referências visuais de:
+
+- [Campanha Corrida Integração - Behance](https://www.behance.net/gallery/203467473/Concorrencia-Campanha-Corrida-Integracao?tracking_source=search_projects|maratona+corrida+de+rua&l=0) - Referência visual e de campanha
+- [Corrida Integração](https://corridaintegracao.com.br/) - Referência de layout e estrutura de site de evento esportivo
+
 ## Paleta de Cores
 
 Baseado na camisa do evento:
