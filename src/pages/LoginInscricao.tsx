@@ -4,12 +4,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useNavigate } from "react-router-dom"
 import { useState, useRef, useEffect } from "react"
-import { ArrowLeft, Mail, Lock, HelpCircle, Volume2, VolumeX } from "lucide-react"
+import { ArrowLeft, User, Lock, HelpCircle, Volume2, VolumeX } from "lucide-react"
 
 export default function LoginInscricao() {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
-    email: "",
+    matricula: "",
     senha: ""
   })
   const [showHelp, setShowHelp] = useState(false)
@@ -160,7 +160,7 @@ export default function LoginInscricao() {
           {/* Card de Login */}
           <Card className="shadow-xl border-2 border-primary-100">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl font-bold text-center text-slate-800">
+              <CardTitle className="text-2xl font-bold text-center" style={{ color: '#242F65' }}>
                 Seja Bem-Vindo!
               </CardTitle>
               <p className="text-center text-slate-600">
@@ -169,19 +169,19 @@ export default function LoginInscricao() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Campo Email */}
+                {/* Campo Matrícula */}
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-slate-700 font-medium">
-                    E-mail
+                  <Label htmlFor="matricula" className="text-slate-700 font-medium">
+                    Matrícula
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={formData.email}
+                      id="matricula"
+                      name="matricula"
+                      type="text"
+                      placeholder="Digite sua matrícula (ex: 001234 ou 1234)"
+                      value={formData.matricula}
                       onChange={handleChange}
                       required
                       className="pl-10 h-12 border-slate-300 focus:border-primary-500 focus:ring-primary-500"
