@@ -245,17 +245,6 @@ export default function Home() {
                   SAIBA MAIS
                 </Button>
               </div>
-
-              <div className="flex items-center gap-4 pt-6 text-sm md:text-base justify-center md:justify-start">
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                  <DollarSign className="w-5 h-5" />
-                  <span className="font-bold">R$ 35,00</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                  <Users className="w-5 h-5" />
-                  <span className="font-semibold">Vagas Limitadas</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
