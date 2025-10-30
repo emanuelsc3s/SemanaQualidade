@@ -1,9 +1,9 @@
-import { useState, FormEvent, ChangeEvent } from "react"
+import { useState, FormEvent, ChangeEvent, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { ArrowLeft, Upload, Check, User, Mail, Phone, CreditCard, MapPin, Shirt } from "lucide-react"
+import { ArrowLeft, Upload, Check, User, CreditCard, MapPin, Shirt, Volume2, VolumeX } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 interface FormData {
@@ -44,6 +44,38 @@ export default function Inscricao() {
   })
   const [errors, setErrors] = useState<FormErrors>({})
   const [photoPreview, setPhotoPreview] = useState<string>('')
+  const [isMuted, setIsMuted] = useState(true)
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const hasUnmutedRef = useRef(false)
+
+  // Ativa som do áudio automaticamente após primeira interação do usuário
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      if (!hasUnmutedRef.current && audioRef.current) {
+        setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.muted = false
+            setIsMuted(false)
+            hasUnmutedRef.current = true
+          }
+        }, 2000)
+        // Remove listeners após primeira execução
+        document.removeEventListener('click', handleFirstInteraction)
+        document.removeEventListener('touchstart', handleFirstInteraction)
+        document.removeEventListener('keydown', handleFirstInteraction)
+      }
+    }
+
+    document.addEventListener('click', handleFirstInteraction)
+    document.addEventListener('touchstart', handleFirstInteraction)
+    document.addEventListener('keydown', handleFirstInteraction)
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction)
+      document.removeEventListener('touchstart', handleFirstInteraction)
+      document.removeEventListener('keydown', handleFirstInteraction)
+    }
+  }, [])
 
   const validateCPF = (cpf: string): boolean => {
     cpf = cpf.replace(/[^\d]/g, '')
@@ -182,6 +214,32 @@ export default function Inscricao() {
   if (submitted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-sky-50 flex items-center justify-center p-4">
+        {/* Background Music - Áudio do vídeo 0104.mp4 */}
+        <audio
+          ref={audioRef}
+          autoPlay
+          loop
+          muted={isMuted}
+          className="hidden"
+        >
+          <source src="/0104.mp4" type="audio/mp4" />
+          Seu navegador não suporta áudio HTML5.
+        </audio>
+
+        {/* Botão de Controle de Som Flutuante */}
+        <button
+          onClick={() => {
+            if (audioRef.current) {
+              audioRef.current.muted = !isMuted
+              setIsMuted(!isMuted)
+            }
+          }}
+          className="fixed bottom-6 right-6 z-50 bg-primary-600 hover:bg-primary-700 text-white rounded-full p-4 shadow-2xl transition-all duration-300 transform hover:scale-110 border-2 border-white/20 backdrop-blur-sm"
+          aria-label={isMuted ? "Ativar som" : "Desativar som"}
+        >
+          {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6 animate-pulse" />}
+        </button>
+
         <Card className="max-w-md w-full">
           <CardHeader className="text-center">
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -223,6 +281,32 @@ export default function Inscricao() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-sky-50">
+      {/* Background Music - Áudio do vídeo 0104.mp4 */}
+      <audio
+        ref={audioRef}
+        autoPlay
+        loop
+        muted={isMuted}
+        className="hidden"
+      >
+        <source src="/0104.mp4" type="audio/mp4" />
+        Seu navegador não suporta áudio HTML5.
+      </audio>
+
+      {/* Botão de Controle de Som Flutuante */}
+      <button
+        onClick={() => {
+          if (audioRef.current) {
+            audioRef.current.muted = !isMuted
+            setIsMuted(!isMuted)
+          }
+        }}
+        className="fixed bottom-6 right-6 z-50 bg-primary-600 hover:bg-primary-700 text-white rounded-full p-4 shadow-2xl transition-all duration-300 transform hover:scale-110 border-2 border-white/20 backdrop-blur-sm"
+        aria-label={isMuted ? "Ativar som" : "Desativar som"}
+      >
+        {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6 animate-pulse" />}
+      </button>
+
       {/* Header */}
       <div className="bg-gradient-to-r from-primary-500 to-sky-400 text-white py-6 shadow-lg">
         <div className="container mx-auto px-4">

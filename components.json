@@ -12,9 +12,7 @@
   },
   "aliases": {
     "components": "@/components",
-    "utils": "@/lib/utils"
-  },
-  "registries": {
-    "@shadcn": "https://ui.shadcn.com/r/default/{name}"
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui"
   }
 }

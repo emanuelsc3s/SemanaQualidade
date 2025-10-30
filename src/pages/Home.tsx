@@ -1,14 +1,49 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Calendar, MapPin, Award, Users, Clock, DollarSign, Menu, X } from "lucide-react"
+import { Calendar, MapPin, Award, Users, Clock, DollarSign, Menu, X, Volume2, VolumeX } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
 export default function Home() {
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+  const [isMuted, setIsMuted] = useState(true)
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const hasUnmutedRef = useRef(false)
+
+  // Ativa som do áudio automaticamente após primeira interação do usuário
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      if (!hasUnmutedRef.current && audioRef.current) {
+        setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.muted = false
+            setIsMuted(false)
+            hasUnmutedRef.current = true
+          }
+        }, 2000)
+        // Remove listeners após primeira execução
+        document.removeEventListener('click', handleFirstInteraction)
+        document.removeEventListener('touchstart', handleFirstInteraction)
+        document.removeEventListener('keydown', handleFirstInteraction)
+        document.removeEventListener('scroll', handleFirstInteraction)
+      }
+    }
+
+    document.addEventListener('click', handleFirstInteraction)
+    document.addEventListener('touchstart', handleFirstInteraction)
+    document.addEventListener('keydown', handleFirstInteraction)
+    document.addEventListener('scroll', handleFirstInteraction)
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction)
+      document.removeEventListener('touchstart', handleFirstInteraction)
+      document.removeEventListener('keydown', handleFirstInteraction)
+      document.removeEventListener('scroll', handleFirstInteraction)
+    }
+  }, [])
 
   useEffect(() => {
     const controlNavbar = () => {
@@ -41,6 +76,32 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-sky-50">
+      {/* Background Music - Áudio do vídeo 0104.mp4 */}
+      <audio
+        ref={audioRef}
+        autoPlay
+        loop
+        muted={isMuted}
+        className="hidden"
+      >
+        <source src="/0104.mp4" type="audio/mp4" />
+        Seu navegador não suporta áudio HTML5.
+      </audio>
+
+      {/* Botão de Controle de Som Flutuante */}
+      <button
+        onClick={() => {
+          if (audioRef.current) {
+            audioRef.current.muted = !isMuted
+            setIsMuted(!isMuted)
+          }
+        }}
+        className="fixed bottom-6 right-6 z-50 bg-primary-600 hover:bg-primary-700 text-white rounded-full p-4 shadow-2xl transition-all duration-300 transform hover:scale-110 border-2 border-white/20 backdrop-blur-sm"
+        aria-label={isMuted ? "Ativar som" : "Desativar som"}
+      >
+        {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6 animate-pulse" />}
+      </button>
+
       {/* Floating Liquid Glass Header */}
       <header className={`fixed left-4 right-4 z-50 transition-all duration-500 ${
         isVisible ? 'top-4 opacity-100' : '-top-24 opacity-0'
