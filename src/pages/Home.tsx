@@ -108,7 +108,7 @@ export default function Home() {
                 <div className="ml-4 relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-accent-400 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
                   <Button
-                    onClick={() => navigate('/inscricao')}
+                    onClick={() => navigate('/loginInscricao')}
                     className="relative bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-bold px-8 py-2.5 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-0 backdrop-blur-sm"
                   >
                     Inscreva-se
@@ -180,7 +180,7 @@ export default function Home() {
                 <Button
                   onClick={() => {
                     setMobileMenuOpen(false)
-                    navigate('/inscricao')
+                    navigate('/loginInscricao')
                   }}
                   className="relative w-full bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-bold py-3 shadow-lg border-0"
                 >
@@ -231,7 +231,7 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center md:justify-start">
                 <Button
                   size="xl"
-                  onClick={() => navigate('/inscricao')}
+                  onClick={() => navigate('/loginInscricao')}
                   className="bg-accent-400 hover:bg-accent-500 text-slate-900 font-bold shadow-2xl transform hover:scale-105 transition-all duration-300"
                 >
                   INSCREVA-SE AGORA
@@ -363,7 +363,7 @@ export default function Home() {
           </p>
           <Button
             size="xl"
-            onClick={() => navigate('/inscricao')}
+            onClick={() => navigate('/loginInscricao')}
             className="bg-accent-400 hover:bg-accent-500 text-slate-900 font-bold shadow-xl transform hover:scale-105 transition-all duration-300"
           >
             FAZER INSCRIÇÃO
