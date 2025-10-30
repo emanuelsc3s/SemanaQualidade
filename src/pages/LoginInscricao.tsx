@@ -46,13 +46,8 @@ export default function LoginInscricao() {
         {/* Overlay com gradiente para melhor legibilidade */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
         
-        {/* Logo e Texto sobre o vídeo */}
+        {/* Texto sobre o vídeo */}
         <div className="relative z-10 flex flex-col justify-end p-12 text-white">
-          <img
-            src="https://farmace.com.br/wp-content/uploads/2023/12/cropped-big-logo-farmace.png"
-            alt="Farmace"
-            className="h-16 w-auto mb-8 drop-shadow-2xl"
-          />
           <h1 className="text-4xl font-bold mb-4 drop-shadow-lg">
             II Corrida e Caminhada da Qualidade
           </h1>
@@ -65,6 +60,15 @@ export default function LoginInscricao() {
       {/* Seção Direita - Formulário de Login */}
       <div className="w-full lg:flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-slate-50 to-sky-50">
         <div className="w-full max-w-md">
+          {/* Logo FARMACE - Topo da área de login */}
+          <div className="flex justify-center mb-8">
+            <img
+              src="https://farmace.com.br/wp-content/uploads/2023/12/cropped-big-logo-farmace.png"
+              alt="Farmace"
+              className="h-16 w-auto mb-8 drop-shadow-2xl"
+            />
+          </div>
+
           {/* Botão Voltar */}
           <Button
             variant="ghost"
@@ -91,7 +95,7 @@ export default function LoginInscricao() {
           <Card className="shadow-xl border-2 border-primary-100">
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl font-bold text-center text-slate-800">
-                Login
+                Seja Bem-Vindo!
               </CardTitle>
               <p className="text-center text-slate-600">
                 Entre com suas credenciais para continuar
@@ -145,28 +149,6 @@ export default function LoginInscricao() {
                   className="w-full h-12 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   Entrar
-                </Button>
-
-                {/* Divisor */}
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-300"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white text-slate-500">
-                      Não tem uma conta?
-                    </span>
-                  </div>
-                </div>
-
-                {/* Botão Criar Conta */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full h-12 border-2 border-primary-500 text-primary-600 hover:bg-primary-50 font-semibold text-lg"
-                  onClick={() => navigate('/inscricao')}
-                >
-                  Criar Conta
                 </Button>
               </form>
             </CardContent>
