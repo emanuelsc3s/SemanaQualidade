@@ -2,9 +2,17 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { useNavigate } from "react-router-dom"
 import { useState, useRef, useEffect } from "react"
-import { ArrowLeft, User, Lock, HelpCircle, Volume2, VolumeX } from "lucide-react"
+import { ArrowLeft, User, Lock, HelpCircle, Volume2, VolumeX, AlertCircle } from "lucide-react"
 
 export default function LoginInscricao() {
   const navigate = useNavigate()
@@ -13,7 +21,7 @@ export default function LoginInscricao() {
     senha: ""
   })
   const [showHelp, setShowHelp] = useState(false)
-  const [errorMessage, setErrorMessage] = useState("")
+  const [showErrorDialog, setShowErrorDialog] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
   const videoRef = useRef<HTMLVideoElement>(null)
   const hasUnmutedRef = useRef(false)
@@ -50,9 +58,6 @@ export default function LoginInscricao() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Limpa mensagem de erro anterior
-    setErrorMessage("")
-
     // Validação hardcoded (sem backend por enquanto)
     const MATRICULA_VALIDA = "468"
     const SENHA_VALIDA = "123"
@@ -78,17 +83,12 @@ export default function LoginInscricao() {
       // Redireciona para página de inscrição
       navigate('/inscricao')
     } else {
-      // Credenciais inválidas
-      setErrorMessage("Matrícula ou senha incorreta. Por favor, verifique suas credenciais.")
+      // Credenciais inválidas - exibe modal de erro
+      setShowErrorDialog(true)
     }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Limpa mensagem de erro quando usuário começa a digitar
-    if (errorMessage) {
-      setErrorMessage("")
-    }
-
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -243,18 +243,6 @@ export default function LoginInscricao() {
                   </div>
                 </div>
 
-                {/* Mensagem de Erro */}
-                {errorMessage && (
-                  <div className="login-error-short bg-red-50 border-l-4 border-red-500 p-4 rounded-md animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                      <p className="text-sm text-red-700 font-medium">{errorMessage}</p>
-                    </div>
-                  </div>
-                )}
-
                 {/* Botão de Login */}
                 <Button
                   type="submit"
@@ -368,6 +356,30 @@ export default function LoginInscricao() {
             </p>
           </div>
         </div>
+
+        {/* Modal de Erro de Autenticação */}
+        <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+          <DialogContent className="sm:max-w-md bg-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="w-5 h-5" />
+                Erro de Autenticação
+              </DialogTitle>
+              <DialogDescription className="text-slate-600 pt-2">
+                Matrícula ou senha incorreta. Por favor, verifique suas credenciais.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="sm:justify-center">
+              <Button
+                type="button"
+                onClick={() => setShowErrorDialog(false)}
+                className="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 text-white"
+              >
+                OK
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
