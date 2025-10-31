@@ -196,3 +196,60 @@ Fica de olho neste WhatsApp, vou falar tudo por aqui.
   return mensagem
 }
 
+/**
+ * Gera a mensagem de confirmação para quem optou por NÃO participar dos eventos
+ * e apenas retirar a cesta natalina presencialmente na Farmace
+ *
+ * @param nome - Nome do colaborador
+ * @param numeroParticipante - Número de registro do colaborador
+ * @returns Mensagem formatada para envio
+ */
+export function gerarMensagemRetirarCesta(
+  nome: string,
+  numeroParticipante: string
+): string {
+  console.log('📝 [WhatsApp Service] Gerando mensagem de retirada de cesta:', {
+    nome,
+    numeroParticipante
+  })
+
+  const primeiroNome = nome.split(' ')[0]
+
+  const mensagem = `🎄 *Cesta Natalina FARMACE - 2025* 🎁
+
+Olá, *${primeiroNome}*! 👋
+
+Aqui é a Lis da FARMACE 💙
+
+Sua solicitação foi recebida ✅
+
+*Registro:*
+• Nº de registro: *#${numeroParticipante}*
+• Opção escolhida: *Retirar cesta natalina presencialmente*
+• Status: *confirmado*
+
+📍 *Informações importantes:*
+
+Você optou por NÃO participar:
+• ❌ Da II Corrida FARMACE
+• ❌ Do evento de comemoração de Natal
+
+✅ Sua cesta natalina estará disponível para retirada presencialmente na FARMACE nos dias:
+• *22 de dezembro de 2025*
+• *23 de dezembro de 2025*
+
+🕐 *Horário de retirada:*
+Das 8h às 17h
+
+📱 Fique de olho neste WhatsApp! Vou te avisar quando sua cesta estiver pronta para retirada e enviar mais detalhes sobre o local exato.
+
+Qualquer dúvida, é só chamar por aqui! 😊
+
+*Lis – FARMACE* 💙`
+
+  console.log('✅ [WhatsApp Service] Mensagem de retirada de cesta gerada com sucesso!')
+  console.log('📏 [WhatsApp Service] Tamanho:', mensagem.length, 'caracteres')
+
+  return mensagem
+}
+

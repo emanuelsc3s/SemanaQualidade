@@ -157,6 +157,12 @@ export default function InscricaoWizard() {
     return numbers.length === 11
   }
 
+  // Função para verificar se deve pular a Etapa 3 (seleção de tamanho de camisa)
+  // Retorna true se o usuário escolheu "retirar-cesta" (não participar de nenhum evento)
+  const shouldSkipStep3 = (): boolean => {
+    return formData.tipoParticipacao === 'retirar-cesta'
+  }
+
   // Validação de cada etapa
   const validateStep = (step: number): boolean => {
     switch (step) {
@@ -170,6 +176,8 @@ export default function InscricaoWizard() {
         if (formData.tipoParticipacao === 'corrida-natal' && !formData.modalidadeCorrida) return false
         return true
       case 3:
+        // Etapa 3: Valida tamanho da camisa (apenas se não pular esta etapa)
+        if (shouldSkipStep3()) return true // Se pular, considera válido automaticamente
         return !!formData.tamanho
       case 4:
         return formData.aceitouRegulamento
@@ -178,7 +186,7 @@ export default function InscricaoWizard() {
     }
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     // Etapa 1: Validação customizada com modal
     if (currentStep === 1) {
       if (!isWhatsappValid(formData.whatsapp)) {
@@ -189,8 +197,21 @@ export default function InscricaoWizard() {
 
     // Para outras etapas, usa validação normal
     if (validateStep(currentStep)) {
+      // NOVO: Se está na Etapa 2 e escolheu "retirar-cesta", pula direto para o modal de confirmação
+      if (currentStep === 2 && formData.tipoParticipacao === 'retirar-cesta') {
+        // Submete a inscrição diretamente
+        await handleSubmitRetirarCesta()
+        return
+      }
+
       if (currentStep < totalSteps) {
-        setCurrentStep(currentStep + 1)
+        // Lógica condicional: Se está na Etapa 2 e deve pular a Etapa 3, vai direto para Etapa 4
+        if (currentStep === 2 && shouldSkipStep3()) {
+          setCurrentStep(4) // Pula a Etapa 3 (seleção de camisa)
+        } else {
+          setCurrentStep(currentStep + 1) // Avança normalmente
+        }
+
         // Força o scroll para o topo imediatamente
         setTimeout(() => {
           window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -201,11 +222,76 @@ export default function InscricaoWizard() {
 
   const handleBack = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
+      // Lógica condicional: Se está na Etapa 4 e deve pular a Etapa 3, volta direto para Etapa 2
+      if (currentStep === 4 && shouldSkipStep3()) {
+        setCurrentStep(2) // Pula a Etapa 3 ao voltar
+      } else {
+        setCurrentStep(currentStep - 1) // Volta normalmente
+      }
+
       // Força o scroll para o topo imediatamente
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }, 0)
+    }
+  }
+
+  // Função específica para processar inscrição de quem escolheu apenas retirar a cesta
+  const handleSubmitRetirarCesta = async () => {
+    setIsSubmitting(true)
+
+    try {
+      // Salvar no localStorage
+      const inscricoes = JSON.parse(localStorage.getItem('inscricoes') || '[]')
+      const numeroParticipante = (inscricoes.length + 1).toString().padStart(4, '0')
+
+      const novaInscricao = {
+        ...formData,
+        id: Date.now(),
+        dataInscricao: new Date().toISOString(),
+        numeroParticipante,
+        // Define valores padrão para campos não preenchidos
+        tamanho: 'N/A', // Não precisa de camiseta
+        aceitouRegulamento: true // Aceita automaticamente (não há regulamento para quem só retira cesta)
+      }
+
+      inscricoes.push(novaInscricao)
+      localStorage.setItem('inscricoes', JSON.stringify(inscricoes))
+
+      // Enviar mensagem de confirmação via WhatsApp
+      console.log('Enviando mensagem de confirmação via WhatsApp (Retirar Cesta)...')
+
+      // Importa a função específica para mensagem de retirada de cesta
+      const { gerarMensagemRetirarCesta } = await import('@/services/whatsappService')
+
+      const mensagem = gerarMensagemRetirarCesta(
+        formData.nome,
+        numeroParticipante
+      )
+
+      const resultado = await sendWhatsAppMessage({
+        phoneNumber: formData.whatsapp,
+        message: mensagem
+      })
+
+      if (resultado.success) {
+        console.log('✅ Mensagem WhatsApp enviada com sucesso!')
+        setWhatsappSent(true)
+      } else {
+        console.error('❌ Erro ao enviar mensagem WhatsApp:', resultado.error)
+        // Mesmo com erro no WhatsApp, continua o fluxo
+        setWhatsappSent(false)
+      }
+
+    } catch (error) {
+      console.error('Erro ao processar inscrição:', error)
+      // Mesmo com erro, mostra o modal de sucesso
+    } finally {
+      setIsSubmitting(false)
+
+      // Mostrar confetes e modal
+      setShowConfetti(true)
+      setShowSuccessModal(true)
     }
   }
 
@@ -422,7 +508,13 @@ export default function InscricaoWizard() {
           <StepTipoParticipacao
             tipoParticipacao={formData.tipoParticipacao}
             modalidadeCorrida={formData.modalidadeCorrida}
-            onTipoChange={(value) => handleInputChange('tipoParticipacao', value)}
+            onTipoChange={(value) => {
+              handleInputChange('tipoParticipacao', value)
+              // Se escolheu "retirar-cesta", limpa o tamanho da camisa
+              if (value === 'retirar-cesta') {
+                handleInputChange('tamanho', '')
+              }
+            }}
             onModalidadeChange={(value) => handleInputChange('modalidadeCorrida', value)}
           />
         )}
@@ -499,35 +591,67 @@ export default function InscricaoWizard() {
       {/* Modal de Sucesso - Formato Recibo */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
         <DialogContent className="max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto">
-          {/* Cabeçalho do Recibo */}
+          {/* Cabeçalho do Recibo - Customizado para "Retirar Cesta" */}
           <div className="text-center border-b-2 border-dashed border-slate-300 pb-3 mb-3">
-            <div className="mx-auto w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-2">
-              <Check className="w-8 h-8 text-green-600" />
+            <div className={`mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-2 ${
+              formData.tipoParticipacao === 'retirar-cesta'
+                ? 'bg-amber-100'
+                : 'bg-green-100'
+            }`}>
+              {formData.tipoParticipacao === 'retirar-cesta' ? (
+                <Gift className="w-8 h-8 text-amber-600" />
+              ) : (
+                <Check className="w-8 h-8 text-green-600" />
+              )}
             </div>
-            <DialogTitle className="text-lg sm:text-xl font-bold text-green-600 mb-1">
-              Inscrição Realizada!
+            <DialogTitle className={`text-lg sm:text-xl font-bold mb-1 ${
+              formData.tipoParticipacao === 'retirar-cesta'
+                ? 'text-amber-600'
+                : 'text-green-600'
+            }`}>
+              {formData.tipoParticipacao === 'retirar-cesta'
+                ? 'Solicitação Registrada!'
+                : 'Inscrição Realizada!'}
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
-              Comprovante de Inscrição
+              {formData.tipoParticipacao === 'retirar-cesta'
+                ? 'Comprovante de Retirada de Cesta Natalina'
+                : 'Comprovante de Inscrição'}
             </DialogDescription>
           </div>
 
           {/* Corpo do Recibo */}
           <div className="space-y-2.5 py-1">
-            {/* Status */}
-            <div className="bg-amber-50 border-l-4 border-amber-400 p-2.5 rounded">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">⏳</span>
-                <div className="flex-1">
-                  <p className="text-xs font-semibold text-amber-800">Status: Aguardando Revisão</p>
-                  <p className="text-xs text-amber-600">Em breve você receberá a confirmação</p>
+            {/* Status - Customizado para "Retirar Cesta" */}
+            {formData.tipoParticipacao === 'retirar-cesta' ? (
+              <div className="bg-green-50 border-l-4 border-green-400 p-2.5 rounded">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">✅</span>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-green-800">Status: Confirmado</p>
+                    <p className="text-xs text-green-600">Sua cesta estará disponível para retirada</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-amber-50 border-l-4 border-amber-400 p-2.5 rounded">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">⏳</span>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-amber-800">Status: Aguardando Revisão</p>
+                    <p className="text-xs text-amber-600">Em breve você receberá a confirmação</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
-            {/* Número do Participante */}
+            {/* Número do Participante/Registro */}
             <div className="bg-gradient-to-r from-primary-50 to-sky-50 border border-primary-200 rounded-lg p-2.5">
-              <p className="text-xs text-slate-600 mb-0.5">Número do Participante</p>
+              <p className="text-xs text-slate-600 mb-0.5">
+                {formData.tipoParticipacao === 'retirar-cesta'
+                  ? 'Número de Registro'
+                  : 'Número do Participante'}
+              </p>
               <p className="text-xl sm:text-2xl font-bold text-primary-700 tracking-wider">
                 #{(JSON.parse(localStorage.getItem('inscricoes') || '[]').length).toString().padStart(4, '0')}
               </p>
@@ -545,33 +669,78 @@ export default function InscricaoWizard() {
                 <p className="font-medium text-slate-700 break-all text-xs">{formData.email}</p>
               </div>
 
-              {/* WhatsApp, Categoria e Camiseta em 3 colunas */}
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <p className="text-xs text-slate-500">WhatsApp</p>
-                  <p className="font-medium text-slate-700 text-xs">{formData.whatsapp}</p>
+              {/* WhatsApp, Categoria e Camiseta - Layout condicional */}
+              {formData.tipoParticipacao === 'retirar-cesta' ? (
+                // Layout para "Retirar Cesta" - Sem camiseta
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-xs text-slate-500">WhatsApp</p>
+                    <p className="font-medium text-slate-700 text-xs">{formData.whatsapp}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500">Opção Escolhida</p>
+                    <p className="font-semibold text-amber-700 uppercase text-xs">
+                      RETIRAR CESTA
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-slate-500">Participação</p>
-                  <p className="font-semibold text-primary-700 uppercase text-xs">
-                    {formData.tipoParticipacao === 'corrida-natal'
-                      ? formData.modalidadeCorrida.toUpperCase()
-                      : formData.tipoParticipacao === 'apenas-natal'
-                      ? 'APENAS NATAL'
-                      : 'RETIRAR CESTA'}
-                  </p>
+              ) : (
+                // Layout padrão - Com camiseta
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <p className="text-xs text-slate-500">WhatsApp</p>
+                    <p className="font-medium text-slate-700 text-xs">{formData.whatsapp}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500">Participação</p>
+                    <p className="font-semibold text-primary-700 uppercase text-xs">
+                      {formData.tipoParticipacao === 'corrida-natal'
+                        ? formData.modalidadeCorrida.toUpperCase()
+                        : 'APENAS NATAL'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500">Camiseta</p>
+                    <p className="font-semibold text-primary-700 text-xs">{formData.tamanho}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-slate-500">Camiseta</p>
-                  <p className="font-semibold text-primary-700 text-xs">{formData.tamanho}</p>
-                </div>
-              </div>
+              )}
 
               <div className="border-t border-slate-200 pt-1.5">
-                <p className="text-xs text-slate-500">Data da Inscrição</p>
+                <p className="text-xs text-slate-500">
+                  {formData.tipoParticipacao === 'retirar-cesta'
+                    ? 'Data do Registro'
+                    : 'Data da Inscrição'}
+                </p>
                 <p className="font-medium text-slate-700 text-xs">{new Date().toLocaleString('pt-BR')}</p>
               </div>
             </div>
+
+            {/* Informações específicas para "Retirar Cesta" */}
+            {formData.tipoParticipacao === 'retirar-cesta' && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <span className="text-lg">📍</span>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-amber-900 mb-1.5">
+                      Informações Importantes:
+                    </p>
+                    <div className="space-y-1 text-xs text-amber-800">
+                      <p>❌ Você <strong>NÃO</strong> participará da II Corrida FARMACE</p>
+                      <p>❌ Você <strong>NÃO</strong> participará do evento de comemoração de Natal</p>
+                      <p className="mt-2 pt-2 border-t border-amber-300">
+                        ✅ Sua cesta natalina estará disponível para <strong>retirada presencial na FARMACE</strong> nos dias:
+                      </p>
+                      <p className="font-semibold">• 22 de dezembro de 2025</p>
+                      <p className="font-semibold">• 23 de dezembro de 2025</p>
+                      <p className="mt-1.5 text-amber-700">
+                        🕐 Horário: Das 8h às 17h
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Aviso WhatsApp */}
             {whatsappSent ? (
