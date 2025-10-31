@@ -305,7 +305,7 @@ export default function InscricaoWizard() {
             <Button
               onClick={handleNext}
               disabled={!validateStep(currentStep)}
-              className="w-full sm:flex-1 order-1 sm:order-2 bg-primary-600 hover:bg-primary-700 h-11 md:h-12 text-sm md:text-base font-semibold"
+              className="w-full sm:flex-1 order-1 sm:order-2 bg-primary-600 hover:bg-primary-700 h-11 md:h-12 text-sm md:text-base font-semibold text-white"
             >
               Próximo
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -314,7 +314,7 @@ export default function InscricaoWizard() {
             <Button
               onClick={handleSubmit}
               disabled={!validateStep(5)}
-              className="w-full sm:flex-1 order-1 sm:order-2 bg-green-600 hover:bg-green-700 h-11 md:h-12 text-sm md:text-base font-semibold"
+              className="w-full sm:flex-1 order-1 sm:order-2 bg-green-600 hover:bg-green-700 h-11 md:h-12 text-sm md:text-base font-semibold text-white"
             >
               <Check className="w-4 h-4 mr-2" />
               Confirmar Inscrição
