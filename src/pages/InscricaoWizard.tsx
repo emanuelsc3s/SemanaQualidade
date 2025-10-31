@@ -29,10 +29,7 @@ interface FormData {
   // Etapa 3: Tamanho da Camiseta
   tamanho: string
 
-  // Etapa 4: Evento de Natal
-  participarNatal: string
-
-  // Etapa 5: Regulamento
+  // Etapa 4: Regulamento
   aceitouRegulamento: boolean
 }
 
@@ -60,11 +57,10 @@ export default function InscricaoWizard() {
     tipoParticipacao: "",
     modalidadeCorrida: "",
     tamanho: "",
-    participarNatal: "",
     aceitouRegulamento: false
   })
 
-  const totalSteps = 5
+  const totalSteps = 4
   const progress = (currentStep / totalSteps) * 100
 
   // Carrega dados do funcionário logado do localStorage
@@ -171,8 +167,6 @@ export default function InscricaoWizard() {
       case 3:
         return !!formData.tamanho
       case 4:
-        return !!formData.participarNatal
-      case 5:
         return formData.aceitouRegulamento
       default:
         return false
@@ -205,7 +199,7 @@ export default function InscricaoWizard() {
   }
 
   const handleSubmit = async () => {
-    if (validateStep(5)) {
+    if (validateStep(4)) {
       setIsSubmitting(true)
 
       try {
@@ -430,16 +424,8 @@ export default function InscricaoWizard() {
           />
         )}
 
-        {/* Etapa 4: Evento de Natal */}
+        {/* Etapa 4: Regulamento */}
         {currentStep === 4 && (
-          <StepEventoNatal
-            participarNatal={formData.participarNatal}
-            onParticipacaoChange={(value) => handleInputChange('participarNatal', value)}
-          />
-        )}
-
-        {/* Etapa 5: Regulamento */}
-        {currentStep === 5 && (
           <StepRegulamento
             aceitouRegulamento={formData.aceitouRegulamento}
             onAceiteChange={(value) => handleInputChange('aceitouRegulamento', value)}
@@ -471,7 +457,7 @@ export default function InscricaoWizard() {
           ) : (
             <Button
               onClick={handleSubmit}
-              disabled={!validateStep(5) || isSubmitting}
+              disabled={!validateStep(4) || isSubmitting}
               className="w-full sm:flex-1 order-1 sm:order-2 bg-green-600 hover:bg-green-700 h-11 md:h-12 text-sm md:text-base font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
@@ -548,8 +534,8 @@ export default function InscricaoWizard() {
                 <p className="font-medium text-slate-700 break-all text-xs">{formData.email}</p>
               </div>
 
-              {/* WhatsApp, Categoria, Camiseta e Evento de Natal em 4 colunas */}
-              <div className="grid grid-cols-4 gap-2">
+              {/* WhatsApp, Categoria e Camiseta em 3 colunas */}
+              <div className="grid grid-cols-3 gap-2">
                 <div>
                   <p className="text-xs text-slate-500">WhatsApp</p>
                   <p className="font-medium text-slate-700 text-xs">{formData.whatsapp}</p>
@@ -567,12 +553,6 @@ export default function InscricaoWizard() {
                 <div>
                   <p className="text-xs text-slate-500">Camiseta</p>
                   <p className="font-semibold text-primary-700 text-xs">{formData.tamanho}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500">Evento Natal</p>
-                  <p className="font-medium text-slate-700 text-xs">
-                    {formData.participarNatal === 'sim' ? '🎄 Sim' : '🚫 Não'}
-                  </p>
                 </div>
               </div>
 
@@ -832,7 +812,7 @@ function StepTipoParticipacao({ tipoParticipacao, modalidadeCorrida, onTipoChang
           Tipo de Participação
         </CardTitle>
         <CardDescription className="text-sm md:text-base">
-          Escolha como você deseja participar dos eventos da Semana da Qualidade
+          Escolha como você deseja participar dos eventos
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-6">
@@ -1073,91 +1053,7 @@ function StepTamanhoCamiseta({ tamanho, onTamanhoChange }: StepTamanhoCamisetaPr
   )
 }
 
-// Etapa 4: Evento de Natal
-interface StepEventoNatalProps {
-  participarNatal: string
-  onParticipacaoChange: (value: string) => void
-}
-
-function StepEventoNatal({ participarNatal, onParticipacaoChange }: StepEventoNatalProps) {
-  const opcoesNatal = [
-    {
-      value: 'sim',
-      label: 'Participar',
-      description: 'Desejo participar e receber a cesta natalina',
-      icon: '🎄'
-    },
-    {
-      value: 'nao',
-      label: 'Não Participar',
-      description: 'Não desejo participar do evento de Natal',
-      icon: '🚫'
-    }
-  ]
-
-  return (
-    <Card className="shadow-xl border-2 border-primary-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <CardHeader className="bg-gradient-to-r from-primary-50 to-sky-50 border-b border-primary-100">
-        <CardTitle className="flex items-center gap-2 text-xl md:text-2xl text-slate-800">
-          <Gift className="w-5 h-5 md:w-6 md:h-6 text-primary-600" />
-          Participação no Evento de Natal
-        </CardTitle>
-        <CardDescription className="text-sm md:text-base">
-          Participe do nosso evento especial de Natal
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pt-6">
-        <div className="space-y-5 md:space-y-6">
-          {/* Card de Informação */}
-          <div className="bg-gradient-to-br from-red-50 to-green-50 border-2 border-red-200 rounded-lg p-4 md:p-6">
-            <div className="flex items-start gap-3 md:gap-4">
-              <div className="text-3xl md:text-4xl">🎄</div>
-              <div className="flex-1">
-                <h3 className="font-bold text-base md:text-lg text-slate-800 mb-2">Evento de Natal FARMACE</h3>
-                <p className="text-sm md:text-base text-slate-600 mb-3">
-                  Ao participar, você receberá uma <strong>cesta natalina especial</strong> no evento.
-                  Celebre conosco essa data especial!
-                </p>
-                <div className="flex items-center gap-2 text-xs md:text-sm text-slate-500">
-                  <span>🎁</span>
-                  <span>Cesta natalina inclusa</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* RadioGroup de Participação */}
-          <RadioGroup value={participarNatal} onValueChange={onParticipacaoChange} className="space-y-3 md:space-y-4">
-            {opcoesNatal.map((opcao) => (
-              <label
-                key={opcao.value}
-                className={`flex items-center gap-4 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
-                  participarNatal === opcao.value
-                    ? 'border-primary-500 bg-primary-50 shadow-md'
-                    : 'border-slate-200 hover:border-primary-300'
-                }`}
-              >
-                <RadioGroupItem value={opcao.value} id={opcao.value} className="w-5 h-5" />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-2xl">{opcao.icon}</span>
-                    <span className="font-bold text-lg md:text-xl text-slate-800">{opcao.label}</span>
-                  </div>
-                  <p className="text-xs md:text-sm text-slate-600">{opcao.description}</p>
-                </div>
-                {participarNatal === opcao.value && (
-                  <Check className="w-5 h-5 md:w-6 md:h-6 text-primary-600" />
-                )}
-              </label>
-            ))}
-          </RadioGroup>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-// Etapa 5: Regulamento
+// Etapa 4: Regulamento
 interface StepRegulamentoProps {
   aceitouRegulamento: boolean
   onAceiteChange: (value: boolean) => void
