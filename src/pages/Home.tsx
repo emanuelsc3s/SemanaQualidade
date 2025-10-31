@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Calendar, MapPin, Award, Users, Clock, DollarSign, Menu, X, Volume2, VolumeX } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useRef } from "react"
@@ -10,6 +11,7 @@ export default function Home() {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isMuted, setIsMuted] = useState(true)
+  const [modalOpen, setModalOpen] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const hasUnmutedRef = useRef(false)
@@ -311,9 +313,11 @@ export default function Home() {
             <div className="hero-content-short space-y-3 md:space-y-4 lg:space-y-6 text-center md:text-left md:pl-12 lg:pl-16">
               {/* Texto principal do Hero */}
               <h1 className="hero-title-short text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
-                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal' }}>II CORRIDA</span><span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}> 2025.2</span>
+                <span style={{ fontFamily: 'Montserrat, sans-serif', fontStyle: 'normal', whiteSpace: 'nowrap' }}><span style={{ fontWeight: 800 }}>CONFRATERNIZAÇÃO</span> <span style={{ fontWeight: 200 }}>E</span></span>
                 <br />
-                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal', display: 'inline-block' }} className="text-accent-400 mt-2 md:mt-3 lg:mt-4">QUALIDADE</span>
+                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal' }}>II CORRIDA</span><span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}> 2025</span>
+                <br />
+                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal', display: 'inline-block' }} className="text-accent-400 mt-10 md:mt-14 lg:mt-16">QUALIDADE</span>
                 <br />
                 <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}>EM CADA METRO</span>
                 <br />
@@ -332,7 +336,7 @@ export default function Home() {
                 <Button
                   variant="outline"
                   className="hero-button-short h-12 md:h-14 px-6 md:px-10 text-base md:text-lg bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
-                  onClick={() => document.getElementById('info')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => setModalOpen(true)}
                 >
                   SAIBA MAIS
                 </Button>
@@ -341,6 +345,72 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Modal "Saiba Mais" - Formato 16:9 */}
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[85vw] lg:w-[80vw] max-w-6xl aspect-video overflow-hidden bg-white/95 backdrop-blur-xl border-2 border-primary-200/50 shadow-2xl rounded-2xl p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col">
+          <DialogHeader className="flex-shrink-0 space-y-1 sm:space-y-2">
+            <DialogTitle className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-500 text-center sm:text-left leading-tight" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+              II Corrida Farmace - 2025
+            </DialogTitle>
+          </DialogHeader>
+
+          <DialogDescription className="flex-1 overflow-y-auto text-xs sm:text-sm md:text-base text-slate-700 leading-relaxed space-y-2 sm:space-y-3 pr-2 scrollbar-thin scrollbar-thumb-primary-300 scrollbar-track-transparent">
+            <p className="font-semibold text-primary-700 text-sm sm:text-base md:text-lg">
+              Prepare-se para encerrar o ano de 2025 com muita energia, alegria e espírito de equipe!
+            </p>
+
+            <p>
+              No dia <span className="font-bold text-primary-600">21 de dezembro</span>, vamos celebrar juntos esse momento especial com a <span className="font-bold">II Corrida Farmace</span>. Um evento feito para movimentar o corpo, o coração e fortalecer nossos laços!
+            </p>
+
+            <div className="bg-gradient-to-r from-accent-50 to-primary-50 border-l-4 border-accent-400 p-2 sm:p-3 rounded-lg shadow-sm">
+              <p className="font-semibold text-slate-800 text-xs sm:text-sm">
+                E tem mais: nesse mesmo dia, teremos a <span className="text-accent-700">entrega das cestas natalinas</span> e o <span className="text-accent-700">sorteio de brindes incríveis</span>, deixando nossa comemoração ainda mais especial!
+              </p>
+            </div>
+
+            <p>
+              As inscrições acontecem de <span className="font-bold text-primary-600">31/10 a 10/11</span>. Garanta sua vaga e venha fazer parte dessa grande festa que celebra um ano de conquistas!
+            </p>
+
+            <div className="bg-gradient-to-br from-primary-600 to-primary-500 text-white p-2 sm:p-3 md:p-4 rounded-xl shadow-lg">
+              <p className="font-bold text-sm sm:text-base md:text-lg mb-1 sm:mb-2">
+                🎄 II Cantata de Natal
+              </p>
+              <p className="text-xs sm:text-sm leading-relaxed">
+                E para fechar com chave de ouro, a Farmace convida toda a região do Cariri para a <span className="font-bold">II Cantata de Natal</span>, um espetáculo de encanto e emoção que acontecerá nos dias <span className="font-bold">17, 18 e 19 de dezembro</span>, no <span className="font-bold">Casarão de Dr. Lívio</span>, no centro histórico de Barbalha.
+              </p>
+              <p className="text-xs sm:text-sm mt-1 sm:mt-2 italic">
+                Este será um presente da Farmace para região do Cariri.
+              </p>
+            </div>
+
+            <p className="text-center font-bold text-sm sm:text-base md:text-lg text-primary-700 pt-2 sm:pt-3 border-t-2 border-primary-200">
+              Vamos juntos celebrar a vida, a união e o espírito natalino! 🎉
+            </p>
+          </DialogDescription>
+
+          <div className="flex-shrink-0 flex flex-col sm:flex-row gap-2 sm:gap-3 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-200">
+            <Button
+              onClick={() => {
+                setModalOpen(false)
+                navigate('/loginInscricao')
+              }}
+              className="w-full sm:flex-1 h-10 sm:h-12 md:h-14 text-sm sm:text-base md:text-lg bg-gradient-to-r from-accent-400 to-accent-500 hover:from-accent-500 hover:to-accent-600 text-slate-900 font-bold shadow-lg transform hover:scale-105 transition-all duration-300"
+            >
+              INSCREVA-SE AGORA
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setModalOpen(false)}
+              className="w-full sm:w-auto h-10 sm:h-12 md:h-14 px-4 sm:px-6 md:px-8 text-sm sm:text-base md:text-lg border-2 border-primary-300 text-primary-700 hover:bg-primary-50 font-semibold"
+            >
+              Fechar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Event Info Section */}
       <section id="info" className="py-16 md:py-24 container mx-auto px-4">

@@ -370,6 +370,8 @@ export default function Inscricao() {
                   <Input
                     id="telefone"
                     name="telefone"
+                    type="tel"
+                    inputMode="numeric"
                     value={formData.telefone}
                     onChange={handlePhoneChange}
                     placeholder="(00) 00000-0000"
@@ -383,6 +385,8 @@ export default function Inscricao() {
                   <Input
                     id="cpf"
                     name="cpf"
+                    type="text"
+                    inputMode="numeric"
                     value={formData.cpf}
                     onChange={handleCPFChange}
                     placeholder="000.000.000-00"
@@ -422,6 +426,8 @@ export default function Inscricao() {
                   <Input
                     id="cep"
                     name="cep"
+                    type="text"
+                    inputMode="numeric"
                     value={formData.cep}
                     onChange={handleCEPChange}
                     placeholder="00000-000"

@@ -655,17 +655,13 @@ export default function InscricaoWizard() {
             <DialogTitle className="text-2xl text-center text-amber-600">
               WhatsApp Obrigatório
             </DialogTitle>
-            <DialogDescription className="text-center text-base pt-2">
-              O campo WhatsApp é obrigatório para continuar
-            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <p className="text-center text-slate-600">
-              O campo <strong>WhatsApp</strong> é obrigatório para prosseguir com a inscrição.
               Por favor, preencha-o corretamente com um número válido no formato <strong>(00) 00000-0000</strong>.
             </p>
             <p className="text-center text-sm text-slate-500">
-              Você receberá a confirmação de inscrição e atualizações importantes via WhatsApp.
+              <strong>Você receberá a confirmação de inscrição e atualizações importantes via WhatsApp.</strong>
             </p>
             <Button
               onClick={() => setShowWhatsappWarning(false)}

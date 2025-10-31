@@ -258,6 +258,7 @@ export default function LoginInscricao() {
                       id="matricula"
                       name="matricula"
                       type="text"
+                      inputMode="numeric"
                       placeholder="Digite sua matrícula (ex: 001234 ou 1234)"
                       value={formData.matricula}
                       onChange={handleChange}
@@ -278,6 +279,7 @@ export default function LoginInscricao() {
                       id="senha"
                       name="senha"
                       type="password"
+                      inputMode="numeric"
                       placeholder="••••••••"
                       value={formData.senha}
                       onChange={handleChange}
