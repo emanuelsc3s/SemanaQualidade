@@ -262,7 +262,7 @@ export default function InscricaoWizard() {
       <div className="relative text-white py-4 md:py-6 shadow-lg sticky top-0 z-40 overflow-hidden">
         {/* Imagem de fundo do Hero */}
         <img
-          src="/HeroCorridaFarmace.png"
+          src="/Banner.png"
           alt="II Corrida FARMACE - 2025.2"
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
@@ -272,18 +272,20 @@ export default function InscricaoWizard() {
 
         {/* Conteúdo do Header */}
         <div className="container mx-auto px-4 max-w-4xl relative z-10">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/')}
-            className="text-white hover:bg-white/20 mb-3 md:mb-4 text-sm md:text-base"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar
-          </Button>
+          <div className="flex items-start gap-4 mb-3 md:mb-4">
+            {/* Logo da FARMACE */}
+            <img
+              src="https://farmace.com.br/wp-content/uploads/2023/12/cropped-big-logo-farmace.png"
+              alt="Farmace"
+              className="drop-shadow-lg"
+              style={{ maxWidth: '150px' }}
+            />
 
-          <div className="text-center mb-3 md:mb-4">
-            <h1 className="text-xl md:text-3xl font-bold mb-1 md:mb-2 drop-shadow-lg">Inscrição - Etapa {currentStep} de {totalSteps}</h1>
-            <p className="text-white/90 text-sm md:text-base drop-shadow-md">II Corrida e Caminhada da Qualidade FARMACE</p>
+            {/* Textos do Header */}
+            <div className="flex-1 text-center">
+              <h1 className="text-xl md:text-3xl font-bold mb-1 md:mb-2 drop-shadow-lg">Inscrição - Etapa {currentStep} de {totalSteps}</h1>
+              <p className="text-white/90 text-sm md:text-base drop-shadow-md">II Corrida FARMACE - 2025</p>
+            </div>
           </div>
 
           <div className="space-y-2">

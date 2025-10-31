@@ -123,7 +123,7 @@ export async function sendWhatsAppMessage({
 
 /**
  * Gera a mensagem de confirmação de inscrição personalizada
- * 
+ *
  * @param nome - Nome do participante
  * @param numeroParticipante - Número de inscrição do participante
  * @param categoria - Categoria escolhida (3km, 5km, 10km)
@@ -135,38 +135,33 @@ export function gerarMensagemConfirmacao(
   categoria: string
 ): string {
   const primeiroNome = nome.split(' ')[0]
-  
-  const categoriaFormatada = categoria === '3km' ? '3KM (Caminhada/Corrida)' 
-    : categoria === '5km' ? '5KM (Corrida)' 
-    : categoria === '10km' ? '10KM (Corrida)'
-    : categoria
-  
-  return `🏃‍♂️ *II Corrida FARMACE 2025.2* 🏃‍♀️
 
-Olá, *${primeiroNome}*! 👋
+  // Formata a categoria para exibição
+  const categoriaFormatada = categoria === '3km' ? '3 km (caminhada)'
+    : categoria === '5km' ? '5 km (corrida)'
+    : categoria === '10km' ? '10 km (corrida)'
+    : categoria.toLowerCase()
 
-✅ *Inscrição Recebida com Sucesso!*
+  return `🏃‍♂️ II Corrida FARMACE - 2025 🏃‍♀️
 
-Recebemos seus dados de inscrição para a II Corrida e Caminhada da Qualidade FARMACE.
+Olá, ${primeiroNome}! 👋
 
-📋 *Dados da Inscrição:*
-• Número do Participante: *#${numeroParticipante}*
-• Categoria: *${categoriaFormatada}*
+Aqui é a Lis da FARMACE 💙
 
-⏳ *Status:* Aguardando Revisão
+Sua solicitação foi recebida ✅
 
-Sua inscrição está em análise pela nossa equipe. Em breve você receberá a confirmação final e mais informações sobre:
-• Retirada do kit (camiseta + número de peito)
-• Detalhes do local e percurso
-• Orientações para o dia do evento
+Inscrição:
+• Nº do participante: #${numeroParticipante}
+• Categoria: ${categoriaFormatada}
+• Status: em análise
+• Local da Largada: Farmace às 6h30
 
-📱 *Fique atento ao WhatsApp!*
-Todas as comunicações oficiais serão enviadas por este canal.
+Assim que confirmarmos, te aviso por aqui com:
+• Retirada do kit
+• orientações para o dia
 
-Qualquer dúvida, estamos à disposição!
+Fica de olho neste WhatsApp, vou falar tudo por aqui.
 
----
-*FARMACE - Semana da Qualidade 2025*
-_Promovendo saúde, bem-estar e qualidade de vida_ 💙`
+Lis – FARMACE 💙`
 }
 
