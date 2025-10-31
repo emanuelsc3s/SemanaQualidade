@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Progress } from "@/components/ui/progress"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { ArrowLeft, ArrowRight, Check, User, Trophy, Shirt, Gift, FileText, Volume2, VolumeX } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, User, Trophy, Shirt, Gift, FileText, Volume2, VolumeX, X } from "lucide-react"
 import Confetti from "react-confetti"
 import { useWindowSize } from "@/hooks/useWindowSize"
 
@@ -41,6 +41,7 @@ export default function InscricaoWizard() {
   const [currentStep, setCurrentStep] = useState(1)
   const [showConfetti, setShowConfetti] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showCancelModal, setShowCancelModal] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
   const audioRef = useRef<HTMLAudioElement>(null)
   const hasUnmutedRef = useRef(false)
@@ -145,6 +146,15 @@ export default function InscricaoWizard() {
   const handleCloseSuccess = () => {
     setShowConfetti(false)
     setShowSuccessModal(false)
+    navigate('/')
+  }
+
+  const handleCancelInscricao = () => {
+    setShowCancelModal(true)
+  }
+
+  const handleConfirmCancel = () => {
+    setShowCancelModal(false)
     navigate('/')
   }
 
@@ -294,13 +304,13 @@ export default function InscricaoWizard() {
             <Button
               variant="outline"
               onClick={handleBack}
-              className="w-full sm:w-auto order-2 sm:order-1 h-11 md:h-12 text-sm md:text-base"
+              className="w-full sm:w-auto order-3 sm:order-1 h-11 md:h-12 text-sm md:text-base border-2 border-slate-300 text-slate-700 hover:border-primary-500 hover:text-primary-700 hover:bg-primary-50/50 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Voltar
             </Button>
           )}
-          
+
           {currentStep < totalSteps ? (
             <Button
               onClick={handleNext}
@@ -320,6 +330,15 @@ export default function InscricaoWizard() {
               Confirmar Inscrição
             </Button>
           )}
+
+          <Button
+            variant="outline"
+            onClick={handleCancelInscricao}
+            className="w-full sm:w-auto order-2 sm:order-3 h-11 md:h-12 text-sm md:text-base border-2 border-red-300 text-red-700 hover:border-red-500 hover:text-red-800 hover:bg-red-50/50 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <X className="w-4 h-4 mr-2" />
+            Cancelar Inscrição
+          </Button>
         </div>
       </div>
 
@@ -347,6 +366,43 @@ export default function InscricaoWizard() {
             >
               OK
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Cancelamento */}
+      <Dialog open={showCancelModal} onOpenChange={setShowCancelModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <X className="w-10 h-10 text-red-600" />
+            </div>
+            <DialogTitle className="text-2xl text-center text-red-600">
+              Cancelar Inscrição?
+            </DialogTitle>
+            <DialogDescription className="text-center text-base pt-2">
+              Tem certeza que deseja cancelar sua inscrição?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <p className="text-center text-slate-600">
+              Todos os dados preenchidos serão perdidos e você será redirecionado para a página inicial.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowCancelModal(false)}
+                className="w-full sm:flex-1 border-2 border-slate-300 hover:border-slate-400"
+              >
+                Continuar Inscrição
+              </Button>
+              <Button
+                onClick={handleConfirmCancel}
+                className="w-full sm:flex-1 bg-red-600 hover:bg-red-700 text-white"
+              >
+                Sim, Cancelar
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

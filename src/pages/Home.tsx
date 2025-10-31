@@ -11,39 +11,48 @@ export default function Home() {
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isMuted, setIsMuted] = useState(true)
   const audioRef = useRef<HTMLAudioElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
   const hasUnmutedRef = useRef(false)
 
-  // Ativa som do áudio automaticamente após primeira interação do usuário
+  // Ativa som do áudio automaticamente após mover o mouse
   useEffect(() => {
-    const handleFirstInteraction = () => {
+    const handleMouseMove = () => {
       if (!hasUnmutedRef.current && audioRef.current) {
+        console.log('🎵 Movimento do mouse detectado, ativando áudio em 2s...')
         setTimeout(() => {
           if (audioRef.current) {
+            console.log('🎵 Desmutando áudio...')
+            console.log('🎵 Estado do áudio - paused:', audioRef.current.paused, 'muted:', audioRef.current.muted, 'volume:', audioRef.current.volume)
             audioRef.current.muted = false
             setIsMuted(false)
             hasUnmutedRef.current = true
+            // Garante que o áudio está tocando após desmutar
+            audioRef.current.play().then(() => {
+              console.log('✅ Áudio reproduzindo com sucesso!')
+              console.log('🎵 Volume atual:', audioRef.current?.volume)
+            }).catch(error => {
+              console.log('❌ Erro ao tentar reproduzir áudio:', error)
+            })
           }
         }, 2000)
-        // Remove listeners após primeira execução
-        document.removeEventListener('click', handleFirstInteraction)
-        document.removeEventListener('touchstart', handleFirstInteraction)
-        document.removeEventListener('keydown', handleFirstInteraction)
-        document.removeEventListener('scroll', handleFirstInteraction)
+        // Remove listener após primeira execução
+        document.removeEventListener('mousemove', handleMouseMove)
       }
     }
 
-    document.addEventListener('click', handleFirstInteraction)
-    document.addEventListener('touchstart', handleFirstInteraction)
-    document.addEventListener('keydown', handleFirstInteraction)
-    document.addEventListener('scroll', handleFirstInteraction)
+    document.addEventListener('mousemove', handleMouseMove)
 
     return () => {
-      document.removeEventListener('click', handleFirstInteraction)
-      document.removeEventListener('touchstart', handleFirstInteraction)
-      document.removeEventListener('keydown', handleFirstInteraction)
-      document.removeEventListener('scroll', handleFirstInteraction)
+      document.removeEventListener('mousemove', handleMouseMove)
     }
   }, [])
+
+  // Controla a velocidade de reprodução do vídeo do hero
+  const handleVideoLoad = () => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = 0.5 // 50% da velocidade normal (slow motion)
+    }
+  }
 
   useEffect(() => {
     const controlNavbar = () => {
@@ -92,8 +101,16 @@ export default function Home() {
       <button
         onClick={() => {
           if (audioRef.current) {
-            audioRef.current.muted = !isMuted
-            setIsMuted(!isMuted)
+            const newMutedState = !isMuted
+            audioRef.current.muted = newMutedState
+            setIsMuted(newMutedState)
+
+            // Se está desmutando, garante que o áudio está tocando
+            if (!newMutedState) {
+              audioRef.current.play().catch(error => {
+                console.log('Erro ao tentar reproduzir áudio:', error)
+              })
+            }
           }
         }}
         className="fixed bottom-6 right-6 z-50 bg-primary-600 hover:bg-primary-700 text-white rounded-full p-4 shadow-2xl transition-all duration-300 transform hover:scale-110 border-2 border-white/20 backdrop-blur-sm"
@@ -255,13 +272,20 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden min-h-screen text-white pt-20">
-        {/* Background Image */}
+        {/* Background Video */}
         <div className="absolute inset-0">
-          <img
-            src="/HeroCorridaFarmace.png"
-            alt="Background"
+          <video
+            ref={videoRef}
+            autoPlay
+            loop
+            muted
+            playsInline
+            onLoadedMetadata={handleVideoLoad}
             className="w-full h-full object-cover"
-          />
+          >
+            <source src="/HeroMulherCorrendo.mp4" type="video/mp4" />
+            Seu navegador não suporta vídeo HTML5.
+          </video>
         </div>
 
         <div className="relative container mx-auto px-4 py-16 md:py-24">
@@ -285,11 +309,19 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6 text-center md:text-left">
-              {/* Espaçamento para manter os botões na mesma posição */}
-              <div className="mb-4" style={{ height: '60px' }}></div>
-              <div style={{ height: '280px' }} className="md:h-[320px]"></div>
+              {/* Texto principal do Hero */}
+              <h1
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[64px] font-extrabold leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
+                style={{
+                  fontFamily: 'Montserrat, sans-serif',
+                  fontStyle: 'italic',
+                  fontWeight: 800
+                }}
+              >
+                II CORRIDA - QUALIDADE EM CADA METRO SAÚDE EM CADA PASSO
+              </h1>
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center md:justify-start">
+              <div className="flex flex-col sm:flex-row gap-4 pt-8 md:pt-12 justify-center md:justify-start">
                 <Button
                   size="xl"
                   onClick={() => navigate('/loginInscricao')}
