@@ -800,8 +800,8 @@ export default function InscricaoWizard() {
                       <p className="mt-2 pt-2 border-t border-amber-300">
                         ✅ Sua cesta natalina estará disponível para <strong>retirada presencial na FARMACE</strong> nos dias:
                       </p>
-                      <p className="font-semibold">• 22 de dezembro de 2025</p>
-                      <p className="font-semibold">• 23 de dezembro de 2025</p>
+                      <p className="font-semibold">• 22 de Dezembro de 2025</p>
+                      <p className="font-semibold">• 23 de Dezembro de 2025</p>
                       <p className="mt-1.5 text-amber-700">
                         🕐 Horário: Das 8h às 17h
                       </p>
@@ -1098,7 +1098,7 @@ function StepTipoParticipacao({ tipoParticipacao, modalidadeCorrida, onTipoChang
                   </span>
                 </div>
                 <p className="text-xs md:text-sm text-slate-600">
-                  Você participará da corrida e receberá a cesta natalina <strong>21 de Dezembro</strong>
+                  Você participará da corrida e receberá a cesta natalina dia <strong>21 de Dezembro</strong>
                 </p>
               </div>
               {tipoParticipacao === 'corrida-natal' && (
@@ -1211,7 +1211,7 @@ function StepTipoParticipacao({ tipoParticipacao, modalidadeCorrida, onTipoChang
                   </span>
                 </div>
                 <p className="text-xs md:text-sm text-slate-600">
-                  Retirada disponível nos dias <strong>22 ou 23 de dezembro/2025</strong>
+                  Retirada disponível nos dias <strong>22 ou 23 de Dezembro de 2025</strong>
                 </p>
               </div>
               {tipoParticipacao === 'retirar-cesta' && (
@@ -1364,7 +1364,7 @@ function StepRegulamento({ aceitouRegulamento, onAceiteChange }: StepRegulamento
                 BARBALHA-CE
               </h4>
               <p className="text-xs md:text-sm font-semibold text-slate-800">
-                Dia 21 de dezembro de 2025
+                Dia 21 de Dezembro de 2025
               </p>
             </div>
 
