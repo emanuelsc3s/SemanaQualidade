@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom"
 import { useState, useRef, useEffect } from "react"
 import { ArrowLeft, User, Lock, HelpCircle, Volume2, VolumeX, AlertCircle } from "lucide-react"
 import funcionariosData from "../../data/funcionarios.json"
+import { supabase } from "@/services/supabase"
 
 // Tipo para os dados do funcionário
 interface Funcionario {
@@ -39,6 +40,24 @@ const gerarSenha = (cpf: string, dataNascimento: string): string => {
 // Função para normalizar matrícula (remove zeros à esquerda)
 const normalizarMatricula = (matricula: string): string => {
   return matricula.replace(/^0+/, '') || '0'
+}
+
+// Função para formatar matrícula com 6 dígitos (adiciona zeros à esquerda)
+const formatarMatricula6Digitos = (matricula: string): string => {
+  const matriculaNormalizada = normalizarMatricula(matricula)
+  return matriculaNormalizada.padStart(6, '0')
+}
+
+// Função para formatar data/hora de forma legível
+const formatarDataHora = (dataISO: string): string => {
+  const data = new Date(dataISO)
+  const dia = data.getDate().toString().padStart(2, '0')
+  const mes = (data.getMonth() + 1).toString().padStart(2, '0')
+  const ano = data.getFullYear()
+  const horas = data.getHours().toString().padStart(2, '0')
+  const minutos = data.getMinutes().toString().padStart(2, '0')
+
+  return `${dia}/${mes}/${ano} às ${horas}:${minutos}`
 }
 
 export default function LoginInscricao() {
