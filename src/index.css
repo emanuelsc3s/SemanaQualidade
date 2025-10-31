@@ -22,9 +22,6 @@
   --color-accent-700: #a16207;
   --color-accent-800: #854d0e;
   --color-accent-900: #713f12;
-
-  /* Custom breakpoint for short screens (max-height: 600px) */
-  --breakpoint-short: 0 (max-height: 600px);
 }
 
 @layer base {
