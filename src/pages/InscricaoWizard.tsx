@@ -1197,9 +1197,7 @@ function StepRegulamento({ aceitouRegulamento, onAceiteChange }: StepRegulamento
             <section>
               <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">6. ENTREGA DE RESULTADOS E MEDALHAS</h4>
               <p className="text-xs md:text-sm leading-relaxed mb-2">
-                Os resultados completos serão divulgados em até 24 horas, após o termino do horário
-                limite de fim de prova. Serão divulgados nos canais oficiais da prova, pelo site da Cronos Cariri,
-                pelo INSTAGRAM @outdooreventosesportivos e pelos canais oficiais da FARMACE.
+                Os resultados completos serão divulgados pelo site oficial da FARMACE, www.farmace.com.br.
               </p>
               <p className="text-xs md:text-sm leading-relaxed">
                 As medalhas serão entregues logo após a prova, apenas para os que completarem o
@@ -1233,9 +1231,7 @@ function StepRegulamento({ aceitouRegulamento, onAceiteChange }: StepRegulamento
             <section>
               <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">9. CANAIS OFICIAIS</h4>
               <p className="text-xs md:text-sm leading-relaxed">
-                Os canais oficiais do evento serão consideradas, as mídias sociais da OUTDOOR EVENTOS
-                ESPORTIVOS, NO INSTAGRAM, site da Cronos Cariri, site da FARMACE, e o email
-                outdoorruncariri@gmail.com.
+                Os canais oficiais do evento serão consideradas, as mídias sociais da FARMACE, NO INSTAGRAM @farmaceoficial, site da oficial da farmace, www.farmace.com.br.
               </p>
             </section>
 
@@ -1252,16 +1248,6 @@ function StepRegulamento({ aceitouRegulamento, onAceiteChange }: StepRegulamento
               <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">REALIZAÇÃO</h4>
               <p className="text-xs md:text-sm leading-relaxed font-bold text-slate-900">
                 FARMACE
-              </p>
-            </section>
-
-            <section>
-              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">ORGANIZAÇÃO:</h4>
-              <p className="text-xs md:text-sm leading-relaxed">
-                <strong>OUTDOOR EVENTOS ESPORTIVOS</strong>
-              </p>
-              <p className="text-xs md:text-sm leading-relaxed">
-                CNPJ 21.803.725/0001-98
               </p>
             </section>
           </div>
