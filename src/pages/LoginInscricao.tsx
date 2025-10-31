@@ -13,6 +13,32 @@ import {
 import { useNavigate } from "react-router-dom"
 import { useState, useRef, useEffect } from "react"
 import { ArrowLeft, User, Lock, HelpCircle, Volume2, VolumeX, AlertCircle } from "lucide-react"
+import funcionariosData from "../../data/funcionarios.json"
+
+// Tipo para os dados do funcionário
+interface Funcionario {
+  MATRICULA: string
+  NOME: string
+  CPF: string
+  NASCIMENTO: string
+}
+
+// Função para gerar a senha esperada baseada no CPF e data de nascimento
+const gerarSenha = (cpf: string, dataNascimento: string): string => {
+  // Pega os 3 últimos dígitos do CPF
+  const ultimosDigitosCPF = cpf.slice(-3)
+
+  // Extrai dia e mês da data de nascimento (formato: DD.MM.YYYY HH:MM)
+  const [dia, mes] = dataNascimento.split('.')
+  const ddmm = `${dia}${mes}`
+
+  return `${ultimosDigitosCPF}${ddmm}`
+}
+
+// Função para normalizar matrícula (remove zeros à esquerda)
+const normalizarMatricula = (matricula: string): string => {
+  return matricula.replace(/^0+/, '') || '0'
+}
 
 export default function LoginInscricao() {
   const navigate = useNavigate()
@@ -58,32 +84,48 @@ export default function LoginInscricao() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Validação hardcoded (sem backend por enquanto)
-    const MATRICULA_VALIDA = "468"
-    const SENHA_VALIDA = "123"
-    const NOME_COLABORADOR = "CICERO EMANUEL DA SILVA"
-
-    // Remove espaços em branco e verifica as credenciais
+    // Remove espaços em branco
     const matriculaDigitada = formData.matricula.trim()
     const senhaDigitada = formData.senha.trim()
 
-    if (matriculaDigitada === MATRICULA_VALIDA && senhaDigitada === SENHA_VALIDA) {
+    // Busca o funcionário no JSON
+    const funcionarios = funcionariosData.RecordSet as Funcionario[]
+    const funcionario = funcionarios.find(f => {
+      // Normaliza a matrícula (remove zeros à esquerda para comparação)
+      const matriculaNormalizada = normalizarMatricula(f.MATRICULA)
+      const matriculaDigitadaNormalizada = normalizarMatricula(matriculaDigitada)
+
+      return matriculaNormalizada === matriculaDigitadaNormalizada
+    })
+
+    if (!funcionario) {
+      // Matrícula não encontrada
+      setShowErrorDialog(true)
+      return
+    }
+
+    // Gera a senha esperada baseada no CPF e data de nascimento
+    const senhaEsperada = gerarSenha(funcionario.CPF, funcionario.NASCIMENTO)
+
+    if (senhaDigitada === senhaEsperada) {
       // Login bem-sucedido
-      // Armazena dados do colaborador no localStorage
       const colaboradorData = {
-        matricula: MATRICULA_VALIDA,
-        nome: NOME_COLABORADOR,
+        matricula: funcionario.MATRICULA,
+        nome: funcionario.NOME,
+        cpf: funcionario.CPF,
+        dataNascimento: funcionario.NASCIMENTO,
         loginTimestamp: new Date().toISOString()
       }
 
       localStorage.setItem('colaboradorLogado', JSON.stringify(colaboradorData))
 
-      console.log("Login bem-sucedido:", NOME_COLABORADOR)
+      console.log("Login bem-sucedido:", funcionario.NOME)
 
       // Redireciona para página de inscrição
       navigate('/inscricao')
     } else {
-      // Credenciais inválidas - exibe modal de erro
+      // Senha incorreta
+      console.log("Senha esperada:", senhaEsperada, "Senha digitada:", senhaDigitada)
       setShowErrorDialog(true)
     }
   }

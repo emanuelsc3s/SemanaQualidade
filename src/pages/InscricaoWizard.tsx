@@ -64,6 +64,56 @@ export default function InscricaoWizard() {
   const totalSteps = 5
   const progress = (currentStep / totalSteps) * 100
 
+  // Carrega dados do funcionário logado do localStorage
+  useEffect(() => {
+    const colaboradorLogado = localStorage.getItem('colaboradorLogado')
+
+    if (colaboradorLogado) {
+      try {
+        const dados = JSON.parse(colaboradorLogado)
+
+        // Função para formatar CPF (XXX.XXX.XXX-XX)
+        const formatarCPF = (cpf: string) => {
+          const numbers = cpf.replace(/\D/g, '')
+          return numbers
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d)/, '$1.$2')
+            .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+            .slice(0, 14)
+        }
+
+        // Função para converter data de "DD.MM.YYYY HH:MM" para "YYYY-MM-DD"
+        const convertDateFormat = (dateString: string): string => {
+          // Formato de entrada: "10.06.1958 00:00"
+          // Formato de saída: "1958-06-10"
+          const [datePart] = dateString.split(' ')
+          const [dia, mes, ano] = datePart.split('.')
+          return `${ano}-${mes}-${dia}`
+        }
+
+        // Preenche automaticamente os campos da Etapa 1
+        setFormData(prev => ({
+          ...prev,
+          nome: dados.nome || '',
+          cpf: formatarCPF(dados.cpf || ''),
+          dataNascimento: dados.dataNascimento ? convertDateFormat(dados.dataNascimento) : ''
+        }))
+
+        console.log('✅ Dados do funcionário carregados automaticamente:', {
+          nome: dados.nome,
+          cpf: dados.cpf,
+          cpfFormatado: formatarCPF(dados.cpf || ''),
+          dataNascimento: dados.dataNascimento,
+          dataNascimentoConvertida: dados.dataNascimento ? convertDateFormat(dados.dataNascimento) : ''
+        })
+      } catch (error) {
+        console.error('❌ Erro ao carregar dados do funcionário:', error)
+      }
+    } else {
+      console.warn('⚠️ Nenhum funcionário logado encontrado no localStorage')
+    }
+  }, [])
+
   // Ativa som do áudio automaticamente após primeira interação do usuário
   useEffect(() => {
     const handleFirstInteraction = () => {
@@ -207,6 +257,27 @@ export default function InscricaoWizard() {
       .slice(0, 14)
   }
 
+  // Função para mascarar CPF conforme LGPD (mostra apenas 3 primeiros e 2 últimos dígitos)
+  const maskCPF = (cpf: string) => {
+    // Remove caracteres não numéricos
+    const numbers = cpf.replace(/\D/g, '')
+
+    if (numbers.length < 5) {
+      // Se tiver menos de 5 dígitos, retorna formatado normalmente
+      return formatCPF(cpf)
+    }
+
+    // Pega os 3 primeiros e 2 últimos dígitos
+    const first3 = numbers.slice(0, 3)
+    const last2 = numbers.slice(-2)
+
+    // Formata como: XXX.***.**X-XX
+    // Exemplo: 006.769.013-01 vira 006.***.**3-01
+    const secondToLast = numbers.length >= 3 ? numbers[numbers.length - 3] : '*'
+
+    return `${first3}.***.**${secondToLast}-${last2}`
+  }
+
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, '')
     if (numbers.length <= 10) {
@@ -304,6 +375,7 @@ export default function InscricaoWizard() {
             onInputChange={handleInputChange}
             formatCPF={formatCPF}
             formatPhone={formatPhone}
+            maskCPF={maskCPF}
           />
         )}
 
@@ -566,9 +638,10 @@ interface StepDadosCadastraisProps {
   onInputChange: (field: keyof FormData, value: string | boolean) => void
   formatCPF: (value: string) => string
   formatPhone: (value: string) => string
+  maskCPF: (value: string) => string
 }
 
-function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone }: StepDadosCadastraisProps) {
+function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone, maskCPF }: StepDadosCadastraisProps) {
   return (
     <Card className="shadow-xl border-2 border-primary-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <CardHeader className="bg-gradient-to-r from-primary-50 to-sky-50 border-b border-primary-100">
@@ -591,7 +664,8 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone }
               value={formData.nome}
               onChange={(e) => onInputChange('nome', e.target.value)}
               placeholder="Seu nome completo"
-              className="mt-1.5 h-12 text-sm md:text-base border-slate-300 focus:border-primary-500 focus:ring-primary-500"
+              className="mt-1.5 h-12 text-sm md:text-base border-slate-300 bg-slate-50"
+              readOnly
             />
           </div>
 
@@ -606,7 +680,8 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone }
                 value={formData.email}
                 onChange={(e) => onInputChange('email', e.target.value)}
                 placeholder="seu@email.com"
-                className="mt-1.5 h-12 text-sm md:text-base border-slate-300 focus:border-primary-500 focus:ring-primary-500"
+                className="mt-1.5 h-12 text-sm md:text-base border-slate-300 bg-slate-50"
+                readOnly
               />
             </div>
 
@@ -616,10 +691,11 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone }
               </Label>
               <Input
                 id="cpf"
-                value={formData.cpf}
+                value={maskCPF(formData.cpf)}
                 onChange={(e) => onInputChange('cpf', formatCPF(e.target.value))}
-                placeholder="000.000.000-00"
-                className="mt-1.5 h-12 text-sm md:text-base border-slate-300 focus:border-primary-500 focus:ring-primary-500"
+                placeholder="000.***.**0-00"
+                className="mt-1.5 h-12 text-sm md:text-base border-slate-300 bg-slate-50"
+                readOnly
               />
             </div>
           </div>
@@ -634,7 +710,8 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone }
                 type="date"
                 value={formData.dataNascimento}
                 onChange={(e) => onInputChange('dataNascimento', e.target.value)}
-                className="mt-1.5 h-12 text-sm md:text-base border-slate-300 focus:border-primary-500 focus:ring-primary-500"
+                className="mt-1.5 h-12 text-sm md:text-base border-slate-300 bg-slate-50"
+                readOnly
               />
             </div>
 
