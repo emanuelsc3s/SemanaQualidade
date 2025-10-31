@@ -21,10 +21,10 @@ CREATE TYPE tipo_participacao_enum AS ENUM (
 );
 
 CREATE TYPE status_inscricao_enum AS ENUM (
-    'pendente',
-    'confirmada',
-    'cancelada',
-    'compareceu'
+    'Pendente',
+    'Confirmada',
+    'Cancelada',
+    'Retirou Kit'
 );
 
 -- ============================================
