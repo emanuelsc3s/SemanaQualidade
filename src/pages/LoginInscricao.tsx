@@ -21,6 +21,7 @@ interface Funcionario {
   NOME: string
   CPF: string
   NASCIMENTO: string
+  EMAIL: string // ✅ NOVO: Campo de email do funcionário
 }
 
 // Função para gerar a senha esperada baseada no CPF e data de nascimento
@@ -114,12 +115,13 @@ export default function LoginInscricao() {
         nome: funcionario.NOME,
         cpf: funcionario.CPF,
         dataNascimento: funcionario.NASCIMENTO,
+        email: funcionario.EMAIL || '', // ✅ NOVO: Adiciona email do funcionário
         loginTimestamp: new Date().toISOString()
       }
 
       localStorage.setItem('colaboradorLogado', JSON.stringify(colaboradorData))
 
-      console.log("Login bem-sucedido:", funcionario.NOME)
+      console.log("Login bem-sucedido:", funcionario.NOME, "| Email:", funcionario.EMAIL)
 
       // Redireciona para página de inscrição
       navigate('/inscricao')

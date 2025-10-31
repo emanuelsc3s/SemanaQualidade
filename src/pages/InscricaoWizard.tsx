@@ -43,6 +43,7 @@ export default function InscricaoWizard() {
   const [showConfetti, setShowConfetti] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
+  const [showWhatsappWarning, setShowWhatsappWarning] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [whatsappSent, setWhatsappSent] = useState(false)
@@ -95,12 +96,14 @@ export default function InscricaoWizard() {
         setFormData(prev => ({
           ...prev,
           nome: dados.nome || '',
+          email: dados.email || '', // ✅ NOVO: Preenche email automaticamente
           cpf: formatarCPF(dados.cpf || ''),
           dataNascimento: dados.dataNascimento ? convertDateFormat(dados.dataNascimento) : ''
         }))
 
         console.log('✅ Dados do funcionário carregados automaticamente:', {
           nome: dados.nome,
+          email: dados.email, // ✅ NOVO: Log do email
           cpf: dados.cpf,
           cpfFormatado: formatarCPF(dados.cpf || ''),
           dataNascimento: dados.dataNascimento,
@@ -143,11 +146,20 @@ export default function InscricaoWizard() {
     }
   }, [])
 
+  // Função para validar se o WhatsApp está completo
+  const isWhatsappValid = (whatsapp: string): boolean => {
+    // Remove caracteres não numéricos
+    const numbers = whatsapp.replace(/\D/g, '')
+    // WhatsApp válido deve ter 11 dígitos (DDD + 9 dígitos)
+    return numbers.length === 11
+  }
+
   // Validação de cada etapa
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 1:
-        return !!(formData.nome && formData.email && formData.cpf && formData.dataNascimento && formData.whatsapp)
+        // Etapa 1: Apenas WhatsApp é obrigatório
+        return isWhatsappValid(formData.whatsapp)
       case 2:
         return !!formData.categoria
       case 3:
@@ -162,6 +174,15 @@ export default function InscricaoWizard() {
   }
 
   const handleNext = () => {
+    // Etapa 1: Validação customizada com modal
+    if (currentStep === 1) {
+      if (!isWhatsappValid(formData.whatsapp)) {
+        setShowWhatsappWarning(true)
+        return
+      }
+    }
+
+    // Para outras etapas, usa validação normal
     if (validateStep(currentStep)) {
       if (currentStep < totalSteps) {
         setCurrentStep(currentStep + 1)
@@ -354,14 +375,13 @@ export default function InscricaoWizard() {
 
             {/* Textos do Header */}
             <div className="flex-1 text-center">
-              <h1 className="text-xl md:text-3xl font-bold mb-1 md:mb-2 drop-shadow-lg">Inscrição - Etapa {currentStep} de {totalSteps}</h1>
+              <h1 className="text-xl md:text-3xl font-bold mb-1 md:mb-2 drop-shadow-lg">INSCRIÇÃO - ETAPA {currentStep} de {totalSteps}</h1>
               <p className="text-white/90 text-sm md:text-base drop-shadow-md">II Corrida FARMACE - 2025</p>
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Progress value={progress} className="h-2 md:h-3 bg-white/20" />
-            <p className="text-center text-xs md:text-sm text-white/80">{Math.round(progress)}% concluído</p>
           </div>
         </div>
       </div>
@@ -427,7 +447,7 @@ export default function InscricaoWizard() {
           {currentStep < totalSteps ? (
             <Button
               onClick={handleNext}
-              disabled={!validateStep(currentStep)}
+              disabled={currentStep === 1 ? false : !validateStep(currentStep)}
               className="w-full sm:flex-1 order-1 sm:order-2 bg-primary-600 hover:bg-primary-700 h-11 md:h-12 text-sm md:text-base font-semibold text-white"
             >
               Próximo
@@ -624,6 +644,38 @@ export default function InscricaoWizard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Modal de Aviso - WhatsApp Obrigatório */}
+      <Dialog open={showWhatsappWarning} onOpenChange={setShowWhatsappWarning}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="mx-auto w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-4">
+              <span className="text-4xl">📱</span>
+            </div>
+            <DialogTitle className="text-2xl text-center text-amber-600">
+              WhatsApp Obrigatório
+            </DialogTitle>
+            <DialogDescription className="text-center text-base pt-2">
+              O campo WhatsApp é obrigatório para continuar
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <p className="text-center text-slate-600">
+              O campo <strong>WhatsApp</strong> é obrigatório para prosseguir com a inscrição.
+              Por favor, preencha-o corretamente com um número válido no formato <strong>(00) 00000-0000</strong>.
+            </p>
+            <p className="text-center text-sm text-slate-500">
+              Você receberá a confirmação de inscrição e atualizações importantes via WhatsApp.
+            </p>
+            <Button
+              onClick={() => setShowWhatsappWarning(false)}
+              className="w-full bg-primary-600 hover:bg-primary-700 text-white"
+            >
+              Entendi
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -657,7 +709,7 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone, 
         <div className="grid gap-4 md:gap-5">
           <div>
             <Label htmlFor="nome" className="text-sm md:text-base font-medium text-slate-700">
-              Nome Completo *
+              Nome Completo
             </Label>
             <Input
               id="nome"
@@ -672,7 +724,7 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone, 
           <div className="grid sm:grid-cols-2 gap-4 md:gap-5">
             <div>
               <Label htmlFor="email" className="text-sm md:text-base font-medium text-slate-700">
-                E-mail *
+                E-mail
               </Label>
               <Input
                 id="email"
@@ -680,14 +732,16 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone, 
                 value={formData.email}
                 onChange={(e) => onInputChange('email', e.target.value)}
                 placeholder="seu@email.com"
-                className="mt-1.5 h-12 text-sm md:text-base border-slate-300 bg-slate-50"
-                readOnly
+                className="mt-1.5 h-12 text-sm md:text-base border-slate-300 focus:border-primary-500 focus:ring-primary-500"
               />
+              <p className="text-xs md:text-sm text-slate-500 mt-1.5">
+                Você pode alterar o e-mail se desejar
+              </p>
             </div>
 
             <div>
               <Label htmlFor="cpf" className="text-sm md:text-base font-medium text-slate-700">
-                CPF *
+                CPF
               </Label>
               <Input
                 id="cpf"
@@ -703,7 +757,7 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone, 
           <div className="grid sm:grid-cols-2 gap-4 md:gap-5">
             <div>
               <Label htmlFor="dataNascimento" className="text-sm md:text-base font-medium text-slate-700">
-                Data de Nascimento *
+                Data de Nascimento
               </Label>
               <Input
                 id="dataNascimento"
@@ -725,6 +779,7 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone, 
                 onChange={(e) => onInputChange('whatsapp', formatPhone(e.target.value))}
                 placeholder="(00) 00000-0000"
                 className="mt-1.5 h-12 text-sm md:text-base border-slate-300 focus:border-primary-500 focus:ring-primary-500"
+                required
               />
               <p className="text-xs md:text-sm text-slate-500 mt-1.5">
                 Você receberá a confirmação de inscrição via WhatsApp
@@ -735,7 +790,7 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone, 
 
         <div className="bg-accent-50 border-l-4 border-accent-400 p-3 md:p-4 rounded mt-4">
           <p className="text-xs md:text-sm text-slate-700">
-            <strong className="text-accent-700">⚠️ Importante:</strong> Verifique se todos os dados estão corretos antes de prosseguir.
+            <strong className="text-accent-700">⚠️ Importante:</strong> O campo WhatsApp é obrigatório. Verifique se todos os dados estão corretos antes de prosseguir.
           </p>
         </div>
       </CardContent>
