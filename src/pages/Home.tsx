@@ -271,7 +271,7 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden min-h-screen text-white pt-20">
+      <section className="relative overflow-hidden min-h-[100svh] md:min-h-screen text-white pt-16 md:pt-20 flex items-center">
         {/* Background Video */}
         <div className="absolute inset-0">
           <video
@@ -288,10 +288,10 @@ export default function Home() {
           </video>
         </div>
 
-        <div className="relative container mx-auto px-4 py-16 md:py-24">
+        <div className="relative container mx-auto px-4 py-8 md:py-10 lg:py-16">
 
           {/* Mobile hero image */}
-          <div className="md:hidden mb-8 relative">
+          <div className="lg:hidden mb-4 md:mb-6 relative">
             <div className="relative aspect-[16/9] rounded-xl overflow-hidden shadow-xl">
               <img
                 src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=600&auto=format&fit=crop"
@@ -307,13 +307,13 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6 text-center md:text-left">
+          <div className="grid lg:grid-cols-2 gap-8 md:gap-10 lg:gap-12 items-center">
+            <div className="space-y-3 md:space-y-4 lg:space-y-6 text-center md:text-left md:pl-12 lg:pl-16">
               {/* Texto principal do Hero */}
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[64px] font-extrabold leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
                 <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal' }}>II CORRIDA</span><span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}> 2025.2</span>
                 <br />
-                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal', display: 'inline-block', marginTop: '2rem' }} className="text-accent-400">QUALIDADE</span>
+                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal', display: 'inline-block' }} className="text-accent-400 mt-2 md:mt-3 lg:mt-4">QUALIDADE</span>
                 <br />
                 <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}>EM CADA METRO</span>
                 <br />
@@ -322,18 +322,16 @@ export default function Home() {
                 <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}>EM CADA PASSO</span>
               </h1>
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-8 md:pt-12 justify-center md:justify-start">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-4 md:pt-6 lg:pt-8 justify-center md:justify-start">
                 <Button
-                  size="xl"
                   onClick={() => navigate('/loginInscricao')}
-                  className="bg-accent-400 hover:bg-accent-500 text-slate-900 font-bold shadow-2xl transform hover:scale-105 transition-all duration-300"
+                  className="h-12 md:h-14 px-6 md:px-10 text-base md:text-lg bg-accent-400 hover:bg-accent-500 text-slate-900 font-bold shadow-2xl transform hover:scale-105 transition-all duration-300"
                 >
                   INSCREVA-SE AGORA
                 </Button>
                 <Button
-                  size="xl"
                   variant="outline"
-                  className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
+                  className="h-12 md:h-14 px-6 md:px-10 text-base md:text-lg bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
                   onClick={() => document.getElementById('info')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   SAIBA MAIS
