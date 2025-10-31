@@ -58,6 +58,24 @@ export default function Inscricao() {
   const audioRef = useRef<HTMLAudioElement>(null)
   const hasUnmutedRef = useRef(false)
 
+  // Função helper para determinar se deve pular a Etapa 3
+  const shouldSkipStep3 = () => {
+    return formData.tipoParticipacao === 'retirar-cesta'
+  }
+
+  // Função helper para calcular o número total de etapas
+  const getTotalSteps = () => {
+    return shouldSkipStep3() ? 3 : 4
+  }
+
+  // Função helper para mapear etapa lógica para etapa visual
+  const getVisualStep = (logicalStep: number) => {
+    if (shouldSkipStep3() && logicalStep === 4) {
+      return 3 // Etapa 4 vira Etapa 3 visualmente
+    }
+    return logicalStep
+  }
+
   // Ativa som do áudio automaticamente após primeira interação do usuário
   useEffect(() => {
     const handleFirstInteraction = () => {
@@ -164,6 +182,12 @@ export default function Inscricao() {
     return Object.keys(newErrors).length === 0
   }
 
+  // Validação da Etapa 4 (ou Etapa 3 final se pulou)
+  const validateStep4 = (): boolean => {
+    // Não há validações específicas na etapa final, apenas confirmação
+    return true
+  }
+
   // Navegação entre etapas
   const handleNextStep = () => {
     let isValid = false
@@ -172,17 +196,34 @@ export default function Inscricao() {
       isValid = validateStep1()
     } else if (currentStep === 2) {
       isValid = validateStep2()
+    } else if (currentStep === 3) {
+      isValid = validateStep3()
     }
 
-    if (isValid && currentStep < 3) {
-      setCurrentStep(currentStep + 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (isValid) {
+      const totalSteps = getTotalSteps()
+      const visualStep = getVisualStep(currentStep)
+
+      if (visualStep < totalSteps) {
+        // Se deve pular a Etapa 3, vai direto da Etapa 2 para Etapa 4
+        if (currentStep === 2 && shouldSkipStep3()) {
+          setCurrentStep(4)
+        } else {
+          setCurrentStep(currentStep + 1)
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
     }
   }
 
   const handlePreviousStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
+      // Se está na Etapa 4 e pulou a Etapa 3, volta para Etapa 2
+      if (currentStep === 4 && shouldSkipStep3()) {
+        setCurrentStep(2)
+      } else {
+        setCurrentStep(currentStep - 1)
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
@@ -260,8 +301,15 @@ export default function Inscricao() {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    // Valida a etapa 3 antes de submeter
-    if (validateStep3()) {
+    // Valida a etapa final antes de submeter
+    let isValid = false
+
+    // Se está na Etapa 4 (fluxo normal) ou Etapa 3 (pulou a Etapa 3)
+    if (currentStep === 4 || (currentStep === 3 && shouldSkipStep3())) {
+      isValid = validateStep4()
+    }
+
+    if (isValid) {
       const inscricoes = JSON.parse(localStorage.getItem('inscricoes') || '[]')
       const novaInscricao = {
         ...formData,
@@ -433,24 +481,31 @@ export default function Inscricao() {
 
             {/* Linha conectora 2-3 */}
             <div className={`flex-1 h-1 mx-2 transition-all duration-300 ${
-              currentStep >= 3 ? 'bg-primary-600' : 'bg-slate-200'
+              (currentStep >= 3 || (currentStep >= 4 && shouldSkipStep3())) ? 'bg-primary-600' : 'bg-slate-200'
             }`}></div>
 
-            {/* Etapa 3 */}
+            {/* Etapa 3 (Finalização) - Número dinâmico baseado no fluxo */}
             <div className="flex flex-col items-center flex-1">
               <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-sm md:text-base transition-all duration-300 ${
-                currentStep >= 3
+                (currentStep >= 3 || (currentStep >= 4 && shouldSkipStep3()))
                   ? 'bg-primary-600 text-white shadow-lg'
                   : 'bg-slate-200 text-slate-400'
               }`}>
-                3
+                {getVisualStep(currentStep >= 4 ? 4 : 3)}
               </div>
               <p className={`text-xs md:text-sm mt-2 font-medium text-center ${
-                currentStep >= 3 ? 'text-primary-600' : 'text-slate-400'
+                (currentStep >= 3 || (currentStep >= 4 && shouldSkipStep3())) ? 'text-primary-600' : 'text-slate-400'
               }`}>
                 Finalização
               </p>
             </div>
+          </div>
+
+          {/* Contador de Etapas */}
+          <div className="text-center mt-4">
+            <p className="text-sm text-slate-600 font-medium">
+              Etapa {getVisualStep(currentStep)} de {getTotalSteps()}
+            </p>
           </div>
         </div>
 
@@ -843,8 +898,8 @@ export default function Inscricao() {
             </>
           )}
 
-          {/* ETAPA 3 - Informações da Corrida e Upload de Foto */}
-          {currentStep === 3 && (
+          {/* ETAPA 3 - Informações da Corrida e Upload de Foto (PULADA se retirar-cesta) */}
+          {currentStep === 3 && !shouldSkipStep3() && (
             <>
               {/* Tamanho da Camiseta - Apenas se participar da corrida */}
               {formData.tipoParticipacao === 'corrida-natal' && (
@@ -955,6 +1010,35 @@ export default function Inscricao() {
                 </Card>
               )}
 
+              {/* Botões de Navegação - Etapa 3 */}
+              <div className="flex flex-col sm:flex-row justify-between gap-4">
+                <Button
+                  type="button"
+                  onClick={handlePreviousStep}
+                  variant="outline"
+                  size="lg"
+                  className="font-semibold px-8 w-full sm:w-auto"
+                >
+                  <ChevronLeft className="w-5 h-5 mr-2" />
+                  Anterior
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleNextStep}
+                  size="lg"
+                  className="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8"
+                >
+                  Próximo
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </Button>
+              </div>
+            </>
+          )}
+
+          {/* ETAPA 4 - Finalização e Resumo (ou Etapa 3 se pulou a anterior) */}
+          {(currentStep === 4 || (currentStep === 3 && shouldSkipStep3())) && (
+            <>
+
               {/* Resumo da Inscrição */}
               <Card className="bg-primary-50 border-2 border-primary-200">
                 <CardHeader>
@@ -984,7 +1068,7 @@ export default function Inscricao() {
                 </CardContent>
               </Card>
 
-              {/* Botões de Navegação - Etapa 3 */}
+              {/* Botões de Navegação - Etapa Final */}
               <div className="flex flex-col sm:flex-row justify-between gap-4">
                 <Button
                   type="button"

@@ -280,7 +280,7 @@ export default function LoginInscricao() {
                       name="senha"
                       type="password"
                       inputMode="numeric"
-                      placeholder="••••••••"
+                      placeholder="3 últimos dígitos CPF + Dia Mês Nascimento"
                       value={formData.senha}
                       onChange={handleChange}
                       required

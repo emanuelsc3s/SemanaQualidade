@@ -63,6 +63,11 @@ export default function InscricaoWizard() {
   const totalSteps = 4
   const progress = (currentStep / totalSteps) * 100
 
+  // Scroll para o topo sempre que a etapa mudar
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [currentStep])
+
   // Carrega dados do funcionário logado do localStorage
   useEffect(() => {
     const colaboradorLogado = localStorage.getItem('colaboradorLogado')
@@ -186,7 +191,10 @@ export default function InscricaoWizard() {
     if (validateStep(currentStep)) {
       if (currentStep < totalSteps) {
         setCurrentStep(currentStep + 1)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
+        // Força o scroll para o topo imediatamente
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }, 0)
       }
     }
   }
@@ -194,7 +202,10 @@ export default function InscricaoWizard() {
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      // Força o scroll para o topo imediatamente
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }, 0)
     }
   }
 
