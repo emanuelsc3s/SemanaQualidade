@@ -699,28 +699,20 @@ export default function InscricaoWizard() {
 
           {/* Corpo do Recibo */}
           <div className="space-y-2.5 py-1">
-            {/* Status - Customizado para "Retirar Cesta" */}
-            {formData.tipoParticipacao === 'retirar-cesta' ? (
-              <div className="bg-green-50 border-l-4 border-green-400 p-2.5 rounded">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">✅</span>
-                  <div className="flex-1">
-                    <p className="text-xs font-semibold text-green-800">Status: Confirmado</p>
-                    <p className="text-xs text-green-600">Sua cesta estará disponível para retirada</p>
-                  </div>
+            {/* Status - Confirmado para todos os tipos de participação */}
+            <div className="bg-green-50 border-l-4 border-green-400 p-2.5 rounded">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">✅</span>
+                <div className="flex-1">
+                  <p className="text-xs font-semibold text-green-800">Status: Confirmado</p>
+                  <p className="text-xs text-green-600">
+                    {formData.tipoParticipacao === 'retirar-cesta'
+                      ? 'Sua cesta estará disponível para retirada'
+                      : 'Sua inscrição foi confirmada com sucesso!'}
+                  </p>
                 </div>
               </div>
-            ) : (
-              <div className="bg-amber-50 border-l-4 border-amber-400 p-2.5 rounded">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">⏳</span>
-                  <div className="flex-1">
-                    <p className="text-xs font-semibold text-amber-800">Status: Aguardando Revisão</p>
-                    <p className="text-xs text-amber-600">Em breve você receberá a confirmação</p>
-                  </div>
-                </div>
-              </div>
-            )}
+            </div>
 
             {/* Número do Participante/Registro */}
             <div className="bg-gradient-to-r from-primary-50 to-sky-50 border border-primary-200 rounded-lg p-2.5">
@@ -843,7 +835,7 @@ export default function InscricaoWizard() {
                       Fique atento ao seu WhatsApp!
                     </p>
                     <p className="text-xs text-blue-600">
-                      Você será notificado assim que sua inscrição for confirmada pela organização.
+                      Você receberá atualizações importantes sobre o evento via WhatsApp.
                     </p>
                   </div>
                 </div>
@@ -1106,7 +1098,7 @@ function StepTipoParticipacao({ tipoParticipacao, modalidadeCorrida, onTipoChang
                   </span>
                 </div>
                 <p className="text-xs md:text-sm text-slate-600">
-                  Você participará da corrida e receberá a cesta natalina 21 de Dezembro
+                  Você participará da corrida e receberá a cesta natalina <strong>21 de Dezembro</strong>
                 </p>
               </div>
               {tipoParticipacao === 'corrida-natal' && (
@@ -1194,7 +1186,7 @@ function StepTipoParticipacao({ tipoParticipacao, modalidadeCorrida, onTipoChang
                   </span>
                 </div>
                 <p className="text-xs md:text-sm text-slate-600">
-                  Você receberá a cesta natalina dia 21 de Dezembro
+                  Você receberá a cesta natalina dia <strong>21 de Dezembro</strong>
                 </p>
               </div>
               {tipoParticipacao === 'apenas-natal' && (

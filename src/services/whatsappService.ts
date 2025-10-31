@@ -174,17 +174,17 @@ Olá, *${primeiroNome}*! 👋
 
 Aqui é a Lis da FARMACE 💙
 
-Sua solicitação foi recebida ✅
+Sua inscrição foi confirmada! ✅
 
 *Inscrição:*
 • Nº do participante: *#${numeroParticipante}*
 • Categoria: *${categoriaFormatada}*
-• Status: *em análise*
+• Status: *confirmada*
 • Local da Largada: Farmace às 6h30
 
-Assim que confirmarmos, te aviso por aqui com:
+Em breve vou te avisar por aqui com:
 • Retirada do kit
-• orientações para o dia
+• Orientações para o dia
 
 Fica de olho neste WhatsApp, vou falar tudo por aqui.
 
@@ -224,13 +224,13 @@ Olá, *${primeiroNome}*! 👋
 
 Aqui é a Lis da FARMACE 💙
 
-Sua solicitação foi recebida ✅
+Sua inscrição foi confirmada! ✅
 
 *Inscrição:*
 • Nº do participante: *#${numeroParticipante}*
 • Opção escolhida: *Participar apenas da comemoração de Natal*
 • Tamanho da camiseta: *${tamanhoCamiseta}*
-• Status: *em análise*
+• Status: *confirmada*
 
 📍 *Informações importantes:*
 
@@ -244,7 +244,7 @@ Você optou por:
 • Acesso à comemoração de Natal
 
 📅 *Próximos passos:*
-Assim que confirmarmos sua inscrição, vou te avisar por aqui com:
+Em breve vou te avisar por aqui com:
 • Data e horário da retirada do kit
 • Local da comemoração de Natal
 • Outras orientações importantes
