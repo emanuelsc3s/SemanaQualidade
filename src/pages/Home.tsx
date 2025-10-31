@@ -418,7 +418,7 @@ export default function Home() {
             Informações do Evento
           </h2>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Confira todos os detalhes sobre a II Corrida e Caminhada da Qualidade FARMACE
+            Confira todos os detalhes sobre a Confraternização e II Corrida
           </p>
         </div>
 
@@ -431,8 +431,8 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Data</h3>
-                  <p className="text-slate-600">A confirmar</p>
-                  <p className="text-sm text-slate-500">Semana da Qualidade 2025</p>
+                  <p className="text-slate-600"><strong>21 de Dezembro</strong></p>
+                  <p className="text-sm text-slate-500">Corrida e Caminhada</p>
                 </div>
               </div>
             </CardContent>
@@ -446,8 +446,8 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Horário</h3>
-                  <p className="text-slate-600">Largada: 7h00</p>
-                  <p className="text-sm text-slate-500">Concentração: 6h30</p>
+                  <p className="text-slate-600"><strong>Concentração: 6h30</strong></p>
+                  <p className="text-sm text-slate-500"><strong>Largada: 7h00</strong></p>
                 </div>
               </div>
             </CardContent>
@@ -461,8 +461,8 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Local</h3>
-                  <p className="text-slate-600">FARMACE</p>
-                  <p className="text-sm text-slate-500">Local a confirmar</p>
+                  <p className="text-slate-600"><strong>FARMACE</strong></p>
+                  <p className="text-sm text-slate-500">AV DOUTOR ANTONIO LYRIO CALLOU,S/N, KM 02</p>
                 </div>
               </div>
             </CardContent>
@@ -476,8 +476,8 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Investimento</h3>
-                  <p className="text-slate-600 text-xl font-bold">R$ 35,00</p>
-                  <p className="text-sm text-slate-500">Por participante</p>
+                  <p className="text-slate-600 text-xl font-bold"><strong>GRATUITO</strong></p>
+                  <p className="text-sm text-slate-500">Para Colaboradores</p>
                 </div>
               </div>
             </CardContent>
@@ -491,7 +491,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Modalidades</h3>
-                  <p className="text-slate-600">5K e 10K</p>
+                  <p className="text-slate-600"><strong>3KM, 5KM e 10KM</strong></p>
                   <p className="text-sm text-slate-500">Corrida e Caminhada</p>
                 </div>
               </div>
@@ -506,8 +506,8 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Kit do Atleta</h3>
-                  <p className="text-slate-600">Camiseta + Número</p>
-                  <p className="text-sm text-slate-500">Retirada antecipada</p>
+                  <p className="text-slate-600"><strong>Camiseta + Número</strong></p>
+                  <p className="text-sm text-slate-500">Gratuito</p>
                 </div>
               </div>
             </CardContent>
