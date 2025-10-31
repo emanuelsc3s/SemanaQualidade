@@ -12,6 +12,7 @@ import { ArrowLeft, ArrowRight, Check, User, Trophy, Shirt, Gift, FileText, Volu
 import Confetti from "react-confetti"
 import { useWindowSize } from "@/hooks/useWindowSize"
 import { sendWhatsAppMessage, gerarMensagemConfirmacao, gerarMensagemRetirarCesta, gerarMensagemApenasNatal } from "@/services/whatsappService"
+import { salvarInscricaoSupabase } from "@/services/inscricaoCorridaSupabaseService"
 
 // Interface para os dados do formulário
 interface FormData {
@@ -45,6 +46,7 @@ export default function InscricaoWizard() {
   const [isMuted, setIsMuted] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [whatsappSent, setWhatsappSent] = useState(false)
+  const [matriculaColaborador, setMatriculaColaborador] = useState<string>('')
   const audioRef = useRef<HTMLAudioElement>(null)
   const hasUnmutedRef = useRef(false)
 
@@ -95,6 +97,9 @@ export default function InscricaoWizard() {
           return `${ano}-${mes}-${dia}`
         }
 
+        // Armazena a matrícula do colaborador
+        setMatriculaColaborador(dados.matricula || '')
+
         // Preenche automaticamente os campos da Etapa 1
         setFormData(prev => ({
           ...prev,
@@ -105,6 +110,7 @@ export default function InscricaoWizard() {
         }))
 
         console.log('✅ Dados do funcionário carregados automaticamente:', {
+          matricula: dados.matricula, // ✅ NOVO: Log da matrícula
           nome: dados.nome,
           email: dados.email, // ✅ NOVO: Log do email
           cpf: dados.cpf,
@@ -255,24 +261,44 @@ export default function InscricaoWizard() {
     setIsSubmitting(true)
 
     try {
-      // Salvar no localStorage
-      const inscricoes = JSON.parse(localStorage.getItem('inscricoes') || '[]')
-      const numeroParticipante = (inscricoes.length + 1).toString().padStart(4, '0')
+      console.log('🚀 [InscricaoWizard] Iniciando processo de inscrição (APENAS NATAL)...')
 
-      const novaInscricao = {
-        ...formData,
-        id: Date.now(),
-        dataInscricao: new Date().toISOString(),
-        numeroParticipante,
-        // Define valores padrão para campos não preenchidos
-        aceitouRegulamento: true // Aceita automaticamente (não há regulamento para quem só participa do Natal)
+      // 1. Salvar no Supabase
+      console.log('💾 [InscricaoWizard] Salvando no Supabase...')
+
+      const dadosParaSupabase = {
+        nome: formData.nome,
+        email: formData.email,
+        telefone: formData.whatsapp,
+        cpf: formData.cpf,
+        dataNascimento: formData.dataNascimento,
+        tipoParticipacao: 'apenas-natal',
+        modalidadeCorrida: '',
+        tamanho: formData.tamanho,
+        matricula: matriculaColaborador, // ✅ Matrícula do colaborador logado
+        status: 'Confirmada', // ✅ Status sempre "Confirmada"
+        cep: '',
+        endereco: '',
+        cidade: '',
+        estado: '',
+        foto: ''
       }
 
-      inscricoes.push(novaInscricao)
-      localStorage.setItem('inscricoes', JSON.stringify(inscricoes))
+      const resultadoSupabase = await salvarInscricaoSupabase(dadosParaSupabase)
 
-      // Enviar mensagem de confirmação via WhatsApp
-      console.log('📱 Enviando mensagem de confirmação via WhatsApp (Apenas Natal)...')
+      if (!resultadoSupabase.success) {
+        console.error('❌ [InscricaoWizard] Erro ao salvar no Supabase:', resultadoSupabase.error)
+        alert(`Erro ao salvar inscrição: ${resultadoSupabase.error}`)
+        setIsSubmitting(false)
+        return
+      }
+
+      console.log('✅ [InscricaoWizard] Inscrição salva no Supabase com sucesso!')
+      const numeroParticipante = resultadoSupabase.data?.numeroParticipante || '0000'
+      console.log('🎫 [InscricaoWizard] Número do participante:', numeroParticipante)
+
+      // 2. Enviar mensagem de confirmação via WhatsApp
+      console.log('📱 [InscricaoWizard] Enviando mensagem de confirmação via WhatsApp (Apenas Natal)...')
 
       const mensagem = gerarMensagemApenasNatal(
         formData.nome,
@@ -280,28 +306,26 @@ export default function InscricaoWizard() {
         formData.tamanho
       )
 
-      console.log('📝 Mensagem gerada:', mensagem.substring(0, 100) + '...')
-      console.log('📞 WhatsApp:', formData.whatsapp)
-
       const resultado = await sendWhatsAppMessage({
         phoneNumber: formData.whatsapp,
         message: mensagem
       })
 
-      console.log('📊 Resultado do envio:', resultado)
-
       if (resultado.success) {
-        console.log('✅ Mensagem WhatsApp enviada com sucesso!')
+        console.log('✅ [InscricaoWizard] Mensagem WhatsApp enviada com sucesso!')
         setWhatsappSent(true)
       } else {
-        console.error('❌ Erro ao enviar mensagem WhatsApp:', resultado.error)
-        // Mesmo com erro no WhatsApp, continua o fluxo
+        console.error('❌ [InscricaoWizard] Erro ao enviar mensagem WhatsApp:', resultado.error)
         setWhatsappSent(false)
       }
 
+      console.log('🎉 [InscricaoWizard] Processo concluído com sucesso!')
+
     } catch (error) {
-      console.error('Erro ao processar inscrição:', error)
-      // Mesmo com erro, mostra o modal de sucesso
+      console.error('❌ [InscricaoWizard] Erro ao processar inscrição:', error)
+      alert('Erro ao processar inscrição. Tente novamente.')
+      setIsSubmitting(false)
+      return
     } finally {
       setIsSubmitting(false)
 
@@ -316,53 +340,70 @@ export default function InscricaoWizard() {
     setIsSubmitting(true)
 
     try {
-      // Salvar no localStorage
-      const inscricoes = JSON.parse(localStorage.getItem('inscricoes') || '[]')
-      const numeroParticipante = (inscricoes.length + 1).toString().padStart(4, '0')
+      console.log('🚀 [InscricaoWizard] Iniciando processo de inscrição (RETIRAR CESTA)...')
 
-      const novaInscricao = {
-        ...formData,
-        id: Date.now(),
-        dataInscricao: new Date().toISOString(),
-        numeroParticipante,
-        // Define valores padrão para campos não preenchidos
-        tamanho: 'N/A', // Não precisa de camiseta
-        aceitouRegulamento: true // Aceita automaticamente (não há regulamento para quem só retira cesta)
+      // 1. Salvar no Supabase
+      console.log('💾 [InscricaoWizard] Salvando no Supabase...')
+
+      const dadosParaSupabase = {
+        nome: formData.nome,
+        email: formData.email,
+        telefone: formData.whatsapp,
+        cpf: formData.cpf,
+        dataNascimento: formData.dataNascimento,
+        tipoParticipacao: 'retirar-cesta',
+        modalidadeCorrida: '',
+        tamanho: '',
+        matricula: matriculaColaborador, // ✅ Matrícula do colaborador logado
+        status: 'Confirmada', // ✅ Status sempre "Confirmada"
+        cep: '',
+        endereco: '',
+        cidade: '',
+        estado: '',
+        foto: ''
       }
 
-      inscricoes.push(novaInscricao)
-      localStorage.setItem('inscricoes', JSON.stringify(inscricoes))
+      const resultadoSupabase = await salvarInscricaoSupabase(dadosParaSupabase)
 
-      // Enviar mensagem de confirmação via WhatsApp
-      console.log('📱 Enviando mensagem de confirmação via WhatsApp (Retirar Cesta)...')
+      if (!resultadoSupabase.success) {
+        console.error('❌ [InscricaoWizard] Erro ao salvar no Supabase:', resultadoSupabase.error)
+        alert(`Erro ao salvar inscrição: ${resultadoSupabase.error}`)
+        setIsSubmitting(false)
+        return
+      }
+
+      console.log('✅ [InscricaoWizard] Inscrição salva no Supabase com sucesso!')
+      const numeroParticipante = resultadoSupabase.data?.numeroParticipante || '0000'
+      console.log('🎫 [InscricaoWizard] Número do participante:', numeroParticipante)
+
+      // 2. Enviar mensagem de confirmação via WhatsApp
+      console.log('📱 [InscricaoWizard] Enviando mensagem de confirmação via WhatsApp (Retirar Cesta)...')
 
       const mensagem = gerarMensagemRetirarCesta(
         formData.nome,
         numeroParticipante
       )
 
-      console.log('📝 Mensagem gerada:', mensagem.substring(0, 100) + '...')
-      console.log('📞 WhatsApp:', formData.whatsapp)
-
       const resultado = await sendWhatsAppMessage({
         phoneNumber: formData.whatsapp,
         message: mensagem
       })
 
-      console.log('📊 Resultado do envio:', resultado)
-
       if (resultado.success) {
-        console.log('✅ Mensagem WhatsApp enviada com sucesso!')
+        console.log('✅ [InscricaoWizard] Mensagem WhatsApp enviada com sucesso!')
         setWhatsappSent(true)
       } else {
-        console.error('❌ Erro ao enviar mensagem WhatsApp:', resultado.error)
-        // Mesmo com erro no WhatsApp, continua o fluxo
+        console.error('❌ [InscricaoWizard] Erro ao enviar mensagem WhatsApp:', resultado.error)
         setWhatsappSent(false)
       }
 
+      console.log('🎉 [InscricaoWizard] Processo concluído com sucesso!')
+
     } catch (error) {
-      console.error('Erro ao processar inscrição:', error)
-      // Mesmo com erro, mostra o modal de sucesso
+      console.error('❌ [InscricaoWizard] Erro ao processar inscrição:', error)
+      alert('Erro ao processar inscrição. Tente novamente.')
+      setIsSubmitting(false)
+      return
     } finally {
       setIsSubmitting(false)
 
@@ -377,29 +418,48 @@ export default function InscricaoWizard() {
       setIsSubmitting(true)
 
       try {
-        // Salvar no localStorage
-        const inscricoes = JSON.parse(localStorage.getItem('inscricoes') || '[]')
-        const numeroParticipante = (inscricoes.length + 1).toString().padStart(4, '0')
+        console.log('🚀 [InscricaoWizard] Iniciando processo de inscrição (CORRIDA)...')
 
-        const novaInscricao = {
-          ...formData,
-          id: Date.now(),
-          dataInscricao: new Date().toISOString(),
-          numeroParticipante
+        // 1. Salvar no Supabase
+        console.log('💾 [InscricaoWizard] Salvando no Supabase...')
+
+        // Mapeia os dados do formData para o formato esperado pelo serviço
+        const dadosParaSupabase = {
+          nome: formData.nome,
+          email: formData.email,
+          telefone: formData.whatsapp,
+          cpf: formData.cpf,
+          dataNascimento: formData.dataNascimento,
+          tipoParticipacao: formData.tipoParticipacao,
+          modalidadeCorrida: formData.modalidadeCorrida,
+          tamanho: formData.tamanho,
+          matricula: matriculaColaborador, // ✅ Matrícula do colaborador logado
+          status: 'Confirmada', // ✅ Status sempre "Confirmada"
+          // Campos não usados mas necessários para a interface
+          cep: '',
+          endereco: '',
+          cidade: '',
+          estado: '',
+          foto: ''
         }
 
-        inscricoes.push(novaInscricao)
-        localStorage.setItem('inscricoes', JSON.stringify(inscricoes))
+        const resultadoSupabase = await salvarInscricaoSupabase(dadosParaSupabase)
 
-        // Enviar mensagem de confirmação via WhatsApp
-        console.log('Enviando mensagem de confirmação via WhatsApp...')
+        if (!resultadoSupabase.success) {
+          console.error('❌ [InscricaoWizard] Erro ao salvar no Supabase:', resultadoSupabase.error)
+          alert(`Erro ao salvar inscrição: ${resultadoSupabase.error}`)
+          setIsSubmitting(false)
+          return
+        }
 
-        // Formata a categoria baseado no tipo de participação e modalidade
-        const categoriaFormatada = formData.tipoParticipacao === 'corrida-natal'
-          ? formData.modalidadeCorrida.toUpperCase()
-          : formData.tipoParticipacao === 'apenas-natal'
-          ? 'APENAS NATAL'
-          : 'RETIRAR CESTA'
+        console.log('✅ [InscricaoWizard] Inscrição salva no Supabase com sucesso!')
+        const numeroParticipante = resultadoSupabase.data?.numeroParticipante || '0000'
+        console.log('🎫 [InscricaoWizard] Número do participante:', numeroParticipante)
+
+        // 2. Enviar mensagem de confirmação via WhatsApp
+        console.log('📱 [InscricaoWizard] Enviando mensagem de confirmação via WhatsApp...')
+
+        const categoriaFormatada = formData.modalidadeCorrida.toUpperCase()
 
         const mensagem = gerarMensagemConfirmacao(
           formData.nome,
@@ -413,17 +473,21 @@ export default function InscricaoWizard() {
         })
 
         if (resultado.success) {
-          console.log('✅ Mensagem WhatsApp enviada com sucesso!')
+          console.log('✅ [InscricaoWizard] Mensagem WhatsApp enviada com sucesso!')
           setWhatsappSent(true)
         } else {
-          console.error('❌ Erro ao enviar mensagem WhatsApp:', resultado.error)
+          console.error('❌ [InscricaoWizard] Erro ao enviar mensagem WhatsApp:', resultado.error)
           // Mesmo com erro no WhatsApp, continua o fluxo
           setWhatsappSent(false)
         }
 
+        console.log('🎉 [InscricaoWizard] Processo concluído com sucesso!')
+
       } catch (error) {
-        console.error('Erro ao processar inscrição:', error)
-        // Mesmo com erro, mostra o modal de sucesso
+        console.error('❌ [InscricaoWizard] Erro ao processar inscrição:', error)
+        alert('Erro ao processar inscrição. Tente novamente.')
+        setIsSubmitting(false)
+        return
       } finally {
         setIsSubmitting(false)
 

@@ -16,6 +16,11 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const hasUnmutedRef = useRef(false)
 
+  // Scroll para o topo quando a página é carregada
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
   // Ativa som do áudio automaticamente após mover o mouse
   useEffect(() => {
     const handleMouseMove = () => {
@@ -152,24 +157,6 @@ export default function Home() {
                   <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-sky-400 to-blue-500 group-hover:w-3/4 transition-all duration-300 rounded-full shadow-lg"></span>
                 </a>
                 <a
-                  href="#info"
-                  className="px-5 py-2.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] hover:text-[#0a588a] font-light hover:font-bold transition-all duration-300 rounded-xl hover:bg-white/20 cursor-pointer relative group"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    document.getElementById('info')?.scrollIntoView({ behavior: 'smooth' })
-                  }}
-                >
-                  Evento
-                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-sky-400 to-blue-500 group-hover:w-3/4 transition-all duration-300 rounded-full shadow-lg"></span>
-                </a>
-                <a
-                  href="#edicao-anterior"
-                  className="px-5 py-2.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] hover:text-[#0a588a] font-light hover:font-bold transition-all duration-300 rounded-xl hover:bg-white/20 cursor-pointer relative group"
-                >
-                  Edição Anterior
-                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-sky-400 to-blue-500 group-hover:w-3/4 transition-all duration-300 rounded-full shadow-lg"></span>
-                </a>
-                <a
                   href="#duvidas"
                   className="px-5 py-2.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] hover:text-[#0a588a] font-light hover:font-bold transition-all duration-300 rounded-xl hover:bg-white/20 cursor-pointer relative group"
                 >
@@ -224,24 +211,6 @@ export default function Home() {
                 Home
               </a>
               <a
-                href="#info"
-                className="px-5 py-3.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] hover:text-[#0a588a] hover:bg-white/20 font-light hover:font-bold transition-all duration-300 rounded-xl cursor-pointer"
-                onClick={(e) => {
-                  e.preventDefault()
-                  setMobileMenuOpen(false)
-                  document.getElementById('info')?.scrollIntoView({ behavior: 'smooth' })
-                }}
-              >
-                Evento
-              </a>
-              <a
-                href="#edicao-anterior"
-                className="px-5 py-3.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] hover:text-[#0a588a] hover:bg-white/20 font-light hover:font-bold transition-all duration-300 rounded-xl cursor-pointer"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Edição Anterior
-              </a>
-              <a
                 href="#duvidas"
                 className="px-5 py-3.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] hover:text-[#0a588a] hover:bg-white/20 font-light hover:font-bold transition-all duration-300 rounded-xl cursor-pointer"
                 onClick={() => setMobileMenuOpen(false)}
@@ -273,7 +242,7 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="hero-section-short relative overflow-hidden min-h-[100svh] md:min-h-screen text-white pt-16 md:pt-20 flex items-center">
+      <section className="hero-section-short relative overflow-hidden min-h-screen text-white pt-20 md:pt-24 flex items-center justify-center">
         {/* Background Video */}
         <div className="absolute inset-0">
           <video
@@ -290,33 +259,19 @@ export default function Home() {
           </video>
         </div>
 
-        <div className="hero-container-short relative container mx-auto px-4 py-8 md:py-10 lg:py-16">
+        <div className="hero-container-short relative container mx-auto px-4 py-6 md:py-10 lg:py-16">
 
-          {/* Mobile hero image - Ocultar em telas com altura reduzida */}
-          <div className="hero-mobile-image-short lg:hidden mb-4 md:mb-6 relative">
-            <div className="relative aspect-[16/9] rounded-xl overflow-hidden shadow-xl">
-              <img
-                src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=600&auto=format&fit=crop"
-                alt="Corredor em ação"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-4 left-4 right-4">
-                <div className="bg-white/10 backdrop-blur-md rounded-lg p-3 border border-white/20">
-                  <p className="text-white font-bold text-sm">5K • 10K • CAMINHADA</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Mobile hero image - Removido para melhor responsividade */}
 
-          <div className="hero-grid-short grid lg:grid-cols-2 gap-8 md:gap-10 lg:gap-12 items-center">
-            <div className="hero-content-short space-y-3 md:space-y-4 lg:space-y-6 text-center md:text-left md:pl-12 lg:pl-16">
+          <div className="hero-grid-short grid lg:grid-cols-2 gap-6 md:gap-10 lg:gap-12 items-center">
+            <div className="hero-content-short space-y-4 md:space-y-5 lg:space-y-6 text-center md:text-left md:pl-8 lg:pl-16">
               {/* Texto principal do Hero */}
-              <h1 className="hero-title-short text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
-                <span style={{ fontFamily: 'Montserrat, sans-serif', fontStyle: 'normal', whiteSpace: 'nowrap' }}><span style={{ fontWeight: 800 }}>CONFRATERNIZAÇÃO</span> <span style={{ fontWeight: 200 }}>E</span></span>
+              <h1 className="hero-title-short text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
+                <span style={{ fontFamily: 'Montserrat, sans-serif', fontStyle: 'normal' }}><span style={{ fontWeight: 800 }}>CONFRATERNIZAÇÃO</span> <span style={{ fontWeight: 200 }}>E</span></span>
                 <br />
                 <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal' }}>II CORRIDA</span><span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}> FARMACE</span>
                 <br />
-                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal', display: 'inline-block' }} className="text-accent-400 mt-10 md:mt-14 lg:mt-16">QUALIDADE</span>
+                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal', display: 'inline-block' }} className="text-accent-400 mt-6 md:mt-10 lg:mt-14">QUALIDADE</span>
                 <br />
                 <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}>EM CADA METRO</span>
                 <br />
@@ -325,16 +280,16 @@ export default function Home() {
                 <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}>EM CADA PASSO</span>
               </h1>
 
-              <div className="hero-buttons-short flex flex-col sm:flex-row gap-3 md:gap-4 pt-4 md:pt-6 lg:pt-8 justify-center md:justify-start">
+              <div className="hero-buttons-short flex flex-col sm:flex-row gap-4 md:gap-4 pt-6 md:pt-8 lg:pt-10 justify-center md:justify-start w-full sm:w-auto">
                 <Button
                   onClick={() => navigate('/loginInscricao')}
-                  className="hero-button-short h-12 md:h-14 px-6 md:px-10 text-base md:text-lg bg-accent-400 hover:bg-accent-500 text-slate-900 font-bold shadow-2xl transform hover:scale-105 transition-all duration-300"
+                  className="hero-button-short h-14 md:h-16 px-8 md:px-12 text-lg md:text-xl bg-accent-400 hover:bg-accent-500 text-slate-900 font-bold shadow-2xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto"
                 >
                   INSCREVA-SE AGORA
                 </Button>
                 <Button
                   variant="outline"
-                  className="hero-button-short h-12 md:h-14 px-6 md:px-10 text-base md:text-lg bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20"
+                  className="hero-button-short h-14 md:h-16 px-8 md:px-12 text-lg md:text-xl bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 w-full sm:w-auto"
                   onClick={() => setModalOpen(true)}
                 >
                   SAIBA MAIS

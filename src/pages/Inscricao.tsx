@@ -4,8 +4,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { ArrowLeft, Upload, Check, User, CreditCard, MapPin, Shirt, Volume2, VolumeX, ChevronRight, ChevronLeft, Gift, Trophy, AlertCircle } from "lucide-react"
+import { ArrowLeft, Upload, Check, User, CreditCard, MapPin, Shirt, Volume2, VolumeX, ChevronRight, ChevronLeft, Gift, Trophy, AlertCircle, Loader2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { salvarInscricaoSupabase } from "@/services/inscricaoCorridaSupabaseService"
+import { sendWhatsAppMessage, gerarMensagemConfirmacao } from "@/services/whatsappService"
+
+// Log para confirmar que os serviços foram importados
+console.log('📦 [Inscrição] Módulo carregado')
+console.log('📦 [Inscrição] salvarInscricaoSupabase:', typeof salvarInscricaoSupabase)
+console.log('📦 [Inscrição] sendWhatsAppMessage:', typeof sendWhatsAppMessage)
 
 interface FormData {
   // Etapa 1 - Tipo de Participação
@@ -34,6 +41,9 @@ export default function Inscricao() {
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState(1)
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string>('')
+  const [numeroParticipante, setNumeroParticipante] = useState<string>('')
   const [formData, setFormData] = useState<FormData>({
     // Etapa 1
     tipoParticipacao: '',
@@ -298,28 +308,94 @@ export default function Inscricao() {
     }
   }
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    console.log('🎯 [Inscrição] handleSubmit CHAMADO')
+    console.log('📊 [Inscrição] currentStep:', currentStep)
+    console.log('📋 [Inscrição] formData:', formData)
 
     // Valida a etapa final antes de submeter
     let isValid = false
 
     // Se está na Etapa 4 (fluxo normal) ou Etapa 3 (pulou a Etapa 3)
     if (currentStep === 4 || (currentStep === 3 && shouldSkipStep3())) {
+      console.log('✅ [Inscrição] Validando etapa final...')
       isValid = validateStep4()
+      console.log('📊 [Inscrição] Validação resultado:', isValid)
+    } else {
+      console.warn('⚠️ [Inscrição] Não está na etapa final! currentStep:', currentStep)
     }
 
-    if (isValid) {
-      const inscricoes = JSON.parse(localStorage.getItem('inscricoes') || '[]')
-      const novaInscricao = {
-        ...formData,
-        id: Date.now(),
-        dataInscricao: new Date().toISOString(),
-        numeroParticipante: (inscricoes.length + 1).toString().padStart(4, '0')
+    if (!isValid) {
+      console.error('❌ [Inscrição] Validação falhou! Abortando submit.')
+      return
+    }
+
+    // Inicia o processo de submissão
+    console.log('🚀 [Inscrição] Iniciando processo de submissão...')
+    setIsSubmitting(true)
+    setSubmitError('')
+
+    try {
+      console.log('📝 [Inscrição] Iniciando processo de inscrição...')
+
+      // 1. Salva a inscrição no Supabase
+      console.log('💾 [Inscrição] Salvando no banco de dados...')
+      console.log('📤 [Inscrição] Dados que serão enviados:', JSON.stringify(formData, null, 2))
+      const resultado = await salvarInscricaoSupabase(formData)
+      console.log('📥 [Inscrição] Resultado do Supabase:', resultado)
+
+      if (!resultado.success) {
+        console.error('❌ [Inscrição] Erro ao salvar no banco:', resultado.error)
+        setSubmitError(resultado.error || 'Erro ao salvar inscrição')
+        setIsSubmitting(false)
+        return
       }
-      inscricoes.push(novaInscricao)
-      localStorage.setItem('inscricoes', JSON.stringify(inscricoes))
+
+      console.log('✅ [Inscrição] Inscrição salva com sucesso!')
+      console.log('🎫 [Inscrição] Número do participante:', resultado.data?.numeroParticipante)
+
+      // Armazena o número do participante
+      const numeroGerado = resultado.data?.numeroParticipante || '0000'
+      setNumeroParticipante(numeroGerado)
+
+      // 2. Envia mensagem de confirmação via WhatsApp (apenas se participar da corrida)
+      if (formData.tipoParticipacao === 'corrida-natal') {
+        console.log('📱 [Inscrição] Enviando confirmação via WhatsApp...')
+
+        const mensagem = gerarMensagemConfirmacao(
+          formData.nome,
+          numeroGerado,
+          formData.modalidadeCorrida
+        )
+
+        const whatsappResult = await sendWhatsAppMessage({
+          phoneNumber: formData.telefone,
+          message: mensagem
+        })
+
+        if (whatsappResult.success) {
+          console.log('✅ [Inscrição] Mensagem WhatsApp enviada com sucesso!')
+        } else {
+          console.warn('⚠️ [Inscrição] Falha ao enviar WhatsApp, mas inscrição foi salva:', whatsappResult.error)
+          // Não bloqueia o fluxo se o WhatsApp falhar
+        }
+      }
+
+      // 3. Marca como submetido e exibe tela de sucesso
+      console.log('🎉 [Inscrição] Processo concluído com sucesso!')
       setSubmitted(true)
+      setIsSubmitting(false)
+
+    } catch (error) {
+      console.error('❌ [Inscrição] Erro inesperado:', error)
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'Erro inesperado ao processar inscrição. Tente novamente.'
+      )
+      setIsSubmitting(false)
     }
   }
 
@@ -366,19 +442,37 @@ export default function Inscricao() {
             <div className="bg-slate-50 p-4 rounded-lg">
               <p className="text-sm text-slate-600 mb-2">Número do Participante</p>
               <p className="text-3xl font-bold text-slate-900">
-                #{(JSON.parse(localStorage.getItem('inscricoes') || '[]').length).toString().padStart(4, '0')}
+                #{numeroParticipante}
               </p>
             </div>
-            <div className="bg-accent-50 border-2 border-accent-200 p-4 rounded-lg">
-              <p className="text-sm font-semibold text-slate-900 mb-2">Valor da Inscrição</p>
-              <p className="text-2xl font-bold text-accent-700">R$ 35,00</p>
-              <p className="text-xs text-slate-600 mt-2">
-                Em breve você receberá as instruções de pagamento no e-mail cadastrado.
-              </p>
-            </div>
+
+            {/* Exibe valor apenas se participar da corrida */}
+            {formData.tipoParticipacao === 'corrida-natal' && (
+              <div className="bg-accent-50 border-2 border-accent-200 p-4 rounded-lg">
+                <p className="text-sm font-semibold text-slate-900 mb-2">Valor da Inscrição</p>
+                <p className="text-2xl font-bold text-accent-700">R$ 35,00</p>
+                <p className="text-xs text-slate-600 mt-2">
+                  Em breve você receberá as instruções de pagamento no e-mail cadastrado.
+                </p>
+              </div>
+            )}
+
+            {/* Mensagem de confirmação via WhatsApp */}
+            {formData.tipoParticipacao === 'corrida-natal' && (
+              <div className="bg-green-50 border-2 border-green-200 p-4 rounded-lg">
+                <p className="text-sm text-green-800 text-center">
+                  ✅ Confirmação enviada via WhatsApp para <strong>{formData.telefone}</strong>
+                </p>
+              </div>
+            )}
+
             <p className="text-sm text-slate-600 text-center">
-              Enviamos um e-mail de confirmação para <strong>{formData.email}</strong> com todas as informações.
+              Sua inscrição foi registrada com sucesso!
+              {formData.tipoParticipacao === 'corrida-natal' && (
+                <> Você receberá mais informações no e-mail <strong>{formData.email}</strong>.</>
+              )}
             </p>
+
             <Button
               className="w-full"
               onClick={() => navigate('/')}
@@ -727,6 +821,7 @@ export default function Inscricao() {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="seu@email.com"
+                    readOnly
                     className={errors.email ? 'border-red-500' : ''}
                   />
                   {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
@@ -1068,6 +1163,28 @@ export default function Inscricao() {
                 </CardContent>
               </Card>
 
+              {/* Mensagem de Erro (se houver) */}
+              {submitError && (
+                <Card className="bg-red-50 border-2 border-red-200">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-semibold text-red-900 mb-1">
+                          Erro ao processar inscrição
+                        </p>
+                        <p className="text-sm text-red-700">
+                          {submitError}
+                        </p>
+                        <p className="text-xs text-red-600 mt-2">
+                          Por favor, tente novamente. Se o erro persistir, entre em contato com o suporte.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Botões de Navegação - Etapa Final */}
               <div className="flex flex-col sm:flex-row justify-between gap-4">
                 <Button
@@ -1076,6 +1193,7 @@ export default function Inscricao() {
                   variant="outline"
                   size="lg"
                   className="font-semibold px-8 w-full sm:w-auto"
+                  disabled={isSubmitting}
                 >
                   <ChevronLeft className="w-5 h-5 mr-2" />
                   Anterior
@@ -1083,10 +1201,20 @@ export default function Inscricao() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold px-8"
+                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isSubmitting}
                 >
-                  <Check className="w-5 h-5 mr-2" />
-                  Confirmar Inscrição
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Processando...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-5 h-5 mr-2" />
+                      Confirmar Inscrição
+                    </>
+                  )}
                 </Button>
               </div>
 

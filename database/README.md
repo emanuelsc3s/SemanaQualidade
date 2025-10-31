@@ -39,14 +39,17 @@ Este schema SQL foi projetado para o sistema de inscrições da **II Corrida e C
 
 ```
 database/
-├── README.md                      # Esta documentação
-├── schema.sql                     # DDL completo (estrutura do banco)
-├── policies.sql                   # Row Level Security (RLS)
-├── seed.sql                       # Dados iniciais (modalidades, tamanhos)
-├── queries.sql                    # Consultas úteis e relatórios
+├── README.md                                      # Esta documentação
+├── FIREBIRD_TO_SUPABASE_MAPPING.md               # 🔥 Mapeamento Firebird → PostgreSQL
+├── schema.sql                                     # DDL completo (estrutura do banco)
+├── policies.sql                                   # Row Level Security (RLS)
+├── seed.sql                                       # Dados iniciais (modalidades, tamanhos)
+├── queries.sql                                    # Consultas úteis e relatórios
 └── migrations/
-    ├── 001_initial_schema.sql     # Migration: estrutura inicial
-    └── 002_add_rls_policies.sql   # Migration: políticas RLS
+    ├── 001_initial_schema.sql                     # Migration: estrutura inicial
+    ├── 002_add_rls_policies.sql                   # Migration: políticas RLS
+    ├── 003_expand_colaboradores_from_firebird.sql # 🔥 Migration: campos do Firebird
+    └── colaboradores.sql                          # Query original Firebird (referência)
 ```
 
 ### Descrição dos Arquivos
@@ -58,6 +61,9 @@ database/
 | `seed.sql` | Popula dados iniciais (modalidades 3km/5km/10km, tamanhos P-EXG) |
 | `queries.sql` | Consultas SQL prontas para uso (relatórios, estatísticas, etc) |
 | `migrations/` | Versionamento do schema para deploy incremental |
+| `FIREBIRD_TO_SUPABASE_MAPPING.md` | **🔥 Documentação completa da migração Firebird → Supabase** |
+| `migrations/colaboradores.sql` | Query original do Firebird 2.5 (EPG) - referência |
+| `migrations/003_expand_colaboradores_from_firebird.sql` | **🔥 Adiciona +50 campos extras à tabela colaboradores** |
 
 ---
 
@@ -586,6 +592,118 @@ As migrations estão versionadas na pasta `migrations/` para facilitar deploy in
 - Define políticas para cada tabela
 - Controla acesso por role (authenticated, admin)
 
+### 003_expand_colaboradores_from_firebird.sql 🔥
+
+**Objetivo:** Expandir tabela `colaboradores` com campos do sistema legado Firebird 2.5
+
+Esta migration adiciona **mais de 50 campos** à tabela `colaboradores` para compatibilidade total com o sistema ERP Firebird da FARMACE (tabela EPG).
+
+**Campos adicionados:**
+
+- **Identificação:** emp_codigo, epg_codigo, nome_social, pis, sexo
+- **Estado Civil:** estado_civil_codigo, estado_civil_descr
+- **Filiação:** mae_nome, pai_nome
+- **Contatos:** ddd, fone, celular
+- **Endereço completo:** end_logradouro, end_numero, end_complemento, bairro, cep, uf_sigla, mun_codigo, municipio_nome
+- **Documentos:** CTPS (número, série, DV, UF, data), Identidade (número, órgão, data), Título de Eleitor (número, zona, seção)
+- **Admissão:** admissao_data, admissao_tipo, admissao_tipo_desc, admissao_tipo_esocial, admissao_tipo_esocial_desc, admissao_vinculo, admissao_vinculo_desc
+- **Demissão:** demissao_data
+- **PCD (Pessoa com Deficiência):** tem_deficiencia, preenche_cota_deficiencia, deficiencia_fisica, deficiencia_visual, deficiencia_auditiva, deficiencia_mental, deficiencia_intelectual
+- **Escolaridade:** escolaridade_codigo, escolaridade_descr (conforme eSocial S-2200)
+- **Cargo atual:** cargo_codigo, cargo_descr
+- **Função atual:** funcao_codigo, funcao_descr
+- **Lotação atual:** lotacao_codigo, lotacao_nome
+
+**Recursos incluídos:**
+
+- 10+ índices para performance
+- 10+ constraints de validação
+- View `v_colaboradores_completo` (compatibilidade com Firebird)
+- Comentários descritivos em cada campo
+- Scripts de exemplo para importação de dados
+
+**Documentação detalhada:** Ver `FIREBIRD_TO_SUPABASE_MAPPING.md`
+
+---
+
+## 🔥 Migração de Dados do Firebird
+
+### Visão Geral
+
+O sistema legado da FARMACE utiliza **Firebird 2.5** com as seguintes tabelas principais:
+
+- **EPG**: Funcionários (dados pessoais, documentos, admissão)
+- **SEP**: Histórico de cargos e lotações
+- **RHSEP**: Histórico de funções
+- **CAR**: Cargos
+- **FUN**: Funções
+- **LOT**: Lotações/Departamentos
+- **MUN**: Municípios
+
+### Documentação Completa
+
+📚 **Ver arquivo:** `FIREBIRD_TO_SUPABASE_MAPPING.md`
+
+Este documento contém:
+
+- ✅ Mapeamento completo campo a campo (Firebird → PostgreSQL)
+- ✅ Todas as transformações CASE necessárias
+- ✅ Diagrama de relacionamentos entre tabelas
+- ✅ Scripts de exportação do Firebird
+- ✅ Scripts de importação no Supabase
+- ✅ Checklist completo de migração
+- ✅ Queries de validação pós-migração
+
+### Processo de Migração (Resumo)
+
+1. **Executar migration 003** no Supabase
+   ```sql
+   -- No SQL Editor do Supabase
+   -- Executar: migrations/003_expand_colaboradores_from_firebird.sql
+   ```
+
+2. **Exportar dados do Firebird**
+   ```sql
+   -- Usar query de: migrations/colaboradores.sql
+   -- Exportar para CSV com encoding UTF-8
+   ```
+
+3. **Importar no Supabase**
+   ```sql
+   COPY colaboradores (...campos...)
+   FROM '/path/to/colaboradores.csv'
+   DELIMITER ',' CSV HEADER;
+   ```
+
+4. **Validar importação**
+   ```sql
+   -- Verificar totais, CPFs únicos, campos obrigatórios
+   -- Ver queries de validação no MAPPING.md
+   ```
+
+### Transformações Principais
+
+**Sexo (M/F → Masculino/Feminino)**
+```sql
+CASE WHEN sexo = 'M' THEN 'Masculino'
+     WHEN sexo = 'F' THEN 'Feminino'
+     ELSE NULL END
+```
+
+**Estado Civil (1-5 → 01-05 + descrição)**
+```sql
+-- Código: '1' → '01' (Solteiro)
+-- Gera também: estado_civil_descr = 'Solteiro'
+```
+
+**Escolaridade (conforme eSocial S-2200)**
+```sql
+-- Código: '01' a '12'
+-- '01' → 'Analfabeto'
+-- '09' → 'Educação superior completa'
+-- '12' → 'Doutorado completo'
+```
+
 ---
 
 ## 📝 Queries Úteis
@@ -719,13 +837,26 @@ Para dúvidas sobre o schema ou problemas no setup:
 
 ## 📚 Referências
 
+### Documentação PostgreSQL/Supabase
+
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [Supabase Documentation](https://supabase.com/docs)
 - [Row Level Security Guide](https://supabase.com/docs/guides/auth/row-level-security)
 - [PostgreSQL Triggers](https://www.postgresql.org/docs/current/trigger-definition.html)
 
+### Documentação do Projeto
+
+- 📄 `FIREBIRD_TO_SUPABASE_MAPPING.md` - Mapeamento completo Firebird → PostgreSQL
+- 📄 `migrations/colaboradores.sql` - Query original do Firebird (referência)
+- 📄 `migrations/003_expand_colaboradores_from_firebird.sql` - Migration de expansão
+
+### Padrões eSocial
+
+- [eSocial - Tabelas](https://www.gov.br/esocial/pt-br/documentacao-tecnica/tabelas)
+- [S-2200 - Cadastramento Inicial e Admissão](https://www.gov.br/esocial/pt-br/documentacao-tecnica/leiautes-esocial-v-s-1-2)
+
 ---
 
 **Última atualização:** 2025-10-31
-**Versão do Schema:** 1.0.0
-**Status:** ✅ Pronto para Produção
+**Versão do Schema:** 2.0.0 (com expansão Firebird)
+**Status:** ✅ Pronto para Produção + 🔥 Migração Firebird Implementada
