@@ -34,8 +34,8 @@
   }
 }
 
-/* Adaptações para telas com altura reduzida (≤600px) */
-@media (max-height: 600px) {
+/* Adaptações para telas com altura reduzida (≤700px) */
+@media (max-height: 700px) {
   .hero-section-short {
     padding-top: 6rem !important; /* Espaço para o header fixo */
     align-items: center !important; /* Centraliza verticalmente */
@@ -87,6 +87,6 @@
 
   /* Ajusta o posicionamento do vídeo de fundo para não cobrir o rosto da atleta */
   .hero-video-short {
-    object-position: center 1% !important; /* Mostra mais da parte inferior do vídeo (rosto da atleta) */
+    object-position: center 70% !important; /* Mostra mais da parte inferior do vídeo (rosto da atleta) */
   }
 }
