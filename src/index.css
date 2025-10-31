@@ -22,11 +22,71 @@
   --color-accent-700: #a16207;
   --color-accent-800: #854d0e;
   --color-accent-900: #713f12;
+
+  /* Custom breakpoint for short screens (max-height: 600px) */
+  --breakpoint-short: 0 (max-height: 600px);
 }
 
 @layer base {
   body {
     font-family: 'Inter', system-ui, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Adaptações para telas com altura reduzida (≤600px) */
+@media (max-height: 600px) {
+  .hero-section-short {
+    padding-top: 6rem !important; /* Espaço para o header fixo */
+    align-items: center !important; /* Centraliza verticalmente */
+    justify-content: center !important;
+  }
+
+  .hero-container-short {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+
+  .hero-title-short {
+    font-size: 2.75rem !important; /* 44px - 80% maior que 24px */
+    line-height: 1.3 !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .hero-title-short .text-accent-400 {
+    margin-top: 0.5rem !important;
+  }
+
+  .hero-buttons-short {
+    gap: 1rem !important;
+    padding-top: 1.5rem !important;
+  }
+
+  .hero-button-short {
+    height: 3.5rem !important; /* 56px - 80% maior que 40px */
+    padding-left: 2.5rem !important;
+    padding-right: 2.5rem !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+    font-size: 1.125rem !important; /* 18px - 80% maior que 14px */
+    font-weight: 700 !important;
+  }
+
+  .hero-grid-short {
+    gap: 1.5rem !important;
+  }
+
+  .hero-content-short {
+    padding-left: 2rem !important;
+  }
+
+  /* Esconde a imagem mobile em telas curtas */
+  .hero-mobile-image-short {
+    display: none !important;
+  }
+
+  /* Ajusta o posicionamento do vídeo de fundo para não cobrir o rosto da atleta */
+  .hero-video-short {
+    object-position: center 1% !important; /* Mostra mais da parte inferior do vídeo (rosto da atleta) */
   }
 }
