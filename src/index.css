@@ -34,8 +34,8 @@
   }
 }
 
-/* Adaptações para telas com altura reduzida (≤700px) */
-@media (max-height: 700px) {
+/* Adaptações para telas com altura reduzida (≤800px) */
+@media (max-height: 800px) {
   .hero-section-short {
     padding-top: 6rem !important; /* Espaço para o header fixo */
     align-items: center !important; /* Centraliza verticalmente */
