@@ -68,6 +68,12 @@ export default function LoginInscricao() {
   })
   const [showHelp, setShowHelp] = useState(false)
   const [showErrorDialog, setShowErrorDialog] = useState(false)
+  const [showAlreadyRegisteredDialog, setShowAlreadyRegisteredDialog] = useState(false)
+  const [inscricaoExistente, setInscricaoExistente] = useState<{
+    dataInscricao: string
+    matricula: string
+  } | null>(null)
+  const [isCheckingRegistration, setIsCheckingRegistration] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
   const videoRef = useRef<HTMLVideoElement>(null)
   const hasUnmutedRef = useRef(false)
@@ -101,7 +107,7 @@ export default function LoginInscricao() {
     }
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     // Remove espaços em branco
@@ -128,22 +134,97 @@ export default function LoginInscricao() {
     const senhaEsperada = gerarSenha(funcionario.CPF, funcionario.NASCIMENTO)
 
     if (senhaDigitada === senhaEsperada) {
-      // Login bem-sucedido
-      const colaboradorData = {
-        matricula: funcionario.MATRICULA,
-        nome: funcionario.NOME,
-        cpf: funcionario.CPF,
-        dataNascimento: funcionario.NASCIMENTO,
-        email: funcionario.EMAIL || '', // ✅ NOVO: Adiciona email do funcionário
-        loginTimestamp: new Date().toISOString()
+      // Login bem-sucedido - AGORA verifica se já está inscrito
+      console.log("✅ Login bem-sucedido:", funcionario.NOME, "| Email:", funcionario.EMAIL)
+
+      // Formata a matrícula com 6 dígitos para consultar no banco
+      const matriculaFormatada = formatarMatricula6Digitos(funcionario.MATRICULA)
+      console.log("🔍 [Login] Verificando inscrição para matrícula:", matriculaFormatada)
+      console.log("🔍 [Login] Matrícula original do funcionário:", funcionario.MATRICULA)
+
+      setIsCheckingRegistration(true)
+
+      try {
+        // Consulta o Supabase para verificar se já existe inscrição
+        console.log("📡 [Login] Iniciando consulta ao Supabase...")
+        console.log("📡 [Login] Filtros: matricula =", matriculaFormatada, "AND deleted_at IS NULL")
+
+        const { data, error, count } = await supabase
+          .from('tbcorrida')
+          .select('corrida_id, data_inscricao, matricula, created_at, deleted_at', { count: 'exact' })
+          .eq('matricula', matriculaFormatada)
+
+        console.log("📡 [Login] Resposta do Supabase:")
+        console.log("  - Total de registros encontrados:", count)
+        console.log("  - Dados retornados:", data)
+        console.log("  - Erro:", error)
+
+        setIsCheckingRegistration(false)
+
+        if (error) {
+          console.error('❌ [Login] Erro ao consultar Supabase:', error)
+          console.error('❌ [Login] Detalhes do erro:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          })
+          // Em caso de erro na consulta, BLOQUEIA o prosseguimento para segurança
+          alert('Erro ao verificar inscrição. Por favor, tente novamente.')
+          return
+        }
+
+        // Filtra manualmente registros com deleted_at NULL (inscrições ativas)
+        const inscricoesAtivas = data?.filter(registro => registro.deleted_at === null) || []
+        console.log("🔍 [Login] Inscrições ativas (deleted_at IS NULL):", inscricoesAtivas.length)
+
+        if (inscricoesAtivas.length > 0) {
+          // JÁ EXISTE INSCRIÇÃO ATIVA - Mostra modal de alerta
+          const inscricao = inscricoesAtivas[0]
+          console.log('⚠️ [Login] Inscrição ativa encontrada:', inscricao)
+          setInscricaoExistente({
+            dataInscricao: inscricao.data_inscricao || inscricao.created_at || new Date().toISOString(),
+            matricula: inscricao.matricula || matriculaFormatada
+          })
+          setShowAlreadyRegisteredDialog(true)
+          return // NÃO redireciona
+        }
+
+        // NÃO existe inscrição ativa - Prossegue normalmente
+        console.log('✅ [Login] Nenhuma inscrição ativa encontrada, prosseguindo...')
+
+        const colaboradorData = {
+          matricula: funcionario.MATRICULA,
+          nome: funcionario.NOME,
+          cpf: funcionario.CPF,
+          dataNascimento: funcionario.NASCIMENTO,
+          email: funcionario.EMAIL || '',
+          loginTimestamp: new Date().toISOString()
+        }
+
+        localStorage.setItem('colaboradorLogado', JSON.stringify(colaboradorData))
+
+        // Redireciona para página de inscrição
+        navigate('/inscricao')
+
+      } catch (error) {
+        console.error('❌ Erro inesperado ao verificar inscrição:', error)
+        setIsCheckingRegistration(false)
+        // Em caso de erro, permite prosseguir (fail-safe)
+        console.warn('⚠️ Erro inesperado, permitindo prosseguir...')
+
+        const colaboradorData = {
+          matricula: funcionario.MATRICULA,
+          nome: funcionario.NOME,
+          cpf: funcionario.CPF,
+          dataNascimento: funcionario.NASCIMENTO,
+          email: funcionario.EMAIL || '',
+          loginTimestamp: new Date().toISOString()
+        }
+
+        localStorage.setItem('colaboradorLogado', JSON.stringify(colaboradorData))
+        navigate('/inscricao')
       }
-
-      localStorage.setItem('colaboradorLogado', JSON.stringify(colaboradorData))
-
-      console.log("Login bem-sucedido:", funcionario.NOME, "| Email:", funcionario.EMAIL)
-
-      // Redireciona para página de inscrição
-      navigate('/inscricao')
     } else {
       // Senha incorreta
       console.log("Senha esperada:", senhaEsperada, "Senha digitada:", senhaDigitada)
@@ -311,9 +392,10 @@ export default function LoginInscricao() {
                 {/* Botão de Login */}
                 <Button
                   type="submit"
-                  className="login-submit-button-short w-full h-12 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                  disabled={isCheckingRegistration}
+                  className="login-submit-button-short w-full h-12 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Entrar
+                  {isCheckingRegistration ? 'Verificando...' : 'Entrar'}
                 </Button>
 
                 {/* Link de Ajuda abaixo do botão Entrar */}
@@ -441,6 +523,66 @@ export default function LoginInscricao() {
                 className="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 text-white"
               >
                 OK
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de Inscrição Já Existente */}
+        <Dialog open={showAlreadyRegisteredDialog} onOpenChange={setShowAlreadyRegisteredDialog}>
+          <DialogContent className="sm:max-w-md bg-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-600">
+                <AlertCircle className="w-6 h-6" />
+                Você já está inscrito!
+              </DialogTitle>
+              <DialogDescription className="text-slate-600 pt-4 space-y-3">
+                <p className="font-medium text-slate-800">
+                  Identificamos que você já realizou sua inscrição para a II Corrida FARMACE.
+                </p>
+
+                {inscricaoExistente && (
+                  <div className="bg-sky-50 border border-sky-200 rounded-lg p-4 space-y-2">
+                    <p className="text-sm text-slate-700">
+                      <span className="font-semibold">Data da inscrição:</span>
+                      <br />
+                      <span className="text-primary-700 font-medium">
+                        {formatarDataHora(inscricaoExistente.dataInscricao)}
+                      </span>
+                    </p>
+                    <p className="text-sm text-slate-700">
+                      <span className="font-semibold">Matrícula:</span>
+                      <br />
+                      <span className="text-primary-700 font-medium">
+                        {inscricaoExistente.matricula}
+                      </span>
+                    </p>
+                  </div>
+                )}
+
+                <div className="bg-accent-50 border-l-4 border-accent-400 p-3 rounded">
+                  <p className="text-sm text-slate-700">
+                    <span className="font-semibold text-accent-700">📱 Atenção:</span>
+                    <br />
+                    Mais detalhes sobre sua inscrição serão enviados via WhatsApp em breve.
+                  </p>
+                </div>
+
+                <p className="text-xs text-slate-500 italic">
+                  Caso tenha alguma dúvida, entre em contato com a organização do evento.
+                </p>
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="sm:justify-center">
+              <Button
+                type="button"
+                onClick={() => {
+                  setShowAlreadyRegisteredDialog(false)
+                  setInscricaoExistente(null)
+                }}
+                className="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 text-white"
+              >
+                Entendi
               </Button>
             </DialogFooter>
           </DialogContent>
