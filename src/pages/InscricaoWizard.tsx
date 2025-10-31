@@ -209,9 +209,20 @@ export default function InscricaoWizard() {
         />
       )}
 
-      {/* Header com Progresso */}
-      <div className="bg-gradient-to-r from-primary-600 to-primary-500 text-white py-4 md:py-6 shadow-lg sticky top-0 z-40">
-        <div className="container mx-auto px-4 max-w-4xl">
+      {/* Header com Hero Background */}
+      <div className="relative text-white py-4 md:py-6 shadow-lg sticky top-0 z-40 overflow-hidden">
+        {/* Imagem de fundo do Hero */}
+        <img
+          src="/HeroCorridaFarmace.png"
+          alt="II Corrida e Caminhada da Qualidade FARMACE"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+
+        {/* Overlay escuro para legibilidade */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/40"></div>
+
+        {/* Conteúdo do Header */}
+        <div className="container mx-auto px-4 max-w-4xl relative z-10">
           <Button
             variant="ghost"
             onClick={() => navigate('/')}
@@ -220,12 +231,12 @@ export default function InscricaoWizard() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar
           </Button>
-          
+
           <div className="text-center mb-3 md:mb-4">
-            <h1 className="text-xl md:text-3xl font-bold mb-1 md:mb-2">Inscrição - Etapa {currentStep} de {totalSteps}</h1>
-            <p className="text-white/90 text-sm md:text-base">II Corrida e Caminhada da Qualidade FARMACE</p>
+            <h1 className="text-xl md:text-3xl font-bold mb-1 md:mb-2 drop-shadow-lg">Inscrição - Etapa {currentStep} de {totalSteps}</h1>
+            <p className="text-white/90 text-sm md:text-base drop-shadow-md">II Corrida e Caminhada da Qualidade FARMACE</p>
           </div>
-          
+
           <div className="space-y-2">
             <Progress value={progress} className="h-2 md:h-3 bg-white/20" />
             <p className="text-center text-xs md:text-sm text-white/80">{Math.round(progress)}% concluído</p>
@@ -378,7 +389,7 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone }
               value={formData.nome}
               onChange={(e) => onInputChange('nome', e.target.value)}
               placeholder="Seu nome completo"
-              className="mt-1.5 h-11 md:h-12 text-sm md:text-base"
+              className="mt-1.5 h-12 text-sm md:text-base border-slate-300 focus:border-primary-500 focus:ring-primary-500"
             />
           </div>
 
@@ -393,7 +404,7 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone }
                 value={formData.email}
                 onChange={(e) => onInputChange('email', e.target.value)}
                 placeholder="seu@email.com"
-                className="mt-1.5 h-11 md:h-12 text-sm md:text-base"
+                className="mt-1.5 h-12 text-sm md:text-base border-slate-300 focus:border-primary-500 focus:ring-primary-500"
               />
             </div>
 
@@ -406,7 +417,7 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone }
                 value={formData.cpf}
                 onChange={(e) => onInputChange('cpf', formatCPF(e.target.value))}
                 placeholder="000.000.000-00"
-                className="mt-1.5 h-11 md:h-12 text-sm md:text-base"
+                className="mt-1.5 h-12 text-sm md:text-base border-slate-300 focus:border-primary-500 focus:ring-primary-500"
               />
             </div>
           </div>
@@ -421,7 +432,7 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone }
                 type="date"
                 value={formData.dataNascimento}
                 onChange={(e) => onInputChange('dataNascimento', e.target.value)}
-                className="mt-1.5 h-11 md:h-12 text-sm md:text-base"
+                className="mt-1.5 h-12 text-sm md:text-base border-slate-300 focus:border-primary-500 focus:ring-primary-500"
               />
             </div>
 
@@ -434,7 +445,7 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone }
                 value={formData.whatsapp}
                 onChange={(e) => onInputChange('whatsapp', formatPhone(e.target.value))}
                 placeholder="(00) 00000-0000"
-                className="mt-1.5 h-11 md:h-12 text-sm md:text-base"
+                className="mt-1.5 h-12 text-sm md:text-base border-slate-300 focus:border-primary-500 focus:ring-primary-500"
               />
               <p className="text-xs md:text-sm text-slate-500 mt-1.5">
                 Você receberá a confirmação de inscrição via WhatsApp
