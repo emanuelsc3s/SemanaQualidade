@@ -314,7 +314,7 @@ export default function Home() {
               <h1 className="hero-title-short text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
                 <span style={{ fontFamily: 'Montserrat, sans-serif', fontStyle: 'normal', whiteSpace: 'nowrap' }}><span style={{ fontWeight: 800 }}>CONFRATERNIZAÇÃO</span> <span style={{ fontWeight: 200 }}>E</span></span>
                 <br />
-                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal' }}>II CORRIDA</span><span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}> 2025</span>
+                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal' }}>II CORRIDA</span><span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}> FARMACE</span>
                 <br />
                 <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal', display: 'inline-block' }} className="text-accent-400 mt-10 md:mt-14 lg:mt-16">QUALIDADE</span>
                 <br />

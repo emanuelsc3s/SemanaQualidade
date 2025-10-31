@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ArrowLeft, ArrowRight, Check, User, Trophy, Shirt, Gift, FileText, Volume2, VolumeX, X } from "lucide-react"
 import Confetti from "react-confetti"
 import { useWindowSize } from "@/hooks/useWindowSize"
-import { sendWhatsAppMessage, gerarMensagemConfirmacao } from "@/services/whatsappService"
+import { sendWhatsAppMessage, gerarMensagemConfirmacao, gerarMensagemRetirarCesta, gerarMensagemApenasNatal } from "@/services/whatsappService"
 
 // Interface para os dados do formulário
 interface FormData {
@@ -163,6 +163,12 @@ export default function InscricaoWizard() {
     return formData.tipoParticipacao === 'retirar-cesta'
   }
 
+  // Função para verificar se deve pular a Etapa 4 (aceite de regulamento)
+  // Retorna true se o usuário escolheu "apenas-natal" (participar apenas da comemoração de Natal)
+  const shouldSkipStep4 = (): boolean => {
+    return formData.tipoParticipacao === 'apenas-natal'
+  }
+
   // Validação de cada etapa
   const validateStep = (step: number): boolean => {
     switch (step) {
@@ -205,11 +211,17 @@ export default function InscricaoWizard() {
       }
 
       if (currentStep < totalSteps) {
-        // Lógica condicional: Se está na Etapa 2 e deve pular a Etapa 3, vai direto para Etapa 4
+        // Lógica condicional de navegação entre etapas
         if (currentStep === 2 && shouldSkipStep3()) {
-          setCurrentStep(4) // Pula a Etapa 3 (seleção de camisa)
+          // Se escolheu "retirar-cesta", pula a Etapa 3 (seleção de camisa) e vai direto para Etapa 4
+          setCurrentStep(4)
+        } else if (currentStep === 3 && shouldSkipStep4()) {
+          // Se escolheu "apenas-natal", pula a Etapa 4 (regulamento) e submete direto
+          await handleSubmitApenasNatal()
+          return
         } else {
-          setCurrentStep(currentStep + 1) // Avança normalmente
+          // Avança normalmente
+          setCurrentStep(currentStep + 1)
         }
 
         // Força o scroll para o topo imediatamente
@@ -222,17 +234,80 @@ export default function InscricaoWizard() {
 
   const handleBack = () => {
     if (currentStep > 1) {
-      // Lógica condicional: Se está na Etapa 4 e deve pular a Etapa 3, volta direto para Etapa 2
+      // Lógica condicional de navegação ao voltar
       if (currentStep === 4 && shouldSkipStep3()) {
-        setCurrentStep(2) // Pula a Etapa 3 ao voltar
+        // Se escolheu "retirar-cesta", volta direto para Etapa 2 (pula a Etapa 3)
+        setCurrentStep(2)
       } else {
-        setCurrentStep(currentStep - 1) // Volta normalmente
+        // Volta normalmente
+        setCurrentStep(currentStep - 1)
       }
 
       // Força o scroll para o topo imediatamente
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }, 0)
+    }
+  }
+
+  // Função específica para processar inscrição de quem escolheu participar apenas da comemoração de Natal
+  const handleSubmitApenasNatal = async () => {
+    setIsSubmitting(true)
+
+    try {
+      // Salvar no localStorage
+      const inscricoes = JSON.parse(localStorage.getItem('inscricoes') || '[]')
+      const numeroParticipante = (inscricoes.length + 1).toString().padStart(4, '0')
+
+      const novaInscricao = {
+        ...formData,
+        id: Date.now(),
+        dataInscricao: new Date().toISOString(),
+        numeroParticipante,
+        // Define valores padrão para campos não preenchidos
+        aceitouRegulamento: true // Aceita automaticamente (não há regulamento para quem só participa do Natal)
+      }
+
+      inscricoes.push(novaInscricao)
+      localStorage.setItem('inscricoes', JSON.stringify(inscricoes))
+
+      // Enviar mensagem de confirmação via WhatsApp
+      console.log('📱 Enviando mensagem de confirmação via WhatsApp (Apenas Natal)...')
+
+      const mensagem = gerarMensagemApenasNatal(
+        formData.nome,
+        numeroParticipante,
+        formData.tamanho
+      )
+
+      console.log('📝 Mensagem gerada:', mensagem.substring(0, 100) + '...')
+      console.log('📞 WhatsApp:', formData.whatsapp)
+
+      const resultado = await sendWhatsAppMessage({
+        phoneNumber: formData.whatsapp,
+        message: mensagem
+      })
+
+      console.log('📊 Resultado do envio:', resultado)
+
+      if (resultado.success) {
+        console.log('✅ Mensagem WhatsApp enviada com sucesso!')
+        setWhatsappSent(true)
+      } else {
+        console.error('❌ Erro ao enviar mensagem WhatsApp:', resultado.error)
+        // Mesmo com erro no WhatsApp, continua o fluxo
+        setWhatsappSent(false)
+      }
+
+    } catch (error) {
+      console.error('Erro ao processar inscrição:', error)
+      // Mesmo com erro, mostra o modal de sucesso
+    } finally {
+      setIsSubmitting(false)
+
+      // Mostrar confetes e modal
+      setShowConfetti(true)
+      setShowSuccessModal(true)
     }
   }
 
@@ -259,20 +334,22 @@ export default function InscricaoWizard() {
       localStorage.setItem('inscricoes', JSON.stringify(inscricoes))
 
       // Enviar mensagem de confirmação via WhatsApp
-      console.log('Enviando mensagem de confirmação via WhatsApp (Retirar Cesta)...')
-
-      // Importa a função específica para mensagem de retirada de cesta
-      const { gerarMensagemRetirarCesta } = await import('@/services/whatsappService')
+      console.log('📱 Enviando mensagem de confirmação via WhatsApp (Retirar Cesta)...')
 
       const mensagem = gerarMensagemRetirarCesta(
         formData.nome,
         numeroParticipante
       )
 
+      console.log('📝 Mensagem gerada:', mensagem.substring(0, 100) + '...')
+      console.log('📞 WhatsApp:', formData.whatsapp)
+
       const resultado = await sendWhatsAppMessage({
         phoneNumber: formData.whatsapp,
         message: mensagem
       })
+
+      console.log('📊 Resultado do envio:', resultado)
 
       if (resultado.success) {
         console.log('✅ Mensagem WhatsApp enviada com sucesso!')
@@ -1029,7 +1106,7 @@ function StepTipoParticipacao({ tipoParticipacao, modalidadeCorrida, onTipoChang
                   </span>
                 </div>
                 <p className="text-xs md:text-sm text-slate-600">
-                  Você participará da corrida e receberá a cesta natalina
+                  Você participará da corrida e receberá a cesta natalina 21 de Dezembro
                 </p>
               </div>
               {tipoParticipacao === 'corrida-natal' && (
@@ -1117,7 +1194,7 @@ function StepTipoParticipacao({ tipoParticipacao, modalidadeCorrida, onTipoChang
                   </span>
                 </div>
                 <p className="text-xs md:text-sm text-slate-600">
-                  Você receberá a cesta natalina
+                  Você receberá a cesta natalina dia 21 de Dezembro
                 </p>
               </div>
               {tipoParticipacao === 'apenas-natal' && (

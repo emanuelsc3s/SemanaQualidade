@@ -197,6 +197,71 @@ Fica de olho neste WhatsApp, vou falar tudo por aqui.
 }
 
 /**
+ * Gera a mensagem de confirmação para quem optou por participar APENAS da comemoração de Natal
+ * (não participa da corrida, mas participa do evento de Natal)
+ *
+ * @param nome - Nome do colaborador
+ * @param numeroParticipante - Número de registro do colaborador
+ * @param tamanhoCamiseta - Tamanho da camiseta escolhida
+ * @returns Mensagem formatada para envio
+ */
+export function gerarMensagemApenasNatal(
+  nome: string,
+  numeroParticipante: string,
+  tamanhoCamiseta: string
+): string {
+  console.log('📝 [WhatsApp Service] Gerando mensagem de participação apenas no Natal:', {
+    nome,
+    numeroParticipante,
+    tamanhoCamiseta
+  })
+
+  const primeiroNome = nome.split(' ')[0]
+
+  const mensagem = `🎄 *Comemoração de Natal FARMACE - 2025* 🎁
+
+Olá, *${primeiroNome}*! 👋
+
+Aqui é a Lis da FARMACE 💙
+
+Sua solicitação foi recebida ✅
+
+*Inscrição:*
+• Nº do participante: *#${numeroParticipante}*
+• Opção escolhida: *Participar apenas da comemoração de Natal*
+• Tamanho da camiseta: *${tamanhoCamiseta}*
+• Status: *em análise*
+
+📍 *Informações importantes:*
+
+Você optou por:
+• ❌ NÃO participar da II Corrida FARMACE
+• ✅ Participar da comemoração de Natal dia 21 de Dezembro
+
+🎁 *O que você vai receber:*
+• Camiseta do evento (tamanho ${tamanhoCamiseta})
+• Cesta natalina
+• Acesso à comemoração de Natal
+
+📅 *Próximos passos:*
+Assim que confirmarmos sua inscrição, vou te avisar por aqui com:
+• Data e horário da retirada do kit
+• Local da comemoração de Natal
+• Outras orientações importantes
+
+📱 Fique de olho neste WhatsApp! Vou falar tudo por aqui.
+
+Qualquer dúvida, é só chamar! 😊
+
+*Lis – FARMACE* 💙`
+
+  console.log('✅ [WhatsApp Service] Mensagem de participação apenas no Natal gerada com sucesso!')
+  console.log('📏 [WhatsApp Service] Tamanho:', mensagem.length, 'caracteres')
+
+  return mensagem
+}
+
+/**
  * Gera a mensagem de confirmação para quem optou por NÃO participar dos eventos
  * e apenas retirar a cesta natalina presencialmente na Farmace
  *
