@@ -39,43 +39,56 @@ function formatPhoneNumber(phone: string): string {
  * @param params - Parâmetros contendo número de telefone e mensagem
  * @returns Promise com resultado do envio
  */
-export async function sendWhatsAppMessage({ 
-  phoneNumber, 
-  message 
+export async function sendWhatsAppMessage({
+  phoneNumber,
+  message
 }: SendMessageParams): Promise<SendMessageResponse> {
   try {
+    console.log('🚀 [WhatsApp Service] Iniciando envio de mensagem...')
+
     // Obtém configurações do .env
     const apiUrl = import.meta.env.VITE_EVOLUTION_API_URL
     const apiToken = import.meta.env.VITE_EVOLUTION_API_TOKEN
     const instanceName = import.meta.env.VITE_EVOLUTION_INSTANCE_NAME
-    
+
+    console.log('🔧 [WhatsApp Service] Variáveis de ambiente:', {
+      apiUrl: apiUrl ? '✅ Configurada' : '❌ Não configurada',
+      apiToken: apiToken ? '✅ Configurada' : '❌ Não configurada',
+      instanceName: instanceName ? '✅ Configurada' : '❌ Não configurada'
+    })
+
     // Valida se as variáveis de ambiente estão configuradas
     if (!apiUrl || !apiToken || !instanceName) {
-      console.error('Variáveis de ambiente da Evolution API não configuradas')
+      console.error('❌ [WhatsApp Service] Variáveis de ambiente da Evolution API não configuradas')
       return {
         success: false,
         error: 'Configuração da API de WhatsApp incompleta'
       }
     }
-    
+
     // Formata o número de telefone
     const formattedPhone = formatPhoneNumber(phoneNumber)
-    
+    console.log('📱 [WhatsApp Service] Número formatado:', {
+      original: phoneNumber,
+      formatado: formattedPhone
+    })
+
     // Monta o endpoint da API
     const endpoint = `${apiUrl}/message/sendText/${instanceName}`
-    
+
     // Corpo da requisição
     const requestBody = {
       number: formattedPhone,
       text: message
     }
-    
-    console.log('Enviando mensagem WhatsApp:', {
+
+    console.log('📤 [WhatsApp Service] Enviando requisição:', {
       endpoint,
       phone: formattedPhone,
-      messageLength: message.length
+      messageLength: message.length,
+      messagePreview: message.substring(0, 100) + '...'
     })
-    
+
     // Faz a requisição para a Evolution API
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -85,35 +98,42 @@ export async function sendWhatsAppMessage({
       },
       body: JSON.stringify(requestBody)
     })
-    
+
+    console.log('📊 [WhatsApp Service] Resposta recebida:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok
+    })
+
     // Verifica se a resposta foi bem-sucedida
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Erro ao enviar mensagem WhatsApp:', {
+      console.error('❌ [WhatsApp Service] Erro ao enviar mensagem:', {
         status: response.status,
         statusText: response.statusText,
         error: errorText
       })
-      
+
       return {
         success: false,
         error: `Erro ao enviar mensagem: ${response.statusText}`
       }
     }
-    
+
     // Processa a resposta
     const data = await response.json()
-    
-    console.log('Mensagem WhatsApp enviada com sucesso:', data)
-    
+
+    console.log('✅ [WhatsApp Service] Mensagem enviada com sucesso!')
+    console.log('📋 [WhatsApp Service] Dados da resposta:', data)
+
     return {
       success: true,
       data
     }
-    
+
   } catch (error) {
-    console.error('Erro ao enviar mensagem WhatsApp:', error)
-    
+    console.error('❌ [WhatsApp Service] Erro ao enviar mensagem:', error)
+
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erro desconhecido ao enviar mensagem'
@@ -134,6 +154,12 @@ export function gerarMensagemConfirmacao(
   numeroParticipante: string,
   categoria: string
 ): string {
+  console.log('📝 [WhatsApp Service] Gerando mensagem de confirmação:', {
+    nome,
+    numeroParticipante,
+    categoria
+  })
+
   const primeiroNome = nome.split(' ')[0]
 
   // Formata a categoria para exibição
@@ -142,7 +168,7 @@ export function gerarMensagemConfirmacao(
     : categoria === '10km' ? '10 km (corrida)'
     : categoria.toLowerCase()
 
-  return `🏃‍♂️ *II Corrida FARMACE - 2025* 🏃‍♀️
+  const mensagem = `🏃‍♂️ *II Corrida FARMACE - 2025* 🏃‍♀️
 
 Olá, *${primeiroNome}*! 👋
 
@@ -163,5 +189,10 @@ Assim que confirmarmos, te aviso por aqui com:
 Fica de olho neste WhatsApp, vou falar tudo por aqui.
 
 *Lis – FARMACE* 💙`
+
+  console.log('✅ [WhatsApp Service] Mensagem gerada com sucesso!')
+  console.log('📏 [WhatsApp Service] Tamanho:', mensagem.length, 'caracteres')
+
+  return mensagem
 }
 
