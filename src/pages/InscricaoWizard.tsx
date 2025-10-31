@@ -28,7 +28,7 @@ interface FormData {
   tamanho: string
   
   // Etapa 4: Evento de Natal
-  participarNatal: boolean
+  participarNatal: string
   
   // Etapa 5: Regulamento
   aceitouRegulamento: boolean
@@ -53,7 +53,7 @@ export default function InscricaoWizard() {
     whatsapp: "",
     categoria: "",
     tamanho: "",
-    participarNatal: false,
+    participarNatal: "",
     aceitouRegulamento: false
   })
 
@@ -99,7 +99,7 @@ export default function InscricaoWizard() {
       case 3:
         return !!formData.tamanho
       case 4:
-        return true // Opcional
+        return !!formData.participarNatal
       case 5:
         return formData.aceitouRegulamento
       default:
@@ -474,7 +474,8 @@ function StepCategoria({ categoria, onCategoriaChange }: StepCategoriaProps) {
   const categorias = [
     { value: '3km', label: '3KM', description: 'Caminhada ou Corrida Leve', icon: '🚶' },
     { value: '5km', label: '5KM', description: 'Corrida Intermediária', icon: '🏃' },
-    { value: '10km', label: '10KM', description: 'Corrida Avançada', icon: '🏃‍♂️💨' }
+    { value: '10km', label: '10KM', description: 'Corrida Avançada', icon: '🏃‍♂️💨' },
+    { value: 'nao-participar', label: 'Não Participar', description: 'Não desejo participar da corrida', icon: '🚫' }
   ]
 
   return (
@@ -597,11 +598,26 @@ function StepTamanhoCamiseta({ tamanho, onTamanhoChange }: StepTamanhoCamisetaPr
 
 // Etapa 4: Evento de Natal
 interface StepEventoNatalProps {
-  participarNatal: boolean
-  onParticipacaoChange: (value: boolean) => void
+  participarNatal: string
+  onParticipacaoChange: (value: string) => void
 }
 
 function StepEventoNatal({ participarNatal, onParticipacaoChange }: StepEventoNatalProps) {
+  const opcoesNatal = [
+    {
+      value: 'sim',
+      label: 'Participar',
+      description: 'Desejo participar e receber a cesta natalina',
+      icon: '🎄'
+    },
+    {
+      value: 'nao',
+      label: 'Não Participar',
+      description: 'Não desejo participar do evento de Natal',
+      icon: '🚫'
+    }
+  ]
+
   return (
     <Card className="shadow-xl border-2 border-primary-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <CardHeader className="bg-gradient-to-r from-primary-50 to-sky-50 border-b border-primary-100">
@@ -633,29 +649,31 @@ function StepEventoNatal({ participarNatal, onParticipacaoChange }: StepEventoNa
             </div>
           </div>
 
-          {/* Checkbox de Participação */}
-          <div className="flex items-start gap-3 p-4 md:p-5 border-2 border-slate-200 rounded-lg hover:border-primary-300 transition-colors">
-            <Checkbox
-              id="participarNatal"
-              checked={participarNatal}
-              onCheckedChange={onParticipacaoChange}
-              className="mt-1 w-5 h-5"
-            />
-            <label htmlFor="participarNatal" className="flex-1 cursor-pointer">
-              <span className="font-semibold text-sm md:text-base text-slate-800 block mb-1">
-                Desejo participar do Evento de Natal
-              </span>
-              <span className="text-xs md:text-sm text-slate-600">
-                Marque esta opção se você deseja participar e receber a cesta natalina
-              </span>
-            </label>
-          </div>
-
-          <div className="bg-sky-50 border-l-4 border-sky-400 p-3 md:p-4 rounded">
-            <p className="text-xs md:text-sm text-slate-700">
-              <strong className="text-sky-700">ℹ️ Informação:</strong> Este campo é opcional. Você pode prosseguir sem marcar.
-            </p>
-          </div>
+          {/* RadioGroup de Participação */}
+          <RadioGroup value={participarNatal} onValueChange={onParticipacaoChange} className="space-y-3 md:space-y-4">
+            {opcoesNatal.map((opcao) => (
+              <label
+                key={opcao.value}
+                className={`flex items-center gap-4 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
+                  participarNatal === opcao.value
+                    ? 'border-primary-500 bg-primary-50 shadow-md'
+                    : 'border-slate-200 hover:border-primary-300'
+                }`}
+              >
+                <RadioGroupItem value={opcao.value} id={opcao.value} className="w-5 h-5" />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-2xl">{opcao.icon}</span>
+                    <span className="font-bold text-lg md:text-xl text-slate-800">{opcao.label}</span>
+                  </div>
+                  <p className="text-xs md:text-sm text-slate-600">{opcao.description}</p>
+                </div>
+                {participarNatal === opcao.value && (
+                  <Check className="w-5 h-5 md:w-6 md:h-6 text-primary-600" />
+                )}
+              </label>
+            ))}
+          </RadioGroup>
         </div>
       </CardContent>
     </Card>
@@ -669,6 +687,34 @@ interface StepRegulamentoProps {
 }
 
 function StepRegulamento({ aceitouRegulamento, onAceiteChange }: StepRegulamentoProps) {
+  const [scrolledToBottom, setScrolledToBottom] = useState(false)
+  const regulamentoRef = useRef<HTMLDivElement>(null)
+
+  // Detecta quando o usuário rolou até o final
+  useEffect(() => {
+    const handleScroll = () => {
+      if (regulamentoRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = regulamentoRef.current
+        // Considera "final" quando está a 10px do fundo (para dar margem)
+        const isAtBottom = scrollHeight - scrollTop - clientHeight < 10
+        setScrolledToBottom(isAtBottom)
+      }
+    }
+
+    const regulamentoElement = regulamentoRef.current
+    if (regulamentoElement) {
+      regulamentoElement.addEventListener('scroll', handleScroll)
+      // Verifica inicialmente se já está no fundo (caso o conteúdo seja pequeno)
+      handleScroll()
+    }
+
+    return () => {
+      if (regulamentoElement) {
+        regulamentoElement.removeEventListener('scroll', handleScroll)
+      }
+    }
+  }, [])
+
   return (
     <Card className="shadow-xl border-2 border-primary-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <CardHeader className="bg-gradient-to-r from-primary-50 to-sky-50 border-b border-primary-100">
@@ -677,12 +723,15 @@ function StepRegulamento({ aceitouRegulamento, onAceiteChange }: StepRegulamento
           Regulamento do Evento
         </CardTitle>
         <CardDescription className="text-sm md:text-base">
-          Leia atentamente o regulamento antes de confirmar sua inscrição
+          Role até o final do regulamento para poder aceitar os termos
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-6 space-y-5 md:space-y-6">
         {/* Área Scrollável do Regulamento */}
-        <div className="border-2 border-slate-200 rounded-lg p-4 md:p-5 max-h-[400px] md:max-h-[500px] overflow-y-auto bg-slate-50">
+        <div
+          ref={regulamentoRef}
+          className="border-2 border-slate-200 rounded-lg p-4 md:p-5 max-h-[400px] md:max-h-[500px] overflow-y-auto bg-slate-50"
+        >
           <div className="prose prose-sm md:prose-base max-w-none text-slate-700 space-y-4">
             <h3 className="font-bold text-base md:text-lg text-slate-900 mb-3">
               REGULAMENTO - II CORRIDA E CAMINHADA DA QUALIDADE FARMACE
@@ -762,15 +811,32 @@ function StepRegulamento({ aceitouRegulamento, onAceiteChange }: StepRegulamento
           </div>
         </div>
 
+        {/* Aviso para rolar até o final */}
+        {!scrolledToBottom && (
+          <div className="bg-amber-50 border-l-4 border-amber-400 p-3 md:p-4 rounded animate-pulse">
+            <p className="text-xs md:text-sm text-amber-700">
+              <strong>👆 Role o regulamento até o final</strong> para poder marcar o aceite dos termos.
+            </p>
+          </div>
+        )}
+
         {/* Checkbox de Aceite */}
-        <div className="flex items-start gap-3 p-4 md:p-5 border-2 border-slate-300 rounded-lg bg-white hover:border-primary-400 transition-colors">
+        <div className={`flex items-start gap-3 p-4 md:p-5 border-2 rounded-lg transition-all ${
+          scrolledToBottom
+            ? 'border-slate-300 bg-white hover:border-primary-400 cursor-pointer'
+            : 'border-slate-200 bg-slate-50 opacity-60 cursor-not-allowed'
+        }`}>
           <Checkbox
             id="aceitouRegulamento"
             checked={aceitouRegulamento}
             onCheckedChange={onAceiteChange}
+            disabled={!scrolledToBottom}
             className="mt-1 w-5 h-5"
           />
-          <label htmlFor="aceitouRegulamento" className="flex-1 cursor-pointer">
+          <label
+            htmlFor="aceitouRegulamento"
+            className={`flex-1 ${scrolledToBottom ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+          >
             <span className="font-semibold text-sm md:text-base text-slate-800 block mb-1">
               Li e aceito o regulamento *
             </span>
@@ -780,7 +846,7 @@ function StepRegulamento({ aceitouRegulamento, onAceiteChange }: StepRegulamento
           </label>
         </div>
 
-        {!aceitouRegulamento && (
+        {!aceitouRegulamento && scrolledToBottom && (
           <div className="bg-red-50 border-l-4 border-red-400 p-3 md:p-4 rounded">
             <p className="text-xs md:text-sm text-red-700">
               <strong>⚠️ Atenção:</strong> Você precisa aceitar o regulamento para confirmar sua inscrição.
