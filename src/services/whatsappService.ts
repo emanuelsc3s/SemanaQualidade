@@ -142,18 +142,18 @@ export function gerarMensagemConfirmacao(
     : categoria === '10km' ? '10 km (corrida)'
     : categoria.toLowerCase()
 
-  return `🏃‍♂️ II Corrida FARMACE - 2025 🏃‍♀️
+  return `🏃‍♂️ *II Corrida FARMACE - 2025* 🏃‍♀️
 
-Olá, ${primeiroNome}! 👋
+Olá, *${primeiroNome}*! 👋
 
 Aqui é a Lis da FARMACE 💙
 
 Sua solicitação foi recebida ✅
 
-Inscrição:
-• Nº do participante: #${numeroParticipante}
-• Categoria: ${categoriaFormatada}
-• Status: em análise
+*Inscrição:*
+• Nº do participante: *#${numeroParticipante}*
+• Categoria: *${categoriaFormatada}*
+• Status: *em análise*
 • Local da Largada: Farmace às 6h30
 
 Assim que confirmarmos, te aviso por aqui com:
@@ -162,6 +162,6 @@ Assim que confirmarmos, te aviso por aqui com:
 
 Fica de olho neste WhatsApp, vou falar tudo por aqui.
 
-Lis – FARMACE 💙`
+*Lis – FARMACE* 💙`
 }
 
