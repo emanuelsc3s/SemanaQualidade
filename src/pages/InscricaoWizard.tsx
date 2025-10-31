@@ -21,16 +21,17 @@ interface FormData {
   cpf: string
   dataNascimento: string
   whatsapp: string
-  
-  // Etapa 2: Categoria
-  categoria: string
-  
+
+  // Etapa 2: Tipo de Participação
+  tipoParticipacao: string
+  modalidadeCorrida: string
+
   // Etapa 3: Tamanho da Camiseta
   tamanho: string
-  
+
   // Etapa 4: Evento de Natal
   participarNatal: string
-  
+
   // Etapa 5: Regulamento
   aceitouRegulamento: boolean
 }
@@ -56,7 +57,8 @@ export default function InscricaoWizard() {
     cpf: "",
     dataNascimento: "",
     whatsapp: "",
-    categoria: "",
+    tipoParticipacao: "",
+    modalidadeCorrida: "",
     tamanho: "",
     participarNatal: "",
     aceitouRegulamento: false
@@ -161,7 +163,11 @@ export default function InscricaoWizard() {
         // Etapa 1: Apenas WhatsApp é obrigatório
         return isWhatsappValid(formData.whatsapp)
       case 2:
-        return !!formData.categoria
+        // Etapa 2: Valida tipo de participação e modalidade (se aplicável)
+        if (!formData.tipoParticipacao) return false
+        // Se escolheu participar da corrida, deve selecionar a modalidade
+        if (formData.tipoParticipacao === 'corrida-natal' && !formData.modalidadeCorrida) return false
+        return true
       case 3:
         return !!formData.tamanho
       case 4:
@@ -399,11 +405,13 @@ export default function InscricaoWizard() {
           />
         )}
 
-        {/* Etapa 2: Escolha da Categoria */}
+        {/* Etapa 2: Tipo de Participação e Modalidade */}
         {currentStep === 2 && (
-          <StepCategoria
-            categoria={formData.categoria}
-            onCategoriaChange={(value) => handleInputChange('categoria', value)}
+          <StepTipoParticipacao
+            tipoParticipacao={formData.tipoParticipacao}
+            modalidadeCorrida={formData.modalidadeCorrida}
+            onTipoChange={(value) => handleInputChange('tipoParticipacao', value)}
+            onModalidadeChange={(value) => handleInputChange('modalidadeCorrida', value)}
           />
         )}
 
@@ -794,56 +802,182 @@ function StepDadosCadastrais({ formData, onInputChange, formatCPF, formatPhone, 
   )
 }
 
-// Etapa 2: Categoria
-interface StepCategoriaProps {
-  categoria: string
-  onCategoriaChange: (value: string) => void
+// Etapa 2: Tipo de Participação e Modalidade
+interface StepTipoParticipacaoProps {
+  tipoParticipacao: string
+  modalidadeCorrida: string
+  onTipoChange: (value: string) => void
+  onModalidadeChange: (value: string) => void
 }
 
-function StepCategoria({ categoria, onCategoriaChange }: StepCategoriaProps) {
-  const categorias = [
-    { value: '3km', label: '3KM', description: 'Caminhada ou Corrida Leve', icon: '🚶' },
-    { value: '5km', label: '5KM', description: 'Corrida Intermediária', icon: '🏃' },
-    { value: '10km', label: '10KM', description: 'Corrida Avançada', icon: '🏃‍♂️💨' },
-    { value: 'nao-participar', label: 'Não Participar', description: 'Não desejo participar da corrida', icon: '🚫' }
-  ]
-
+function StepTipoParticipacao({ tipoParticipacao, modalidadeCorrida, onTipoChange, onModalidadeChange }: StepTipoParticipacaoProps) {
   return (
     <Card className="shadow-xl border-2 border-primary-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <CardHeader className="bg-gradient-to-r from-primary-50 to-sky-50 border-b border-primary-100">
         <CardTitle className="flex items-center gap-2 text-xl md:text-2xl text-slate-800">
-          <Trophy className="w-5 h-5 md:w-6 md:h-6 text-primary-600" />
-          Escolha sua Categoria
+          <Gift className="w-5 h-5 md:w-6 md:h-6 text-primary-600" />
+          Tipo de Participação
         </CardTitle>
         <CardDescription className="text-sm md:text-base">
-          Selecione a distância que você deseja percorrer
+          Escolha como você deseja participar dos eventos da Semana da Qualidade
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-6">
-        <RadioGroup value={categoria} onValueChange={onCategoriaChange} className="space-y-3 md:space-y-4">
-          {categorias.map((cat) => (
+      <CardContent className="pt-6 space-y-6 md:space-y-8">
+        {/* Seção A - Seleção do Tipo de Participação */}
+        <div className="space-y-4">
+          <Label className="text-base md:text-lg font-semibold text-slate-700">
+            Selecione uma opção: *
+          </Label>
+          <RadioGroup
+            value={tipoParticipacao}
+            onValueChange={(value) => {
+              onTipoChange(value)
+              // Limpa a modalidade se não for corrida
+              if (value !== 'corrida-natal') {
+                onModalidadeChange('')
+              }
+            }}
+            className="space-y-3 md:space-y-4"
+          >
+            {/* Opção 1 - Corrida + Natal */}
             <label
-              key={cat.value}
-              className={`flex items-center gap-4 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
-                categoria === cat.value
+              className={`flex items-start gap-3 md:gap-4 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
+                tipoParticipacao === 'corrida-natal'
                   ? 'border-primary-500 bg-primary-50 shadow-md'
                   : 'border-slate-200 hover:border-primary-300'
               }`}
             >
-              <RadioGroupItem value={cat.value} id={cat.value} className="w-5 h-5" />
+              <RadioGroupItem value="corrida-natal" id="corrida-natal" className="mt-1 w-5 h-5" />
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-2xl">{cat.icon}</span>
-                  <span className="font-bold text-lg md:text-xl text-slate-800">{cat.label}</span>
+                  <Trophy className="w-5 h-5 text-primary-600" />
+                  <span className="font-bold text-base md:text-lg text-slate-800">
+                    Participar da corrida e da comemoração de Natal
+                  </span>
                 </div>
-                <p className="text-xs md:text-sm text-slate-600">{cat.description}</p>
+                <p className="text-xs md:text-sm text-slate-600">
+                  Você participará da corrida e receberá a cesta natalina
+                </p>
               </div>
-              {categoria === cat.value && (
-                <Check className="w-5 h-5 md:w-6 md:h-6 text-primary-600" />
+              {tipoParticipacao === 'corrida-natal' && (
+                <Check className="w-5 h-5 md:w-6 md:h-6 text-primary-600 flex-shrink-0" />
               )}
             </label>
-          ))}
-        </RadioGroup>
+
+            {/* Opção 2 - Apenas Natal */}
+            <label
+              className={`flex items-start gap-3 md:gap-4 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
+                tipoParticipacao === 'apenas-natal'
+                  ? 'border-primary-500 bg-primary-50 shadow-md'
+                  : 'border-slate-200 hover:border-primary-300'
+              }`}
+            >
+              <RadioGroupItem value="apenas-natal" id="apenas-natal" className="mt-1 w-5 h-5" />
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <Gift className="w-5 h-5 text-accent-600" />
+                  <span className="font-bold text-base md:text-lg text-slate-800">
+                    Participar apenas da comemoração de Natal
+                  </span>
+                </div>
+                <p className="text-xs md:text-sm text-slate-600">
+                  Você receberá a cesta natalina
+                </p>
+              </div>
+              {tipoParticipacao === 'apenas-natal' && (
+                <Check className="w-5 h-5 md:w-6 md:h-6 text-primary-600 flex-shrink-0" />
+              )}
+            </label>
+
+            {/* Opção 3 - Retirar Cesta */}
+            <label
+              className={`flex items-start gap-3 md:gap-4 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
+                tipoParticipacao === 'retirar-cesta'
+                  ? 'border-primary-500 bg-primary-50 shadow-md'
+                  : 'border-slate-200 hover:border-primary-300'
+              }`}
+            >
+              <RadioGroupItem value="retirar-cesta" id="retirar-cesta" className="mt-1 w-5 h-5" />
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <Gift className="w-5 h-5 text-slate-600" />
+                  <span className="font-bold text-base md:text-lg text-slate-800">
+                    Não participar de nenhum evento e retirar a cesta natalina na Farmace
+                  </span>
+                </div>
+                <p className="text-xs md:text-sm text-slate-600">
+                  Retirada disponível nos dias <strong>22 ou 23 de dezembro/2025</strong>
+                </p>
+              </div>
+              {tipoParticipacao === 'retirar-cesta' && (
+                <Check className="w-5 h-5 md:w-6 md:h-6 text-primary-600 flex-shrink-0" />
+              )}
+            </label>
+          </RadioGroup>
+        </div>
+
+        {/* Seção B - Seleção da Modalidade de Corrida (Condicional) */}
+        {tipoParticipacao === 'corrida-natal' && (
+          <div className="space-y-4 pt-4 md:pt-6 border-t-2 border-slate-200 animate-in fade-in slide-in-from-top-4 duration-500">
+            <Label className="text-base md:text-lg font-semibold text-slate-700 flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-primary-600" />
+              Selecione a modalidade de corrida: *
+            </Label>
+            <RadioGroup
+              value={modalidadeCorrida}
+              onValueChange={onModalidadeChange}
+              className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4"
+            >
+              {/* 3KM */}
+              <label
+                className={`flex flex-col items-center justify-center gap-2 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
+                  modalidadeCorrida === '3km'
+                    ? 'border-primary-500 bg-primary-50 shadow-md'
+                    : 'border-slate-200 hover:border-primary-300'
+                }`}
+              >
+                <RadioGroupItem value="3km" id="3km" className="w-5 h-5" />
+                <span className="font-bold text-2xl md:text-3xl text-primary-600">3KM</span>
+                <span className="text-xs md:text-sm text-slate-600 text-center">Caminhada ou Corrida Leve</span>
+                {modalidadeCorrida === '3km' && (
+                  <Check className="w-5 h-5 text-primary-600 mt-1" />
+                )}
+              </label>
+
+              {/* 5KM */}
+              <label
+                className={`flex flex-col items-center justify-center gap-2 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
+                  modalidadeCorrida === '5km'
+                    ? 'border-primary-500 bg-primary-50 shadow-md'
+                    : 'border-slate-200 hover:border-primary-300'
+                }`}
+              >
+                <RadioGroupItem value="5km" id="5km" className="w-5 h-5" />
+                <span className="font-bold text-2xl md:text-3xl text-primary-600">5KM</span>
+                <span className="text-xs md:text-sm text-slate-600 text-center">Corrida Intermediária</span>
+                {modalidadeCorrida === '5km' && (
+                  <Check className="w-5 h-5 text-primary-600 mt-1" />
+                )}
+              </label>
+
+              {/* 10KM */}
+              <label
+                className={`flex flex-col items-center justify-center gap-2 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
+                  modalidadeCorrida === '10km'
+                    ? 'border-primary-500 bg-primary-50 shadow-md'
+                    : 'border-slate-200 hover:border-primary-300'
+                }`}
+              >
+                <RadioGroupItem value="10km" id="10km" className="w-5 h-5" />
+                <span className="font-bold text-2xl md:text-3xl text-primary-600">10KM</span>
+                <span className="text-xs md:text-sm text-slate-600 text-center">Corrida Avançada</span>
+                {modalidadeCorrida === '10km' && (
+                  <Check className="w-5 h-5 text-primary-600 mt-1" />
+                )}
+              </label>
+            </RadioGroup>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

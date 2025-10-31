@@ -3,10 +3,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { ArrowLeft, Upload, Check, User, CreditCard, MapPin, Shirt, Volume2, VolumeX } from "lucide-react"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { ArrowLeft, Upload, Check, User, CreditCard, MapPin, Shirt, Volume2, VolumeX, ChevronRight, ChevronLeft, Gift, Trophy, AlertCircle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 interface FormData {
+  // Etapa 1 - Tipo de Participação
+  tipoParticipacao: string
+  modalidadeCorrida: string
+  // Etapa 2 - Dados Pessoais
   nome: string
   email: string
   telefone: string
@@ -16,7 +21,7 @@ interface FormData {
   endereco: string
   cidade: string
   estado: string
-  modalidade: string
+  // Etapa 3 - Informações da Corrida
   tamanho: string
   foto: string
 }
@@ -27,8 +32,13 @@ interface FormErrors {
 
 export default function Inscricao() {
   const navigate = useNavigate()
+  const [currentStep, setCurrentStep] = useState(1)
   const [submitted, setSubmitted] = useState(false)
   const [formData, setFormData] = useState<FormData>({
+    // Etapa 1
+    tipoParticipacao: '',
+    modalidadeCorrida: '',
+    // Etapa 2
     nome: '',
     email: '',
     telefone: '',
@@ -38,7 +48,7 @@ export default function Inscricao() {
     endereco: '',
     cidade: '',
     estado: '',
-    modalidade: '5k',
+    // Etapa 3
     tamanho: 'M',
     foto: ''
   })
@@ -94,7 +104,25 @@ export default function Inscricao() {
     return digits.length >= 10
   }
 
-  const validateForm = (): boolean => {
+  // Validação da Etapa 1
+  const validateStep1 = (): boolean => {
+    const newErrors: FormErrors = {}
+
+    if (!formData.tipoParticipacao) {
+      newErrors.tipoParticipacao = 'Selecione um tipo de participação'
+    }
+
+    // Se escolheu participar da corrida, deve selecionar a modalidade
+    if (formData.tipoParticipacao === 'corrida-natal' && !formData.modalidadeCorrida) {
+      newErrors.modalidadeCorrida = 'Selecione uma modalidade de corrida'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  // Validação da Etapa 2
+  const validateStep2 = (): boolean => {
     const newErrors: FormErrors = {}
 
     if (!formData.nome.trim()) newErrors.nome = 'Nome é obrigatório'
@@ -118,10 +146,45 @@ export default function Inscricao() {
     if (!formData.endereco.trim()) newErrors.endereco = 'Endereço é obrigatório'
     if (!formData.cidade.trim()) newErrors.cidade = 'Cidade é obrigatória'
     if (!formData.estado.trim()) newErrors.estado = 'Estado é obrigatório'
-    if (!formData.foto) newErrors.foto = 'Foto é obrigatória'
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
+  }
+
+  // Validação da Etapa 3
+  const validateStep3 = (): boolean => {
+    const newErrors: FormErrors = {}
+
+    // Apenas valida foto se o usuário escolheu participar da corrida
+    if (formData.tipoParticipacao === 'corrida-natal' && !formData.foto) {
+      newErrors.foto = 'Foto é obrigatória para participantes da corrida'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  // Navegação entre etapas
+  const handleNextStep = () => {
+    let isValid = false
+
+    if (currentStep === 1) {
+      isValid = validateStep1()
+    } else if (currentStep === 2) {
+      isValid = validateStep2()
+    }
+
+    if (isValid && currentStep < 3) {
+      setCurrentStep(currentStep + 1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
+  const handlePreviousStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -197,7 +260,8 @@ export default function Inscricao() {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    if (validateForm()) {
+    // Valida a etapa 3 antes de submeter
+    if (validateStep3()) {
       const inscricoes = JSON.parse(localStorage.getItem('inscricoes') || '[]')
       const novaInscricao = {
         ...formData,
@@ -327,9 +391,257 @@ export default function Inscricao() {
 
       {/* Form */}
       <div className="container mx-auto px-4 py-8 max-w-3xl">
+        {/* Indicador de Progresso das Etapas */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between max-w-2xl mx-auto">
+            {/* Etapa 1 */}
+            <div className="flex flex-col items-center flex-1">
+              <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-sm md:text-base transition-all duration-300 ${
+                currentStep >= 1
+                  ? 'bg-primary-600 text-white shadow-lg'
+                  : 'bg-slate-200 text-slate-400'
+              }`}>
+                1
+              </div>
+              <p className={`text-xs md:text-sm mt-2 font-medium text-center ${
+                currentStep >= 1 ? 'text-primary-600' : 'text-slate-400'
+              }`}>
+                Participação
+              </p>
+            </div>
+
+            {/* Linha conectora 1-2 */}
+            <div className={`flex-1 h-1 mx-2 transition-all duration-300 ${
+              currentStep >= 2 ? 'bg-primary-600' : 'bg-slate-200'
+            }`}></div>
+
+            {/* Etapa 2 */}
+            <div className="flex flex-col items-center flex-1">
+              <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-sm md:text-base transition-all duration-300 ${
+                currentStep >= 2
+                  ? 'bg-primary-600 text-white shadow-lg'
+                  : 'bg-slate-200 text-slate-400'
+              }`}>
+                2
+              </div>
+              <p className={`text-xs md:text-sm mt-2 font-medium text-center ${
+                currentStep >= 2 ? 'text-primary-600' : 'text-slate-400'
+              }`}>
+                Dados Pessoais
+              </p>
+            </div>
+
+            {/* Linha conectora 2-3 */}
+            <div className={`flex-1 h-1 mx-2 transition-all duration-300 ${
+              currentStep >= 3 ? 'bg-primary-600' : 'bg-slate-200'
+            }`}></div>
+
+            {/* Etapa 3 */}
+            <div className="flex flex-col items-center flex-1">
+              <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-sm md:text-base transition-all duration-300 ${
+                currentStep >= 3
+                  ? 'bg-primary-600 text-white shadow-lg'
+                  : 'bg-slate-200 text-slate-400'
+              }`}>
+                3
+              </div>
+              <p className={`text-xs md:text-sm mt-2 font-medium text-center ${
+                currentStep >= 3 ? 'text-primary-600' : 'text-slate-400'
+              }`}>
+                Finalização
+              </p>
+            </div>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Dados Pessoais */}
-          <Card>
+          {/* ETAPA 1 - Tipo de Participação e Modalidade */}
+          {currentStep === 1 && (
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-xl md:text-2xl">
+                    <Gift className="w-6 h-6" />
+                    Tipo de Participação
+                  </CardTitle>
+                  <CardDescription>
+                    Escolha como você deseja participar dos eventos da Semana da Qualidade
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Seção A - Seleção do Tipo de Participação */}
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold text-slate-700">
+                      Selecione uma opção: *
+                    </Label>
+                    <RadioGroup
+                      value={formData.tipoParticipacao}
+                      onValueChange={(value) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          tipoParticipacao: value,
+                          // Limpa a modalidade se não for corrida
+                          modalidadeCorrida: value === 'corrida-natal' ? prev.modalidadeCorrida : ''
+                        }))
+                        if (errors.tipoParticipacao) {
+                          setErrors(prev => ({ ...prev, tipoParticipacao: '' }))
+                        }
+                      }}
+                      className="space-y-3"
+                    >
+                      {/* Opção 1 - Corrida + Natal */}
+                      <div className={`flex items-start space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
+                        formData.tipoParticipacao === 'corrida-natal'
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-slate-200 hover:border-primary-300 hover:bg-slate-50'
+                      }`}>
+                        <RadioGroupItem value="corrida-natal" id="corrida-natal" className="mt-1" />
+                        <div className="flex-1">
+                          <Label
+                            htmlFor="corrida-natal"
+                            className="font-semibold text-slate-800 cursor-pointer flex items-center gap-2"
+                          >
+                            <Trophy className="w-5 h-5 text-primary-600" />
+                            Participar da corrida e da comemoração de Natal
+                          </Label>
+                          <p className="text-sm text-slate-600 mt-1">
+                            Você participará da corrida e receberá a cesta natalina
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Opção 2 - Apenas Natal */}
+                      <div className={`flex items-start space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
+                        formData.tipoParticipacao === 'apenas-natal'
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-slate-200 hover:border-primary-300 hover:bg-slate-50'
+                      }`}>
+                        <RadioGroupItem value="apenas-natal" id="apenas-natal" className="mt-1" />
+                        <div className="flex-1">
+                          <Label
+                            htmlFor="apenas-natal"
+                            className="font-semibold text-slate-800 cursor-pointer flex items-center gap-2"
+                          >
+                            <Gift className="w-5 h-5 text-accent-600" />
+                            Participar apenas da comemoração de Natal
+                          </Label>
+                          <p className="text-sm text-slate-600 mt-1">
+                            Você receberá a cesta natalina
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Opção 3 - Retirar Cesta */}
+                      <div className={`flex items-start space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
+                        formData.tipoParticipacao === 'retirar-cesta'
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-slate-200 hover:border-primary-300 hover:bg-slate-50'
+                      }`}>
+                        <RadioGroupItem value="retirar-cesta" id="retirar-cesta" className="mt-1" />
+                        <div className="flex-1">
+                          <Label
+                            htmlFor="retirar-cesta"
+                            className="font-semibold text-slate-800 cursor-pointer"
+                          >
+                            Não participar de nenhum evento e retirar a cesta natalina na Farmace
+                          </Label>
+                          <p className="text-sm text-slate-600 mt-1">
+                            Retirada disponível nos dias <strong>22 ou 23 de dezembro/2025</strong>
+                          </p>
+                        </div>
+                      </div>
+                    </RadioGroup>
+                    {errors.tipoParticipacao && (
+                      <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
+                        <AlertCircle className="w-4 h-4" />
+                        {errors.tipoParticipacao}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Seção B - Seleção da Modalidade de Corrida (Condicional) */}
+                  {formData.tipoParticipacao === 'corrida-natal' && (
+                    <div className="space-y-4 pt-4 border-t-2 border-slate-200 animate-in fade-in slide-in-from-top-4 duration-500">
+                      <Label className="text-base font-semibold text-slate-700 flex items-center gap-2">
+                        <Trophy className="w-5 h-5 text-primary-600" />
+                        Selecione a modalidade de corrida: *
+                      </Label>
+                      <RadioGroup
+                        value={formData.modalidadeCorrida}
+                        onValueChange={(value) => {
+                          setFormData(prev => ({ ...prev, modalidadeCorrida: value }))
+                          if (errors.modalidadeCorrida) {
+                            setErrors(prev => ({ ...prev, modalidadeCorrida: '' }))
+                          }
+                        }}
+                        className="grid grid-cols-1 md:grid-cols-3 gap-3"
+                      >
+                        {/* 3KM */}
+                        <div className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
+                          formData.modalidadeCorrida === '3km'
+                            ? 'border-primary-500 bg-primary-50'
+                            : 'border-slate-200 hover:border-primary-300 hover:bg-slate-50'
+                        }`}>
+                          <RadioGroupItem value="3km" id="3km" />
+                          <Label htmlFor="3km" className="font-semibold text-slate-800 cursor-pointer">
+                            3KM
+                          </Label>
+                        </div>
+
+                        {/* 5KM */}
+                        <div className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
+                          formData.modalidadeCorrida === '5km'
+                            ? 'border-primary-500 bg-primary-50'
+                            : 'border-slate-200 hover:border-primary-300 hover:bg-slate-50'
+                        }`}>
+                          <RadioGroupItem value="5km" id="5km" />
+                          <Label htmlFor="5km" className="font-semibold text-slate-800 cursor-pointer">
+                            5KM
+                          </Label>
+                        </div>
+
+                        {/* 10KM */}
+                        <div className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
+                          formData.modalidadeCorrida === '10km'
+                            ? 'border-primary-500 bg-primary-50'
+                            : 'border-slate-200 hover:border-primary-300 hover:bg-slate-50'
+                        }`}>
+                          <RadioGroupItem value="10km" id="10km" />
+                          <Label htmlFor="10km" className="font-semibold text-slate-800 cursor-pointer">
+                            10KM
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                      {errors.modalidadeCorrida && (
+                        <p className="text-sm text-red-600 mt-2 flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" />
+                          {errors.modalidadeCorrida}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Botão Próximo */}
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  onClick={handleNextStep}
+                  size="lg"
+                  className="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8"
+                >
+                  Próximo
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </Button>
+              </div>
+            </>
+          )}
+
+          {/* ETAPA 2 - Dados Pessoais e Endereço */}
+          {currentStep === 2 && (
+            <>
+              <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="w-5 h-5" />
@@ -506,130 +818,199 @@ export default function Inscricao() {
             </CardContent>
           </Card>
 
-          {/* Informações da Corrida */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shirt className="w-5 h-5" />
-                Informações da Corrida
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="modalidade">Modalidade *</Label>
-                  <select
-                    id="modalidade"
-                    name="modalidade"
-                    value={formData.modalidade}
-                    onChange={handleInputChange}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <option value="5k">5K - Corrida</option>
-                    <option value="5k-caminhada">5K - Caminhada</option>
-                    <option value="10k">10K - Corrida</option>
-                  </select>
-                </div>
-
-                <div>
-                  <Label htmlFor="tamanho">Tamanho da Camiseta *</Label>
-                  <select
-                    id="tamanho"
-                    name="tamanho"
-                    value={formData.tamanho}
-                    onChange={handleInputChange}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <option value="PP">PP</option>
-                    <option value="P">P</option>
-                    <option value="M">M</option>
-                    <option value="G">G</option>
-                    <option value="GG">GG</option>
-                    <option value="XG">XG</option>
-                  </select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Upload de Foto */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Upload className="w-5 h-5" />
-                Foto do Participante
-              </CardTitle>
-              <CardDescription>
-                Envie uma foto recente para identificação
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <Label
-                  htmlFor="foto"
-                  className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-slate-50 ${
-                    errors.foto ? 'border-red-500' : 'border-slate-300'
-                  }`}
+              {/* Botões de Navegação - Etapa 2 */}
+              <div className="flex justify-between gap-4">
+                <Button
+                  type="button"
+                  onClick={handlePreviousStep}
+                  variant="outline"
+                  size="lg"
+                  className="font-semibold px-8"
                 >
-                  {photoPreview ? (
-                    <img
-                      src={photoPreview}
-                      alt="Preview"
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className="w-12 h-12 mb-3 text-slate-400" />
-                      <p className="mb-2 text-sm text-slate-600">
-                        <span className="font-semibold">Clique para enviar</span> ou arraste e solte
+                  <ChevronLeft className="w-5 h-5 mr-2" />
+                  Anterior
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleNextStep}
+                  size="lg"
+                  className="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-8"
+                >
+                  Próximo
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </Button>
+              </div>
+            </>
+          )}
+
+          {/* ETAPA 3 - Informações da Corrida e Upload de Foto */}
+          {currentStep === 3 && (
+            <>
+              {/* Tamanho da Camiseta - Apenas se participar da corrida */}
+              {formData.tipoParticipacao === 'corrida-natal' && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Shirt className="w-5 h-5" />
+                      Tamanho da Camiseta
+                    </CardTitle>
+                    <CardDescription>
+                      Selecione o tamanho da camiseta que você receberá no kit do atleta
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="tamanho">Tamanho *</Label>
+                      <select
+                        id="tamanho"
+                        name="tamanho"
+                        value={formData.tamanho}
+                        onChange={handleInputChange}
+                        className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <option value="PP">PP</option>
+                        <option value="P">P</option>
+                        <option value="M">M</option>
+                        <option value="G">G</option>
+                        <option value="GG">GG</option>
+                        <option value="XG">XG</option>
+                      </select>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Upload de Foto - Apenas se participar da corrida */}
+              {formData.tipoParticipacao === 'corrida-natal' && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Upload className="w-5 h-5" />
+                      Foto do Participante
+                    </CardTitle>
+                    <CardDescription>
+                      Envie uma foto recente para identificação no dia da corrida
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <Label
+                        htmlFor="foto"
+                        className={`flex flex-col items-center justify-center w-full h-48 md:h-64 border-2 border-dashed rounded-lg cursor-pointer hover:bg-slate-50 transition-colors ${
+                          errors.foto ? 'border-red-500' : 'border-slate-300'
+                        }`}
+                      >
+                        {photoPreview ? (
+                          <img
+                            src={photoPreview}
+                            alt="Preview"
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <Upload className="w-12 h-12 mb-3 text-slate-400" />
+                            <p className="mb-2 text-sm md:text-base text-slate-600 text-center px-4">
+                              <span className="font-semibold">Clique para enviar</span> ou arraste e solte
+                            </p>
+                            <p className="text-xs text-slate-500">PNG, JPG ou JPEG (MAX. 5MB)</p>
+                          </div>
+                        )}
+                        <Input
+                          id="foto"
+                          name="foto"
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoChange}
+                          className="hidden"
+                        />
+                      </Label>
+                      {errors.foto && (
+                        <p className="text-sm text-red-600 flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4" />
+                          {errors.foto}
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Informação de Pagamento - Apenas se participar da corrida */}
+              {formData.tipoParticipacao === 'corrida-natal' && (
+                <Card className="bg-accent-50 border-2 border-accent-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-accent-900">
+                      <CreditCard className="w-5 h-5" />
+                      Valor da Inscrição
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center">
+                      <p className="text-3xl md:text-4xl font-bold text-accent-700 mb-2">R$ 35,00</p>
+                      <p className="text-sm text-slate-600">
+                        Após confirmar a inscrição, você receberá as instruções de pagamento por e-mail.
                       </p>
-                      <p className="text-xs text-slate-500">PNG, JPG ou JPEG (MAX. 5MB)</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Resumo da Inscrição */}
+              <Card className="bg-primary-50 border-2 border-primary-200">
+                <CardHeader>
+                  <CardTitle className="text-primary-900">Resumo da Inscrição</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-primary-200">
+                    <span className="text-slate-700 font-medium">Tipo de Participação:</span>
+                    <span className="text-slate-900 font-semibold">
+                      {formData.tipoParticipacao === 'corrida-natal' && 'Corrida + Natal'}
+                      {formData.tipoParticipacao === 'apenas-natal' && 'Apenas Natal'}
+                      {formData.tipoParticipacao === 'retirar-cesta' && 'Retirar Cesta'}
+                    </span>
+                  </div>
+                  {formData.tipoParticipacao === 'corrida-natal' && formData.modalidadeCorrida && (
+                    <div className="flex justify-between items-center py-2 border-b border-primary-200">
+                      <span className="text-slate-700 font-medium">Modalidade:</span>
+                      <span className="text-slate-900 font-semibold">{formData.modalidadeCorrida.toUpperCase()}</span>
                     </div>
                   )}
-                  <Input
-                    id="foto"
-                    name="foto"
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoChange}
-                    className="hidden"
-                  />
-                </Label>
-                {errors.foto && <p className="text-sm text-red-600">{errors.foto}</p>}
+                  {formData.tipoParticipacao === 'corrida-natal' && (
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-slate-700 font-medium">Tamanho da Camiseta:</span>
+                      <span className="text-slate-900 font-semibold">{formData.tamanho}</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Botões de Navegação - Etapa 3 */}
+              <div className="flex flex-col sm:flex-row justify-between gap-4">
+                <Button
+                  type="button"
+                  onClick={handlePreviousStep}
+                  variant="outline"
+                  size="lg"
+                  className="font-semibold px-8 w-full sm:w-auto"
+                >
+                  <ChevronLeft className="w-5 h-5 mr-2" />
+                  Anterior
+                </Button>
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-bold px-8"
+                >
+                  <Check className="w-5 h-5 mr-2" />
+                  Confirmar Inscrição
+                </Button>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Pagamento Info */}
-          <Card className="bg-accent-50 border-2 border-accent-200">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-accent-900">
-                <CreditCard className="w-5 h-5" />
-                Valor da Inscrição
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center">
-                <p className="text-4xl font-bold text-accent-700 mb-2">R$ 35,00</p>
-                <p className="text-sm text-slate-600">
-                  Após confirmar a inscrição, você receberá as instruções de pagamento por e-mail.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            size="lg"
-            className="w-full bg-primary-500 hover:bg-primary-600 text-white font-bold"
-          >
-            Confirmar Inscrição
-          </Button>
-
-          <p className="text-center text-sm text-slate-500">
-            * Campos obrigatórios
-          </p>
+              <p className="text-center text-sm text-slate-500">
+                * Campos obrigatórios
+              </p>
+            </>
+          )}
         </form>
       </div>
     </div>
