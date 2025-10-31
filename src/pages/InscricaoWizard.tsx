@@ -857,6 +857,69 @@ function StepTipoParticipacao({ tipoParticipacao, modalidadeCorrida, onTipoChang
               )}
             </label>
 
+            {/* Seção B - Seleção da Modalidade de Corrida (Condicional) - DENTRO DO RADIOGROUP */}
+            {tipoParticipacao === 'corrida-natal' && (
+              <div className="ml-0 pl-4 md:pl-6 border-l-4 border-primary-400 bg-primary-50/50 rounded-r-lg py-4 md:py-5 pr-4 md:pr-5 animate-in fade-in slide-in-from-top-4 duration-500">
+                <Label className="text-base md:text-lg font-semibold text-slate-700 flex items-center gap-2 mb-4">
+                  <Trophy className="w-5 h-5 text-primary-600" />
+                  Selecione a modalidade de corrida: *
+                </Label>
+                <RadioGroup
+                  value={modalidadeCorrida}
+                  onValueChange={onModalidadeChange}
+                  className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4"
+                >
+                  {/* 3KM */}
+                  <label
+                    className={`flex flex-col items-center justify-center gap-2 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
+                      modalidadeCorrida === '3km'
+                        ? 'border-primary-500 bg-primary-50 shadow-md'
+                        : 'border-slate-200 hover:border-primary-300'
+                    }`}
+                  >
+                    <RadioGroupItem value="3km" id="3km" className="w-5 h-5" />
+                    <span className="font-bold text-2xl md:text-3xl text-primary-600">3KM</span>
+                    <span className="text-xs md:text-sm text-slate-600 text-center">Caminhada ou Corrida Leve</span>
+                    {modalidadeCorrida === '3km' && (
+                      <Check className="w-5 h-5 text-primary-600 mt-1" />
+                    )}
+                  </label>
+
+                  {/* 5KM */}
+                  <label
+                    className={`flex flex-col items-center justify-center gap-2 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
+                      modalidadeCorrida === '5km'
+                        ? 'border-primary-500 bg-primary-50 shadow-md'
+                        : 'border-slate-200 hover:border-primary-300'
+                    }`}
+                  >
+                    <RadioGroupItem value="5km" id="5km" className="w-5 h-5" />
+                    <span className="font-bold text-2xl md:text-3xl text-primary-600">5KM</span>
+                    <span className="text-xs md:text-sm text-slate-600 text-center">Corrida Intermediária</span>
+                    {modalidadeCorrida === '5km' && (
+                      <Check className="w-5 h-5 text-primary-600 mt-1" />
+                    )}
+                  </label>
+
+                  {/* 10KM */}
+                  <label
+                    className={`flex flex-col items-center justify-center gap-2 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
+                      modalidadeCorrida === '10km'
+                        ? 'border-primary-500 bg-primary-50 shadow-md'
+                        : 'border-slate-200 hover:border-primary-300'
+                    }`}
+                  >
+                    <RadioGroupItem value="10km" id="10km" className="w-5 h-5" />
+                    <span className="font-bold text-2xl md:text-3xl text-primary-600">10KM</span>
+                    <span className="text-xs md:text-sm text-slate-600 text-center">Corrida Avançada</span>
+                    {modalidadeCorrida === '10km' && (
+                      <Check className="w-5 h-5 text-primary-600 mt-1" />
+                    )}
+                  </label>
+                </RadioGroup>
+              </div>
+            )}
+
             {/* Opção 2 - Apenas Natal */}
             <label
               className={`flex items-start gap-3 md:gap-4 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
@@ -907,69 +970,6 @@ function StepTipoParticipacao({ tipoParticipacao, modalidadeCorrida, onTipoChang
               )}
             </label>
           </RadioGroup>
-
-          {/* Seção B - Seleção da Modalidade de Corrida (Condicional) */}
-          {tipoParticipacao === 'corrida-natal' && (
-            <div className="mt-4 md:mt-5 pl-4 md:pl-6 border-l-4 border-primary-400 bg-primary-50/50 rounded-r-lg py-4 md:py-5 pr-4 md:pr-5 animate-in fade-in slide-in-from-top-4 duration-500">
-              <Label className="text-base md:text-lg font-semibold text-slate-700 flex items-center gap-2 mb-4">
-                <Trophy className="w-5 h-5 text-primary-600" />
-                Selecione a modalidade de corrida: *
-              </Label>
-              <RadioGroup
-                value={modalidadeCorrida}
-                onValueChange={onModalidadeChange}
-                className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4"
-              >
-              {/* 3KM */}
-              <label
-                className={`flex flex-col items-center justify-center gap-2 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
-                  modalidadeCorrida === '3km'
-                    ? 'border-primary-500 bg-primary-50 shadow-md'
-                    : 'border-slate-200 hover:border-primary-300'
-                }`}
-              >
-                <RadioGroupItem value="3km" id="3km" className="w-5 h-5" />
-                <span className="font-bold text-2xl md:text-3xl text-primary-600">3KM</span>
-                <span className="text-xs md:text-sm text-slate-600 text-center">Caminhada ou Corrida Leve</span>
-                {modalidadeCorrida === '3km' && (
-                  <Check className="w-5 h-5 text-primary-600 mt-1" />
-                )}
-              </label>
-
-              {/* 5KM */}
-              <label
-                className={`flex flex-col items-center justify-center gap-2 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
-                  modalidadeCorrida === '5km'
-                    ? 'border-primary-500 bg-primary-50 shadow-md'
-                    : 'border-slate-200 hover:border-primary-300'
-                }`}
-              >
-                <RadioGroupItem value="5km" id="5km" className="w-5 h-5" />
-                <span className="font-bold text-2xl md:text-3xl text-primary-600">5KM</span>
-                <span className="text-xs md:text-sm text-slate-600 text-center">Corrida Intermediária</span>
-                {modalidadeCorrida === '5km' && (
-                  <Check className="w-5 h-5 text-primary-600 mt-1" />
-                )}
-              </label>
-
-              {/* 10KM */}
-              <label
-                className={`flex flex-col items-center justify-center gap-2 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
-                  modalidadeCorrida === '10km'
-                    ? 'border-primary-500 bg-primary-50 shadow-md'
-                    : 'border-slate-200 hover:border-primary-300'
-                }`}
-              >
-                <RadioGroupItem value="10km" id="10km" className="w-5 h-5" />
-                <span className="font-bold text-2xl md:text-3xl text-primary-600">10KM</span>
-                <span className="text-xs md:text-sm text-slate-600 text-center">Corrida Avançada</span>
-                {modalidadeCorrida === '10km' && (
-                  <Check className="w-5 h-5 text-primary-600 mt-1" />
-                )}
-              </label>
-            </RadioGroup>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
@@ -1106,80 +1106,152 @@ function StepRegulamento({ aceitouRegulamento, onAceiteChange }: StepRegulamento
           className="border-2 border-slate-200 rounded-lg p-4 md:p-5 max-h-[400px] md:max-h-[500px] overflow-y-auto bg-slate-50"
         >
           <div className="prose prose-sm md:prose-base max-w-none text-slate-700 space-y-4">
-            <h3 className="font-bold text-base md:text-lg text-slate-900 mb-3">
-              REGULAMENTO - II CORRIDA E CAMINHADA DA QUALIDADE FARMACE
+            <h3 className="font-bold text-base md:text-lg text-slate-900 mb-3 text-center">
+              REGULAMENTO - II CORRIDA DA QUALIDADE FARMACE
             </h3>
 
+            <div className="text-center mb-4">
+              <h4 className="font-bold text-sm md:text-base text-slate-900 mb-1">
+                BARBALHA-CE
+              </h4>
+              <p className="text-xs md:text-sm font-semibold text-slate-800">
+                Dia 21 de dezembro de 2025
+              </p>
+            </div>
+
             <section>
-              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">1. DO EVENTO</h4>
+              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">1. O EVENTO</h4>
+              <p className="text-xs md:text-sm leading-relaxed mb-2">
+                Hábitos saudáveis, como boa alimentação, exercícios físicos, melhoram a qualidade de vida
+                dos colaboradores de empresas. Pensando nisto, a FARMACE no intuito em melhorar a
+                qualidade de vida do seu quadro de funcionários, comemora o encerramento do ano e da
+                Semana da Qualidade da empresa, com uma corrida.
+              </p>
               <p className="text-xs md:text-sm leading-relaxed">
-                A II Corrida e Caminhada da Qualidade FARMACE é um evento corporativo interno,
-                exclusivo para colaboradores da empresa FARMACE, realizado durante a Semana da Qualidade 2025.
+                Diante do exposto, será realizada uma corrida no dia 21 de dezembro de 2025, com local
+                de largada as 7:00 da manhã, na própria FARMACE.
               </p>
             </section>
 
             <section>
-              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">2. DAS MODALIDADES</h4>
-              <p className="text-xs md:text-sm leading-relaxed mb-2">O evento oferece três modalidades:</p>
+              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">2. PARTICIPANTES E PROVAS</h4>
+              <p className="text-xs md:text-sm leading-relaxed mb-2">
+                Estarão habilitados a correr a CORRIDA DA FARMACE- 2025
+              </p>
+              <p className="text-xs md:text-sm leading-relaxed mb-2">
+                Funcionários a partir de 16 anos (completos ou a serem completados em 2025), para os 3k
+                e 5K e 18 anos para os 10k.
+              </p>
+              <p className="text-xs md:text-sm leading-relaxed mb-2">As provas serão:</p>
               <ul className="list-disc list-inside text-xs md:text-sm space-y-1 ml-2">
-                <li>Caminhada/Corrida 3KM</li>
-                <li>Corrida 5KM</li>
-                <li>Corrida 10KM</li>
+                <li>Categoria geral, DISTANCIA 3KM, sem premiação em troféus. Corrida e Caminhada inclusiva.</li>
+                <li>Categoria geral, Distância de 5K, os 3 primeiros gerais, masculino e feminino, premiados com troféus</li>
+                <li>Distancia 10K os 3 premiados na geral, masculino e feminino, serão premiados, com troféus.</li>
               </ul>
             </section>
 
             <section>
-              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">3. DA INSCRIÇÃO</h4>
-              <ul className="list-disc list-inside text-xs md:text-sm space-y-1 ml-2">
-                <li>Valor da inscrição: R$ 35,00</li>
-                <li>Inscrições limitadas por ordem de chegada</li>
-                <li>Apenas colaboradores da FARMACE podem se inscrever</li>
-                <li>É obrigatório apresentar documento com foto no dia do evento</li>
-              </ul>
-            </section>
-
-            <section>
-              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">4. DO KIT DO ATLETA</h4>
+              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">3. PREMIAÇÕES</h4>
               <p className="text-xs md:text-sm leading-relaxed">
-                Cada participante receberá um kit contendo: camiseta oficial do evento e número de peito.
-                A retirada do kit será informada posteriormente via WhatsApp.
+                Troféus aos vencedores, geral 5k e 10k, e medalhas finisher somente aos concluintes dos
+                percursos. Poderão ser oferecidos também eventuais brindes de parceiros aos vencedores.
               </p>
             </section>
 
             <section>
-              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">5. DO DIA DO EVENTO</h4>
-              <ul className="list-disc list-inside text-xs md:text-sm space-y-1 ml-2">
-                <li>Concentração: 6h30</li>
-                <li>Largada: 7h00</li>
-                <li>Local: FARMACE (local específico será divulgado)</li>
-                <li>É obrigatório o uso da camiseta oficial do evento</li>
-              </ul>
-            </section>
-
-            <section>
-              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">6. DAS RESPONSABILIDADES</h4>
-              <p className="text-xs md:text-sm leading-relaxed">
-                O participante declara estar em boas condições de saúde e apto para participar do evento.
-                A organização não se responsabiliza por objetos perdidos, acidentes ou problemas de saúde
-                decorrentes da participação no evento.
+              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">4. SERVIÇOS AOS PARTICIPANTES</h4>
+              <p className="text-xs md:text-sm leading-relaxed mb-2">
+                Entrega de medalhas aos que concluirem a prova, chip, camisetas, número de peito,
+                hidratação, alimentação, resultados, e eventuais brindes que os patrocinadores ofereçam para
+                o kit. A entrega dos kits, acontecerá no dia 18/12 e 19/12, na sede da Farmace, das 10:30 às
+                19:30 horas. No ato da retirada, obrigatória a apresentação do documento de identidade.{' '}
+                <strong>NÃO HAVERA ENTREGA DE KITS, APÓS A DATA E O HORARIO ESPECIFICADO, SOB HIPOTESE
+                ALGUMA.</strong>
               </p>
             </section>
 
             <section>
-              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">7. DO USO DE IMAGEM</h4>
+              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">5. INSCRIÇÕES</h4>
+              <p className="text-xs md:text-sm leading-relaxed mb-2">
+                As inscrições poderão ser realizadas via site da empresa.
+              </p>
               <p className="text-xs md:text-sm leading-relaxed">
-                Ao se inscrever, o participante autoriza o uso de sua imagem em fotos e vídeos do evento
-                para fins de divulgação institucional da FARMACE.
+                <strong>INICIO DAS INSCRIÇÕES:</strong> dia 31 de outubro de 2025
+              </p>
+              <p className="text-xs md:text-sm leading-relaxed">
+                <strong>TERMINO DAS INSCRIÇÕES:</strong> Dia 10 de novembro de 2025
               </p>
             </section>
 
             <section>
-              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">8. DISPOSIÇÕES GERAIS</h4>
-              <ul className="list-disc list-inside text-xs md:text-sm space-y-1 ml-2">
-                <li>A organização se reserva o direito de alterar este regulamento a qualquer momento</li>
-                <li>Casos omissos serão resolvidos pela comissão organizadora</li>
-                <li>A participação no evento implica na aceitação total deste regulamento</li>
-              </ul>
+              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">6. ENTREGA DE RESULTADOS E MEDALHAS</h4>
+              <p className="text-xs md:text-sm leading-relaxed mb-2">
+                Os resultados completos serão divulgados em até 24 horas, após o termino do horário
+                limite de fim de prova. Serão divulgados nos canais oficiais da prova, pelo site da Cronos Cariri,
+                pelo INSTAGRAM @outdooreventosesportivos e pelos canais oficiais da FARMACE.
+              </p>
+              <p className="text-xs md:text-sm leading-relaxed">
+                As medalhas serão entregues logo após a prova, apenas para os que completarem o
+                percurso e estiverem portando pulseira identificadora. Não haverá entrega posterior de
+                medalhas.
+              </p>
+            </section>
+
+            <section>
+              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">7. SISTEMA DE CRONOMETRAGEM E VALIDAÇÃO DOS TEMPOS DE PROVAS</h4>
+              <p className="text-xs md:text-sm leading-relaxed">
+                Os 3 primeiros por naipe e distancia, serão classificados, pela ordem de chegada, para efeitos
+                de classificação. Os demais, pelo tempo liquido.
+              </p>
+            </section>
+
+            <section>
+              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">8. ESTADO DE SAUDE E OBRIGAÇÕES DO ATLETA</h4>
+              <p className="text-xs md:text-sm leading-relaxed">
+                Ao se inscrever no evento, o atleta admite estar em bom estado de saúde e dá seu aceite
+                sobre este regulamento, e também assume total responsabilidade sobre as informações
+                fornecidas, sejam de dados de inscrição e tempos de validação. O atleta cede também, seus
+                direitos de imagem a prova, sem custo, para serem usadas ou não, no futuro. O número de
+                peito, deve estar fixado no tronco de forma visível. O uso de equipamentos sonoro, tais como
+                fones e assemelhados, pode levar a desclassificação, também, conforme determina as regras
+                da World Athetics. Por ser uma prova com permissão oficial da Federação Cearense, os
+                árbitros presentes, podem assim proceder.
+              </p>
+            </section>
+
+            <section>
+              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">9. CANAIS OFICIAIS</h4>
+              <p className="text-xs md:text-sm leading-relaxed">
+                Os canais oficiais do evento serão consideradas, as mídias sociais da OUTDOOR EVENTOS
+                ESPORTIVOS, NO INSTAGRAM, site da Cronos Cariri, site da FARMACE, e o email
+                outdoorruncariri@gmail.com.
+              </p>
+            </section>
+
+            <section>
+              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">10. CASOS OMISSOS</h4>
+              <p className="text-xs md:text-sm leading-relaxed">
+                Casos omissos ao regulamento, a comissão organizadora tem o direito de decidir de forma
+                que entender como a mais justa. No caso de duvida, será aplicada as determinações da Norma
+                07 da WA/Cbat.
+              </p>
+            </section>
+
+            <section className="border-t-2 border-slate-300 pt-4 mt-6">
+              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">REALIZAÇÃO</h4>
+              <p className="text-xs md:text-sm leading-relaxed font-bold text-slate-900">
+                FARMACE
+              </p>
+            </section>
+
+            <section>
+              <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">ORGANIZAÇÃO:</h4>
+              <p className="text-xs md:text-sm leading-relaxed">
+                <strong>OUTDOOR EVENTOS ESPORTIVOS</strong>
+              </p>
+              <p className="text-xs md:text-sm leading-relaxed">
+                CNPJ 21.803.725/0001-98
+              </p>
             </section>
           </div>
         </div>
