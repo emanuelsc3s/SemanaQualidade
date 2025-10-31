@@ -300,7 +300,6 @@ export default function Home() {
                 alt="Corredor em ação"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary-600/80 via-primary-500/40 to-transparent"></div>
               <div className="absolute bottom-4 left-4 right-4">
                 <div className="bg-white/10 backdrop-blur-md rounded-lg p-3 border border-white/20">
                   <p className="text-white font-bold text-sm">5K • 10K • CAMINHADA</p>

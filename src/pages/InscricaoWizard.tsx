@@ -226,10 +226,17 @@ export default function InscricaoWizard() {
         // Enviar mensagem de confirmação via WhatsApp
         console.log('Enviando mensagem de confirmação via WhatsApp...')
 
+        // Formata a categoria baseado no tipo de participação e modalidade
+        const categoriaFormatada = formData.tipoParticipacao === 'corrida-natal'
+          ? formData.modalidadeCorrida.toUpperCase()
+          : formData.tipoParticipacao === 'apenas-natal'
+          ? 'APENAS NATAL'
+          : 'RETIRAR CESTA'
+
         const mensagem = gerarMensagemConfirmacao(
           formData.nome,
           numeroParticipante,
-          formData.categoria
+          categoriaFormatada
         )
 
         const resultado = await sendWhatsAppMessage({
@@ -548,8 +555,14 @@ export default function InscricaoWizard() {
                   <p className="font-medium text-slate-700 text-xs">{formData.whatsapp}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500">Categoria</p>
-                  <p className="font-semibold text-primary-700 uppercase text-xs">{formData.categoria}</p>
+                  <p className="text-xs text-slate-500">Participação</p>
+                  <p className="font-semibold text-primary-700 uppercase text-xs">
+                    {formData.tipoParticipacao === 'corrida-natal'
+                      ? formData.modalidadeCorrida.toUpperCase()
+                      : formData.tipoParticipacao === 'apenas-natal'
+                      ? 'APENAS NATAL'
+                      : 'RETIRAR CESTA'}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Camiseta</p>
@@ -822,7 +835,7 @@ function StepTipoParticipacao({ tipoParticipacao, modalidadeCorrida, onTipoChang
           Escolha como você deseja participar dos eventos da Semana da Qualidade
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-6 space-y-6 md:space-y-8">
+      <CardContent className="pt-6">
         {/* Seção A - Seleção do Tipo de Participação */}
         <div className="space-y-4">
           <Label className="text-base md:text-lg font-semibold text-slate-700">
@@ -914,20 +927,19 @@ function StepTipoParticipacao({ tipoParticipacao, modalidadeCorrida, onTipoChang
               )}
             </label>
           </RadioGroup>
-        </div>
 
-        {/* Seção B - Seleção da Modalidade de Corrida (Condicional) */}
-        {tipoParticipacao === 'corrida-natal' && (
-          <div className="space-y-4 pt-4 md:pt-6 border-t-2 border-slate-200 animate-in fade-in slide-in-from-top-4 duration-500">
-            <Label className="text-base md:text-lg font-semibold text-slate-700 flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-primary-600" />
-              Selecione a modalidade de corrida: *
-            </Label>
-            <RadioGroup
-              value={modalidadeCorrida}
-              onValueChange={onModalidadeChange}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4"
-            >
+          {/* Seção B - Seleção da Modalidade de Corrida (Condicional) */}
+          {tipoParticipacao === 'corrida-natal' && (
+            <div className="mt-4 md:mt-5 pl-4 md:pl-6 border-l-4 border-primary-400 bg-primary-50/50 rounded-r-lg py-4 md:py-5 pr-4 md:pr-5 animate-in fade-in slide-in-from-top-4 duration-500">
+              <Label className="text-base md:text-lg font-semibold text-slate-700 flex items-center gap-2 mb-4">
+                <Trophy className="w-5 h-5 text-primary-600" />
+                Selecione a modalidade de corrida: *
+              </Label>
+              <RadioGroup
+                value={modalidadeCorrida}
+                onValueChange={onModalidadeChange}
+                className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4"
+              >
               {/* 3KM */}
               <label
                 className={`flex flex-col items-center justify-center gap-2 p-4 md:p-5 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
@@ -976,8 +988,9 @@ function StepTipoParticipacao({ tipoParticipacao, modalidadeCorrida, onTipoChang
                 )}
               </label>
             </RadioGroup>
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   )
