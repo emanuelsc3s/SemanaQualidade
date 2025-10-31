@@ -241,8 +241,8 @@ export default function Home() {
         )}
       </header>
 
-      {/* Hero Section - Mobile-First Optimized */}
-      <section className="hero-section-short relative overflow-hidden min-h-screen text-white pt-16 sm:pt-20 md:pt-24 flex items-center justify-center">
+      {/* Hero Section - Mobile-First Optimized for Small Screens */}
+      <section className="hero-section-short relative overflow-hidden h-screen max-h-[700px] sm:max-h-none sm:min-h-screen text-white pt-24 sm:pt-20 md:pt-24 flex items-center justify-center">
         {/* Background Video */}
         <div className="absolute inset-0">
           <video
@@ -261,11 +261,11 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50"></div>
         </div>
 
-        <div className="hero-container-short relative container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-10 lg:py-16">
-          <div className="hero-grid-short grid lg:grid-cols-2 gap-4 sm:gap-6 md:gap-10 lg:gap-12 items-center">
-            <div className="hero-content-short space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 text-center md:text-left md:pl-8 lg:pl-16">
-              {/* Texto principal do Hero - Mobile First */}
-              <h1 className="hero-title-short text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]">
+        <div className="hero-container-short relative container mx-auto px-4 sm:px-4 py-2 sm:py-6 md:py-10 lg:py-16 h-full flex items-center">
+          <div className="hero-grid-short grid lg:grid-cols-2 gap-3 sm:gap-6 md:gap-10 lg:gap-12 items-center w-full">
+            <div className="hero-content-short space-y-2 sm:space-y-4 md:space-y-5 lg:space-y-6 text-center md:text-left md:pl-8 lg:pl-16">
+              {/* Texto principal do Hero - Mobile First - COMPACTO */}
+              <h1 className="hero-title-short text-[1.4rem] leading-[1.2] xs:text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl sm:leading-tight font-extrabold drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]">
                 <span style={{ fontFamily: 'Montserrat, sans-serif', fontStyle: 'normal' }}>
                   <span style={{ fontWeight: 800 }}>CONFRATERNIZAÇÃO</span> <span style={{ fontWeight: 200 }}>E</span>
                 </span>
@@ -275,7 +275,7 @@ export default function Home() {
                 <br />
                 <span
                   style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal', display: 'inline-block' }}
-                  className="text-accent-400 mt-3 sm:mt-6 md:mt-10 lg:mt-14"
+                  className="text-accent-400 mt-2 sm:mt-6 md:mt-10 lg:mt-14"
                 >
                   QUALIDADE
                 </span>
@@ -287,16 +287,16 @@ export default function Home() {
                 <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}>EM CADA PASSO</span>
               </h1>
 
-              <div className="hero-buttons-short flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6 md:pt-8 lg:pt-10 justify-center md:justify-start w-full sm:w-auto">
+              <div className="hero-buttons-short flex flex-col sm:flex-row gap-2 sm:gap-4 pt-3 sm:pt-6 md:pt-8 lg:pt-10 justify-center md:justify-start w-full sm:w-auto">
                 <Button
                   onClick={() => navigate('/loginInscricao')}
-                  className="hero-button-short h-12 sm:h-14 md:h-16 px-6 sm:px-8 md:px-12 text-base sm:text-lg md:text-xl bg-accent-400 hover:bg-accent-500 text-slate-900 font-bold shadow-2xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto"
+                  className="hero-button-short h-11 sm:h-14 md:h-16 px-5 sm:px-8 md:px-12 text-sm sm:text-lg md:text-xl bg-accent-400 hover:bg-accent-500 text-slate-900 font-bold shadow-2xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto"
                 >
                   INSCREVA-SE AGORA
                 </Button>
                 <Button
                   variant="outline"
-                  className="hero-button-short h-12 sm:h-14 md:h-16 px-6 sm:px-8 md:px-12 text-base sm:text-lg md:text-xl bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 w-full sm:w-auto"
+                  className="hero-button-short h-11 sm:h-14 md:h-16 px-5 sm:px-8 md:px-12 text-sm sm:text-lg md:text-xl bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 w-full sm:w-auto"
                   onClick={() => setModalOpen(true)}
                 >
                   SAIBA MAIS
