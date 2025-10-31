@@ -346,9 +346,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Modal "Saiba Mais" - Formato 16:9 */}
+      {/* Modal "Saiba Mais" */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="w-[95vw] sm:w-[90vw] md:w-[85vw] lg:w-[80vw] max-w-6xl aspect-video overflow-hidden bg-white/95 backdrop-blur-xl border-2 border-primary-200/50 shadow-2xl rounded-2xl p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col">
+        <DialogContent className="w-[90vw] sm:w-[85vw] md:w-[75vw] lg:w-[70vw] max-w-5xl overflow-hidden bg-white/95 backdrop-blur-xl border-2 border-primary-200/50 shadow-2xl rounded-2xl p-3 sm:p-4 md:p-6 lg:p-8 flex flex-col max-h-[90vh]">
           <DialogHeader className="flex-shrink-0 space-y-1 sm:space-y-2">
             <DialogTitle className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-500 text-center sm:text-left leading-tight" style={{ fontFamily: 'Montserrat, sans-serif' }}>
               II Corrida Farmace - 2025
