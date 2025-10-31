@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ArrowLeft, ArrowRight, Check, User, Trophy, Shirt, Gift, FileText, Volume2, VolumeX, X } from "lucide-react"
 import Confetti from "react-confetti"
 import { useWindowSize } from "@/hooks/useWindowSize"
+import { sendWhatsAppMessage, gerarMensagemConfirmacao } from "@/services/whatsappService"
 
 // Interface para os dados do formulário
 interface FormData {
@@ -43,6 +44,8 @@ export default function InscricaoWizard() {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [whatsappSent, setWhatsappSent] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
   const hasUnmutedRef = useRef(false)
 
@@ -124,22 +127,58 @@ export default function InscricaoWizard() {
     }
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validateStep(5)) {
-      // Salvar no localStorage
-      const inscricoes = JSON.parse(localStorage.getItem('inscricoes') || '[]')
-      const novaInscricao = {
-        ...formData,
-        id: Date.now(),
-        dataInscricao: new Date().toISOString(),
-        numeroParticipante: (inscricoes.length + 1).toString().padStart(4, '0')
+      setIsSubmitting(true)
+
+      try {
+        // Salvar no localStorage
+        const inscricoes = JSON.parse(localStorage.getItem('inscricoes') || '[]')
+        const numeroParticipante = (inscricoes.length + 1).toString().padStart(4, '0')
+
+        const novaInscricao = {
+          ...formData,
+          id: Date.now(),
+          dataInscricao: new Date().toISOString(),
+          numeroParticipante
+        }
+
+        inscricoes.push(novaInscricao)
+        localStorage.setItem('inscricoes', JSON.stringify(inscricoes))
+
+        // Enviar mensagem de confirmação via WhatsApp
+        console.log('Enviando mensagem de confirmação via WhatsApp...')
+
+        const mensagem = gerarMensagemConfirmacao(
+          formData.nome,
+          numeroParticipante,
+          formData.categoria
+        )
+
+        const resultado = await sendWhatsAppMessage({
+          phoneNumber: formData.whatsapp,
+          message: mensagem
+        })
+
+        if (resultado.success) {
+          console.log('✅ Mensagem WhatsApp enviada com sucesso!')
+          setWhatsappSent(true)
+        } else {
+          console.error('❌ Erro ao enviar mensagem WhatsApp:', resultado.error)
+          // Mesmo com erro no WhatsApp, continua o fluxo
+          setWhatsappSent(false)
+        }
+
+      } catch (error) {
+        console.error('Erro ao processar inscrição:', error)
+        // Mesmo com erro, mostra o modal de sucesso
+      } finally {
+        setIsSubmitting(false)
+
+        // Mostrar confetes e modal
+        setShowConfetti(true)
+        setShowSuccessModal(true)
       }
-      inscricoes.push(novaInscricao)
-      localStorage.setItem('inscricoes', JSON.stringify(inscricoes))
-      
-      // Mostrar confetes e modal
-      setShowConfetti(true)
-      setShowSuccessModal(true)
     }
   }
 
@@ -224,7 +263,7 @@ export default function InscricaoWizard() {
         {/* Imagem de fundo do Hero */}
         <img
           src="/HeroCorridaFarmace.png"
-          alt="II Corrida e Caminhada da Qualidade FARMACE"
+          alt="II Corrida FARMACE - 2025.2"
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
 
@@ -323,11 +362,20 @@ export default function InscricaoWizard() {
           ) : (
             <Button
               onClick={handleSubmit}
-              disabled={!validateStep(5)}
-              className="w-full sm:flex-1 order-1 sm:order-2 bg-green-600 hover:bg-green-700 h-11 md:h-12 text-sm md:text-base font-semibold text-white"
+              disabled={!validateStep(5) || isSubmitting}
+              className="w-full sm:flex-1 order-1 sm:order-2 bg-green-600 hover:bg-green-700 h-11 md:h-12 text-sm md:text-base font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Check className="w-4 h-4 mr-2" />
-              Confirmar Inscrição
+              {isSubmitting ? (
+                <>
+                  <span className="animate-spin mr-2">⏳</span>
+                  Processando...
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4 mr-2" />
+                  Confirmar Inscrição
+                </>
+              )}
             </Button>
           )}
 
@@ -344,112 +392,121 @@ export default function InscricaoWizard() {
 
       {/* Modal de Sucesso - Formato Recibo */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="max-w-md sm:max-w-lg">
+        <DialogContent className="max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto">
           {/* Cabeçalho do Recibo */}
-          <div className="text-center border-b-2 border-dashed border-slate-300 pb-4 mb-4">
-            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-3">
-              <Check className="w-10 h-10 text-green-600" />
+          <div className="text-center border-b-2 border-dashed border-slate-300 pb-3 mb-3">
+            <div className="mx-auto w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-2">
+              <Check className="w-8 h-8 text-green-600" />
             </div>
-            <DialogTitle className="text-xl sm:text-2xl font-bold text-green-600 mb-1">
+            <DialogTitle className="text-lg sm:text-xl font-bold text-green-600 mb-1">
               Inscrição Realizada!
             </DialogTitle>
-            <DialogDescription className="text-sm text-slate-500">
+            <DialogDescription className="text-xs text-slate-500">
               Comprovante de Inscrição
             </DialogDescription>
           </div>
 
           {/* Corpo do Recibo */}
-          <div className="space-y-3 py-2">
+          <div className="space-y-2.5 py-1">
             {/* Status */}
-            <div className="bg-amber-50 border-l-4 border-amber-400 p-3 rounded">
+            <div className="bg-amber-50 border-l-4 border-amber-400 p-2.5 rounded">
               <div className="flex items-center gap-2">
-                <span className="text-xl">⏳</span>
+                <span className="text-lg">⏳</span>
                 <div className="flex-1">
-                  <p className="text-xs sm:text-sm font-semibold text-amber-800">Status: Aguardando Revisão</p>
+                  <p className="text-xs font-semibold text-amber-800">Status: Aguardando Revisão</p>
                   <p className="text-xs text-amber-600">Em breve você receberá a confirmação</p>
                 </div>
               </div>
             </div>
 
             {/* Número do Participante */}
-            <div className="bg-gradient-to-r from-primary-50 to-sky-50 border border-primary-200 rounded-lg p-3">
-              <p className="text-xs text-slate-600 mb-1">Número do Participante</p>
-              <p className="text-2xl sm:text-3xl font-bold text-primary-700 tracking-wider">
+            <div className="bg-gradient-to-r from-primary-50 to-sky-50 border border-primary-200 rounded-lg p-2.5">
+              <p className="text-xs text-slate-600 mb-0.5">Número do Participante</p>
+              <p className="text-xl sm:text-2xl font-bold text-primary-700 tracking-wider">
                 #{(JSON.parse(localStorage.getItem('inscricoes') || '[]').length).toString().padStart(4, '0')}
               </p>
             </div>
 
             {/* Dados do Inscrito */}
             <div className="space-y-2 text-sm">
-              <div className="border-b border-slate-200 pb-2">
+              <div className="border-b border-slate-200 pb-1.5">
                 <p className="text-xs text-slate-500">Nome</p>
-                <p className="font-semibold text-slate-800">{formData.nome}</p>
+                <p className="font-semibold text-slate-800 text-sm">{formData.nome}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <p className="text-xs text-slate-500">CPF</p>
-                  <p className="font-medium text-slate-700 text-xs sm:text-sm">{formData.cpf}</p>
-                </div>
+              <div className="border-b border-slate-200 pb-1.5">
+                <p className="text-xs text-slate-500">E-mail</p>
+                <p className="font-medium text-slate-700 break-all text-xs">{formData.email}</p>
+              </div>
+
+              {/* WhatsApp, Categoria, Camiseta e Evento de Natal em 4 colunas */}
+              <div className="grid grid-cols-4 gap-2">
                 <div>
                   <p className="text-xs text-slate-500">WhatsApp</p>
-                  <p className="font-medium text-slate-700 text-xs sm:text-sm">{formData.whatsapp}</p>
+                  <p className="font-medium text-slate-700 text-xs">{formData.whatsapp}</p>
                 </div>
-              </div>
-
-              <div className="border-b border-slate-200 pb-2">
-                <p className="text-xs text-slate-500">E-mail</p>
-                <p className="font-medium text-slate-700 break-all text-xs sm:text-sm">{formData.email}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-xs text-slate-500">Categoria</p>
-                  <p className="font-semibold text-primary-700 uppercase">{formData.categoria}</p>
+                  <p className="font-semibold text-primary-700 uppercase text-xs">{formData.categoria}</p>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">Camiseta</p>
-                  <p className="font-semibold text-primary-700">{formData.tamanho}</p>
+                  <p className="font-semibold text-primary-700 text-xs">{formData.tamanho}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">Evento Natal</p>
+                  <p className="font-medium text-slate-700 text-xs">
+                    {formData.participarNatal === 'sim' ? '🎄 Sim' : '🚫 Não'}
+                  </p>
                 </div>
               </div>
 
-              <div>
-                <p className="text-xs text-slate-500">Evento de Natal</p>
-                <p className="font-medium text-slate-700">
-                  {formData.participarNatal === 'sim' ? '🎄 Participar' : '🚫 Não participar'}
-                </p>
-              </div>
-
-              <div className="border-t border-slate-200 pt-2">
+              <div className="border-t border-slate-200 pt-1.5">
                 <p className="text-xs text-slate-500">Data da Inscrição</p>
-                <p className="font-medium text-slate-700">{new Date().toLocaleString('pt-BR')}</p>
+                <p className="font-medium text-slate-700 text-xs">{new Date().toLocaleString('pt-BR')}</p>
               </div>
             </div>
 
-            {/* Aviso */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
-              <div className="flex items-start gap-2">
-                <span className="text-lg">📱</span>
-                <div className="flex-1">
-                  <p className="text-xs sm:text-sm font-medium text-blue-800 mb-1">
-                    Fique atento ao seu WhatsApp!
-                  </p>
-                  <p className="text-xs text-blue-600">
-                    Você será notificado assim que sua inscrição for confirmada pela organização.
-                  </p>
+            {/* Aviso WhatsApp */}
+            {whatsappSent ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-2.5">
+                <div className="flex items-start gap-2">
+                  <span className="text-base">✅</span>
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-green-800 mb-0.5">
+                      Mensagem enviada para seu WhatsApp!
+                    </p>
+                    <p className="text-xs text-green-600">
+                      Você receberá atualizações sobre sua inscrição via WhatsApp.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
+                <div className="flex items-start gap-2">
+                  <span className="text-base">📱</span>
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-blue-800 mb-0.5">
+                      Fique atento ao seu WhatsApp!
+                    </p>
+                    <p className="text-xs text-blue-600">
+                      Você será notificado assim que sua inscrição for confirmada pela organização.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Rodapé do Recibo */}
-          <div className="border-t-2 border-dashed border-slate-300 pt-4 mt-4">
-            <p className="text-center text-xs text-slate-400 mb-3">
-              II Corrida e Caminhada da Qualidade FARMACE
+          <div className="border-t-2 border-dashed border-slate-300 pt-3 mt-3">
+            <p className="text-center text-xs text-slate-400 mb-2">
+              II Corrida FARMACE - 2025.2
             </p>
             <Button
               onClick={handleCloseSuccess}
-              className="w-full bg-primary-600 hover:bg-primary-700 h-11 font-semibold"
+              className="w-full bg-primary-600 hover:bg-primary-700 h-10 font-semibold text-sm text-white"
             >
               Voltar para a Página Inicial
             </Button>
