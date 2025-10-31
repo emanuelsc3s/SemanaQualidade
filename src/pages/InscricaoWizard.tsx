@@ -342,29 +342,116 @@ export default function InscricaoWizard() {
         </div>
       </div>
 
-      {/* Modal de Sucesso */}
+      {/* Modal de Sucesso - Formato Recibo */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+        <DialogContent className="max-w-md sm:max-w-lg">
+          {/* Cabeçalho do Recibo */}
+          <div className="text-center border-b-2 border-dashed border-slate-300 pb-4 mb-4">
+            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-3">
               <Check className="w-10 h-10 text-green-600" />
             </div>
-            <DialogTitle className="text-2xl text-center text-green-600">
-              Inscrição Realizada com Sucesso!
+            <DialogTitle className="text-xl sm:text-2xl font-bold text-green-600 mb-1">
+              Inscrição Realizada!
             </DialogTitle>
-            <DialogDescription className="text-center text-base pt-2">
-              Sua inscrição está em revisão
+            <DialogDescription className="text-sm text-slate-500">
+              Comprovante de Inscrição
             </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <p className="text-center text-slate-600">
-              Assim que confirmada, você será notificado via WhatsApp
+          </div>
+
+          {/* Corpo do Recibo */}
+          <div className="space-y-3 py-2">
+            {/* Status */}
+            <div className="bg-amber-50 border-l-4 border-amber-400 p-3 rounded">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">⏳</span>
+                <div className="flex-1">
+                  <p className="text-xs sm:text-sm font-semibold text-amber-800">Status: Aguardando Revisão</p>
+                  <p className="text-xs text-amber-600">Em breve você receberá a confirmação</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Número do Participante */}
+            <div className="bg-gradient-to-r from-primary-50 to-sky-50 border border-primary-200 rounded-lg p-3">
+              <p className="text-xs text-slate-600 mb-1">Número do Participante</p>
+              <p className="text-2xl sm:text-3xl font-bold text-primary-700 tracking-wider">
+                #{(JSON.parse(localStorage.getItem('inscricoes') || '[]').length).toString().padStart(4, '0')}
+              </p>
+            </div>
+
+            {/* Dados do Inscrito */}
+            <div className="space-y-2 text-sm">
+              <div className="border-b border-slate-200 pb-2">
+                <p className="text-xs text-slate-500">Nome</p>
+                <p className="font-semibold text-slate-800">{formData.nome}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-slate-500">CPF</p>
+                  <p className="font-medium text-slate-700 text-xs sm:text-sm">{formData.cpf}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">WhatsApp</p>
+                  <p className="font-medium text-slate-700 text-xs sm:text-sm">{formData.whatsapp}</p>
+                </div>
+              </div>
+
+              <div className="border-b border-slate-200 pb-2">
+                <p className="text-xs text-slate-500">E-mail</p>
+                <p className="font-medium text-slate-700 break-all text-xs sm:text-sm">{formData.email}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-slate-500">Categoria</p>
+                  <p className="font-semibold text-primary-700 uppercase">{formData.categoria}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500">Camiseta</p>
+                  <p className="font-semibold text-primary-700">{formData.tamanho}</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-slate-500">Evento de Natal</p>
+                <p className="font-medium text-slate-700">
+                  {formData.participarNatal === 'sim' ? '🎄 Participar' : '🚫 Não participar'}
+                </p>
+              </div>
+
+              <div className="border-t border-slate-200 pt-2">
+                <p className="text-xs text-slate-500">Data da Inscrição</p>
+                <p className="font-medium text-slate-700">{new Date().toLocaleString('pt-BR')}</p>
+              </div>
+            </div>
+
+            {/* Aviso */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
+              <div className="flex items-start gap-2">
+                <span className="text-lg">📱</span>
+                <div className="flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-blue-800 mb-1">
+                    Fique atento ao seu WhatsApp!
+                  </p>
+                  <p className="text-xs text-blue-600">
+                    Você será notificado assim que sua inscrição for confirmada pela organização.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Rodapé do Recibo */}
+          <div className="border-t-2 border-dashed border-slate-300 pt-4 mt-4">
+            <p className="text-center text-xs text-slate-400 mb-3">
+              II Corrida e Caminhada da Qualidade FARMACE
             </p>
             <Button
               onClick={handleCloseSuccess}
-              className="w-full bg-primary-600 hover:bg-primary-700"
+              className="w-full bg-primary-600 hover:bg-primary-700 h-11 font-semibold"
             >
-              OK
+              Voltar para a Página Inicial
             </Button>
           </div>
         </DialogContent>

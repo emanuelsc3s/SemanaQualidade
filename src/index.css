@@ -89,4 +89,155 @@
   .hero-video-short {
     object-position: center 70% !important; /* Mostra mais da parte inferior do vídeo (rosto da atleta) */
   }
+
+  /* ========== Adaptações para LoginInscricao ========== */
+
+  /* Container principal da página de login */
+  .login-container-short {
+    padding: 0.5rem !important; /* Reduz padding vertical para eliminar scroll */
+  }
+
+  /* Logo FARMACE no topo */
+  .login-logo-short {
+    height: 2.5rem !important; /* 40px - reduzido de 64px */
+    margin-bottom: 1rem !important; /* Reduz espaço abaixo */
+  }
+
+  /* Botão Voltar */
+  .login-back-button-short {
+    margin-bottom: 0.75rem !important; /* Reduz margem */
+    height: 2rem !important; /* 32px */
+    font-size: 0.875rem !important; /* 14px */
+  }
+
+  /* Card de Login */
+  .login-card-short {
+    padding: 0 !important;
+  }
+
+  /* Header do Card */
+  .login-card-header-short {
+    padding: 1rem !important; /* Reduz padding */
+    gap: 0.25rem !important;
+  }
+
+  /* Título do Card */
+  .login-card-title-short {
+    font-size: 1.25rem !important; /* 20px - reduzido de 24px */
+    margin-bottom: 0.25rem !important;
+  }
+
+  /* Subtítulo do Card */
+  .login-card-subtitle-short {
+    font-size: 0.875rem !important; /* 14px */
+  }
+
+  /* Content do Card */
+  .login-card-content-short {
+    padding: 1rem !important; /* Reduz padding */
+  }
+
+  /* Form - espaçamento entre campos */
+  .login-form-short {
+    gap: 0.75rem !important; /* Reduz espaço entre campos */
+  }
+
+  /* Campos de input (matrícula e senha) */
+  .login-input-short {
+    height: 2.5rem !important; /* 40px - reduzido de 48px */
+    font-size: 0.875rem !important; /* 14px */
+  }
+
+  /* Labels dos campos */
+  .login-label-short {
+    font-size: 0.875rem !important; /* 14px */
+    margin-bottom: 0.25rem !important;
+  }
+
+  /* Ícones dentro dos inputs */
+  .login-input-icon-short {
+    width: 1rem !important; /* 16px - reduzido de 20px */
+    height: 1rem !important;
+  }
+
+  /* Mensagem de erro */
+  .login-error-short {
+    padding: 0.5rem !important; /* Reduz padding */
+    font-size: 0.75rem !important; /* 12px */
+  }
+
+  /* Botão de Login (Entrar) */
+  .login-submit-button-short {
+    height: 2.5rem !important; /* 40px - reduzido de 48px */
+    font-size: 0.875rem !important; /* 14px */
+  }
+
+  /* Link de ajuda abaixo do botão */
+  .login-help-link-short {
+    margin-top: 0.5rem !important;
+    font-size: 0.75rem !important; /* 12px */
+  }
+
+  /* Informações adicionais (Termos de Uso) */
+  .login-footer-short {
+    margin-top: 1rem !important; /* Reduz margem */
+    font-size: 0.75rem !important; /* 12px */
+  }
+
+  /* Botão de Ajuda Flutuante */
+  .login-help-button-short {
+    padding: 0.5rem 1rem !important; /* Reduz padding */
+    font-size: 0.75rem !important; /* 12px */
+  }
+
+  /* Logo Mobile */
+  .login-mobile-logo-short {
+    height: 2rem !important; /* 32px - reduzido de 48px */
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Título Mobile */
+  .login-mobile-title-short {
+    font-size: 1.5rem !important; /* 24px - reduzido de 32px */
+    margin-bottom: 1rem !important;
+  }
+
+  /* Seção do vídeo lateral */
+  .login-video-section-short {
+    padding: 1.5rem !important; /* Reduz padding */
+  }
+
+  /* Título sobre o vídeo */
+  .login-video-title-short {
+    font-size: 1.5rem !important; /* 24px - reduzido de 32px */
+    margin-bottom: 0.25rem !important;
+  }
+
+  /* Subtítulo sobre o vídeo */
+  .login-video-subtitle-short {
+    font-size: 1rem !important; /* 16px - reduzido de 20px */
+  }
+
+  /* Modal de Ajuda - reduz tamanhos */
+  .login-help-modal-title-short {
+    font-size: 1.125rem !important; /* 18px - reduzido de 24px */
+  }
+
+  .login-help-modal-content-short {
+    padding: 1rem !important; /* Reduz padding */
+    gap: 0.75rem !important;
+  }
+
+  .login-help-modal-heading-short {
+    font-size: 0.875rem !important; /* 14px */
+  }
+
+  .login-help-modal-text-short {
+    font-size: 0.75rem !important; /* 12px */
+  }
+
+  .login-help-modal-button-short {
+    margin-top: 0.5rem !important;
+    height: 2.5rem !important; /* 40px */
+  }
 }

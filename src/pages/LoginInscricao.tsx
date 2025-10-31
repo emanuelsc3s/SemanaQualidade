@@ -133,22 +133,22 @@ export default function LoginInscricao() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
         
         {/* Texto sobre o vídeo */}
-        <div className="relative z-10 flex flex-col justify-end p-12 text-white">
-          <h1 className="mb-0 drop-shadow-lg font-bold" style={{ fontSize: '32px' }}>
+        <div className="login-video-section-short relative z-10 flex flex-col justify-end p-12 text-white">
+          <h1 className="login-video-title-short mb-0 drop-shadow-lg font-bold" style={{ fontSize: '32px' }}>
             II Corrida - 2025
           </h1>
-          <p className="text-xl text-white/90 drop-shadow-md">
+          <p className="login-video-subtitle-short text-xl text-white/90 drop-shadow-md">
             Faça seu login para realizar a inscrição
           </p>
         </div>
       </div>
 
       {/* Seção Direita - Formulário de Login */}
-      <div className="w-full lg:flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-slate-50 to-sky-50 relative">
+      <div className="login-container-short w-full lg:flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-slate-50 to-sky-50 relative">
         {/* Botão de Ajuda Flutuante */}
         <button
           onClick={handleHelpClick}
-          className="fixed top-4 right-4 lg:absolute lg:top-8 lg:right-8 z-50
+          className="login-help-button-short fixed top-4 right-4 lg:absolute lg:top-8 lg:right-8 z-50
                      bg-primary-600 text-white rounded-full px-5 py-3 shadow-lg
                      hover:bg-primary-700 hover:scale-105 transition-all duration-300
                      focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
@@ -165,7 +165,7 @@ export default function LoginInscricao() {
             <img
               src="https://farmace.com.br/wp-content/uploads/2023/12/cropped-big-logo-farmace.png"
               alt="Farmace"
-              className="h-16 w-auto mb-8 drop-shadow-2xl"
+              className="login-logo-short h-16 w-auto mb-8 drop-shadow-2xl"
             />
           </div>
 
@@ -173,7 +173,7 @@ export default function LoginInscricao() {
           <Button
             variant="ghost"
             onClick={() => navigate('/')}
-            className="mb-6 text-slate-600 hover:text-primary-600"
+            className="login-back-button-short mb-6 text-slate-600 hover:text-primary-600"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar para Home
@@ -184,32 +184,32 @@ export default function LoginInscricao() {
             <img
               src="https://farmace.com.br/wp-content/uploads/2023/12/cropped-big-logo-farmace.png"
               alt="Farmace"
-              className="h-12 w-auto mx-auto mb-4"
+              className="login-mobile-logo-short h-12 w-auto mx-auto mb-4"
             />
-            <h2 className="text-slate-800 font-bold" style={{ fontSize: '32px' }}>
+            <h2 className="login-mobile-title-short text-slate-800 font-bold" style={{ fontSize: '32px' }}>
               II Corrida - 2025
             </h2>
           </div>
 
           {/* Card de Login */}
-          <Card className="shadow-xl border-2 border-primary-100">
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl font-bold text-center" style={{ color: '#242F65' }}>
+          <Card className="login-card-short shadow-xl border-2 border-primary-100">
+            <CardHeader className="login-card-header-short space-y-1">
+              <CardTitle className="login-card-title-short text-2xl font-bold text-center" style={{ color: '#242F65' }}>
                 Seja Bem-Vindo!
               </CardTitle>
-              <p className="text-center text-slate-600">
+              <p className="login-card-subtitle-short text-center text-slate-600">
                 Entre com suas credenciais para continuar
               </p>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+            <CardContent className="login-card-content-short">
+              <form onSubmit={handleSubmit} className="login-form-short space-y-6">
                 {/* Campo Matrícula */}
                 <div className="space-y-2">
-                  <Label htmlFor="matricula" className="text-slate-700 font-medium">
+                  <Label htmlFor="matricula" className="login-label-short text-slate-700 font-medium">
                     Matrícula
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <User className="login-input-icon-short absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <Input
                       id="matricula"
                       name="matricula"
@@ -218,18 +218,18 @@ export default function LoginInscricao() {
                       value={formData.matricula}
                       onChange={handleChange}
                       required
-                      className="pl-10 h-12 border-slate-300 focus:border-primary-500 focus:ring-primary-500"
+                      className="login-input-short pl-10 h-12 border-slate-300 focus:border-primary-500 focus:ring-primary-500"
                     />
                   </div>
                 </div>
 
                 {/* Campo Senha */}
                 <div className="space-y-2">
-                  <Label htmlFor="senha" className="text-slate-700 font-medium">
+                  <Label htmlFor="senha" className="login-label-short text-slate-700 font-medium">
                     Senha
                   </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <Lock className="login-input-icon-short absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <Input
                       id="senha"
                       name="senha"
@@ -238,14 +238,14 @@ export default function LoginInscricao() {
                       value={formData.senha}
                       onChange={handleChange}
                       required
-                      className="pl-10 h-12 border-slate-300 focus:border-primary-500 focus:ring-primary-500"
+                      className="login-input-short pl-10 h-12 border-slate-300 focus:border-primary-500 focus:ring-primary-500"
                     />
                   </div>
                 </div>
 
                 {/* Mensagem de Erro */}
                 {errorMessage && (
-                  <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="login-error-short bg-red-50 border-l-4 border-red-500 p-4 rounded-md animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="flex items-center gap-2">
                       <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -258,13 +258,13 @@ export default function LoginInscricao() {
                 {/* Botão de Login */}
                 <Button
                   type="submit"
-                  className="w-full h-12 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="login-submit-button-short w-full h-12 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   Entrar
                 </Button>
 
                 {/* Link de Ajuda abaixo do botão Entrar */}
-                <div className="mt-4 text-center">
+                <div className="login-help-link-short mt-4 text-center">
                   <button
                     type="button"
                     onClick={handleHelpClick}
@@ -284,7 +284,7 @@ export default function LoginInscricao() {
               <Card className="w-full max-w-lg shadow-2xl border-2 border-primary-200 animate-in fade-in zoom-in duration-300 bg-white overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-t-lg">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-xl font-bold flex items-center gap-2">
+                    <CardTitle className="login-help-modal-title-short text-xl font-bold flex items-center gap-2">
                       <HelpCircle className="w-6 h-6" />
                       Como fazer login?
                     </CardTitle>
@@ -299,53 +299,53 @@ export default function LoginInscricao() {
                     </button>
                   </div>
                 </CardHeader>
-                <CardContent className="p-6 space-y-4">
+                <CardContent className="login-help-modal-content-short p-6 space-y-4">
                   <div className="space-y-3">
-                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                    <h3 className="login-help-modal-heading-short font-bold text-slate-800 flex items-center gap-2">
                       <span className="bg-primary-100 text-primary-700 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">1</span>
                       Campo de Login - Número de Matrícula
                     </h3>
-                    <p className="text-slate-600 text-sm ml-8">
+                    <p className="login-help-modal-text-short text-slate-600 text-sm ml-8">
                       Para fazer login, utilize seu <strong>número de Matrícula do RH</strong> (número que consta no seu crachá).
                       Você pode digitar o número <strong>com ou sem os zeros à esquerda</strong>.
                     </p>
-                    <p className="text-slate-600 text-sm ml-8 bg-sky-50 border border-sky-200 rounded p-2 mt-2">
+                    <p className="login-help-modal-text-short text-slate-600 text-sm ml-8 bg-sky-50 border border-sky-200 rounded p-2 mt-2">
                       <strong>Exemplo:</strong> '001234' ou '1234' - ambos são aceitos
                     </p>
                   </div>
 
                   <div className="space-y-3">
-                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                    <h3 className="login-help-modal-heading-short font-bold text-slate-800 flex items-center gap-2">
                       <span className="bg-primary-100 text-primary-700 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">2</span>
                       Composição da Senha
                     </h3>
-                    <p className="text-slate-600 text-sm ml-8">
+                    <p className="login-help-modal-text-short text-slate-600 text-sm ml-8">
                       A senha é formada pelos <strong>3 últimos dígitos do seu CPF</strong> seguidos do <strong>dia e mês do seu nascimento (DDMM)</strong>.
                     </p>
-                    <p className="text-slate-600 text-sm ml-8 bg-sky-50 border border-sky-200 rounded p-2 mt-2">
+                    <p className="login-help-modal-text-short text-slate-600 text-sm ml-8 bg-sky-50 border border-sky-200 rounded p-2 mt-2">
                       <strong>Exemplo:</strong> Se os últimos dígitos do CPF são '456' e você nasceu em 15 de março, sua senha será '<strong>4561503</strong>'
                     </p>
                   </div>
 
                   <div className="space-y-3">
-                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                    <h3 className="login-help-modal-heading-short font-bold text-slate-800 flex items-center gap-2">
                       <span className="bg-primary-100 text-primary-700 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">3</span>
                       Problemas para acessar?
                     </h3>
-                    <p className="text-slate-600 text-sm ml-8">
+                    <p className="login-help-modal-text-short text-slate-600 text-sm ml-8">
                       Entre em contato com o RH ou TI da FARMACE para obter suas credenciais de acesso.
                     </p>
                   </div>
 
                   <div className="bg-accent-50 border-l-4 border-accent-400 p-4 rounded mt-6">
-                    <p className="text-sm text-slate-700">
+                    <p className="login-help-modal-text-short text-sm text-slate-700">
                       <strong className="text-accent-700">⚠️ Importante:</strong> Apenas colaboradores da FARMACE podem se inscrever neste evento.
                     </p>
                   </div>
 
                   <Button
                     onClick={handleHelpClick}
-                    className="w-full mt-4 bg-primary-600 hover:bg-primary-700 text-white"
+                    className="login-help-modal-button-short w-full mt-4 bg-primary-600 hover:bg-primary-700 text-white"
                   >
                     Entendi
                   </Button>
@@ -355,7 +355,7 @@ export default function LoginInscricao() {
           )}
 
           {/* Informações Adicionais */}
-          <div className="mt-6 text-center text-sm text-slate-600">
+          <div className="login-footer-short mt-6 text-center text-sm text-slate-600">
             <p>
               Ao fazer login, você concorda com nossos{" "}
               <a href="#" className="text-primary-600 hover:underline">
