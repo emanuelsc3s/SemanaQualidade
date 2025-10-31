@@ -189,7 +189,7 @@ export default function Home() {
                     onClick={() => navigate('/loginInscricao')}
                     className="relative bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-bold px-8 py-2.5 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-0 backdrop-blur-sm"
                   >
-                    Inscreva-se
+                    INSCREVA-SE
                   </Button>
                 </div>
               </nav>
@@ -310,15 +310,16 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6 text-center md:text-left">
               {/* Texto principal do Hero */}
-              <h1
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[64px] font-extrabold leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
-                style={{
-                  fontFamily: 'Montserrat, sans-serif',
-                  fontStyle: 'italic',
-                  fontWeight: 800
-                }}
-              >
-                II CORRIDA - QUALIDADE EM CADA METRO SAÚDE EM CADA PASSO
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-[64px] font-extrabold leading-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
+                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal' }}>II CORRIDA</span><span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}> 2025.2</span>
+                <br />
+                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal', display: 'inline-block', marginTop: '2rem' }} className="text-accent-400">QUALIDADE</span>
+                <br />
+                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}>EM CADA METRO</span>
+                <br />
+                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontStyle: 'normal' }} className="text-accent-400">SAÚDE</span>
+                <br />
+                <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 200, fontStyle: 'normal' }}>EM CADA PASSO</span>
               </h1>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-8 md:pt-12 justify-center md:justify-start">
