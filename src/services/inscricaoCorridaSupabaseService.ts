@@ -54,14 +54,6 @@ function validarTipoParticipacao(tipo: string): tipo is TipoParticipacao {
 }
 
 /**
- * Valida se o status é válido (conforme enum no banco)
- */
-function validarStatus(status: string): status is StatusInscricao {
-  const statusValidos: StatusInscricao[] = ['Pendente', 'Confirmada', 'Cancelada', 'Retirou Kit']
-  return statusValidos.includes(status as StatusInscricao)
-}
-
-/**
  * Formata a data de nascimento para o formato aceito pelo PostgreSQL
  * @param dataNascimento - Data no formato YYYY-MM-DD
  * @returns Data formatada para DATE (YYYY-MM-DD)
