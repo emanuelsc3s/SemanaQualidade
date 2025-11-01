@@ -506,7 +506,7 @@ export default function LoginInscricao() {
           {/* Rodapé com Versão */}
           <div className="mt-8 text-center">
             <p className="text-xs text-slate-400">
-              Versão: 1.54
+              Versão: 1.55
             </p>
           </div>
         </div>
