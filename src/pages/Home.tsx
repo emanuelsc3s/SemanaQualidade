@@ -430,16 +430,17 @@ export default function Home() {
       {/* Event Info Section */}
       <section id="info" className="relative py-16 md:py-24 container mx-auto px-4">
         {/* Decorative SVG - Top of section (flipped) - Estilização FARMACE */}
-        <div className="absolute -top-24 sm:-top-32 md:-top-40 lg:-top-48 xl:-top-56 left-1/2 -translate-x-1/2 w-full max-w-[1511px] pointer-events-none" style={{ zIndex: 1 }}>
+        <div className="absolute -top-24 sm:-top-32 md:-top-40 lg:-top-48 xl:-top-56 left-0 right-0 w-screen pointer-events-none" style={{ zIndex: 1, marginLeft: 'calc(-50vw + 50%)' }}>
           <img
             src="/lines.svg"
             alt="Decorative lines"
-            className="w-[120%] sm:w-[110%] md:w-full h-auto mx-auto
+            className="w-full h-auto
                        opacity-60 sm:opacity-65 md:opacity-70 lg:opacity-75
                        scale-y-[-1]"
             style={{
               filter: 'brightness(0.8) saturate(1.2)',
-              display: 'block'
+              display: 'block',
+              minWidth: '100vw'
             }}
             width="1511"
             height="486"
@@ -548,16 +549,16 @@ export default function Home() {
         </div>
 
         {/* Decorative SVG - Positioned absolutely without affecting layout - Estilização FARMACE */}
-        <div className="relative h-0 w-full overflow-visible pointer-events-none" style={{ zIndex: 1 }}>
+        <div className="relative h-0 w-screen overflow-visible pointer-events-none" style={{ zIndex: 1, marginLeft: 'calc(-50vw + 50%)' }}>
           <img
             src="/lines.svg"
             alt="Decorative lines"
-            className="absolute left-1/2 -translate-x-1/2 top-0
-                       w-[120%] sm:w-[110%] md:w-full max-w-[1511px] h-auto
+            className="absolute left-0 top-0 w-full h-auto
                        opacity-60 sm:opacity-65 md:opacity-70 lg:opacity-75"
             style={{
               filter: 'brightness(0.8) saturate(1.2)',
-              display: 'block'
+              display: 'block',
+              minWidth: '100vw'
             }}
             width="1511"
             height="486"
