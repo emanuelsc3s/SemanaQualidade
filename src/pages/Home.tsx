@@ -263,7 +263,7 @@ export default function Home() {
 
         <div className="hero-container-short relative container mx-auto px-4 max-[639px]:!px-3 sm:px-4 py-2 max-[639px]:!py-4 sm:py-6 md:py-10 lg:py-16 h-full flex items-center">
           <div className="hero-grid-short grid lg:grid-cols-2 gap-3 max-[639px]:!gap-4 sm:gap-6 md:gap-10 lg:gap-12 items-center w-full">
-            <div className="hero-content-short space-y-2 max-[639px]:!space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 text-center md:text-left md:pl-8 lg:pl-16">
+            <div className="hero-content-short space-y-2 max-[639px]:!space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 text-center md:text-left max-[767px]:!pl-0 max-[767px]:!pr-0 md:pl-8 lg:pl-16">
               {/* Texto principal do Hero - Mobile First - COMPACTO */}
               <h1 className="hero-title-short text-[1.4rem] leading-[1.2] max-[639px]:!text-[1.75rem] max-[639px]:!leading-[1.15] xs:text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl sm:leading-tight font-extrabold drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)] max-[639px]:!drop-shadow-[0_3px_15px_rgba(0,0,0,0.7)]">
                 <span style={{ fontFamily: 'Montserrat, sans-serif', fontStyle: 'normal' }}>
