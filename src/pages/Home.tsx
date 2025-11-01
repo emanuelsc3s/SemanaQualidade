@@ -717,14 +717,14 @@ export default function Home() {
                 href="mailto:qualidade@farmace.com.br"
                 className="inline-flex items-center gap-2 px-5 md:px-6 py-2.5 md:py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md text-sm md:text-base"
               >
-                📧 qualidade@farmace.com.br
+                regulatorios@farmace.com.br
               </a>
               <span className="text-slate-400 hidden sm:inline">ou</span>
               <a
                 href="tel:+5511999999999"
                 className="inline-flex items-center gap-2 px-5 md:px-6 py-2.5 md:py-3 bg-accent-400 hover:bg-accent-500 text-slate-900 font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md text-sm md:text-base"
               >
-                📱 WhatsApp: (11) 99999-9999
+                (88) 3532-7000
               </a>
             </div>
           </div>
