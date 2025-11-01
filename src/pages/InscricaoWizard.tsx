@@ -11,8 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ArrowLeft, ArrowRight, Check, User, Trophy, Shirt, Gift, FileText, Volume2, VolumeX, X } from "lucide-react"
 import Confetti from "react-confetti"
 import { useWindowSize } from "@/hooks/useWindowSize"
-import { sendWhatsAppMessage, gerarMensagemConfirmacao, gerarMensagemRetirarCesta, gerarMensagemApenasNatal } from "@/services/whatsappService"
+import { sendWhatsAppMessage, sendWhatsAppDocument, gerarMensagemConfirmacao, gerarMensagemRetirarCesta, gerarMensagemApenasNatal } from "@/services/whatsappService"
 import { salvarInscricaoSupabase } from "@/services/inscricaoCorridaSupabaseService"
+import { gerarReciboPDFBase64 } from "@/utils/pdfGenerator"
 
 // Interface para os dados do formulário
 interface FormData {
@@ -321,6 +322,41 @@ export default function InscricaoWizard() {
         setWhatsappSent(false)
       }
 
+      // 3. Gerar e enviar PDF do recibo via WhatsApp
+      try {
+        console.log('📄 [InscricaoWizard] Gerando PDF do recibo (Apenas Natal)...')
+
+        const pdfBase64 = await gerarReciboPDFBase64({
+          nome: formData.nome,
+          email: formData.email,
+          whatsapp: formData.whatsapp,
+          numeroParticipante: numeroParticipanteRetornado,
+          tipoParticipacao: 'apenas-natal',
+          tamanho: formData.tamanho,
+          whatsappSent: resultado.success
+        })
+
+        console.log('✅ [InscricaoWizard] PDF gerado com sucesso!')
+        console.log('📤 [InscricaoWizard] Enviando PDF via WhatsApp...')
+
+        const resultadoPDF = await sendWhatsAppDocument({
+          phoneNumber: formData.whatsapp,
+          message: '📋 Aqui está o comprovante da sua inscrição em PDF!',
+          documentBase64: pdfBase64,
+          fileName: `Comprovante_Inscricao_${numeroParticipanteRetornado}.pdf`,
+          mimeType: 'application/pdf'
+        })
+
+        if (resultadoPDF.success) {
+          console.log('✅ [InscricaoWizard] PDF enviado via WhatsApp com sucesso!')
+        } else {
+          console.error('❌ [InscricaoWizard] Erro ao enviar PDF via WhatsApp:', resultadoPDF.error)
+        }
+      } catch (pdfError) {
+        console.error('❌ [InscricaoWizard] Erro ao gerar/enviar PDF (não crítico):', pdfError)
+        // Não bloqueia o fluxo - a inscrição já foi salva
+      }
+
       console.log('🎉 [InscricaoWizard] Processo concluído com sucesso!')
 
     } catch (error) {
@@ -398,6 +434,40 @@ export default function InscricaoWizard() {
       } else {
         console.error('❌ [InscricaoWizard] Erro ao enviar mensagem WhatsApp:', resultado.error)
         setWhatsappSent(false)
+      }
+
+      // 3. Gerar e enviar PDF do recibo via WhatsApp
+      try {
+        console.log('📄 [InscricaoWizard] Gerando PDF do recibo (Retirar Cesta)...')
+
+        const pdfBase64 = await gerarReciboPDFBase64({
+          nome: formData.nome,
+          email: formData.email,
+          whatsapp: formData.whatsapp,
+          numeroParticipante: numeroParticipanteRetornado,
+          tipoParticipacao: 'retirar-cesta',
+          whatsappSent: resultado.success
+        })
+
+        console.log('✅ [InscricaoWizard] PDF gerado com sucesso!')
+        console.log('📤 [InscricaoWizard] Enviando PDF via WhatsApp...')
+
+        const resultadoPDF = await sendWhatsAppDocument({
+          phoneNumber: formData.whatsapp,
+          message: '📋 Aqui está o comprovante da sua solicitação em PDF!',
+          documentBase64: pdfBase64,
+          fileName: `Comprovante_Cesta_${numeroParticipanteRetornado}.pdf`,
+          mimeType: 'application/pdf'
+        })
+
+        if (resultadoPDF.success) {
+          console.log('✅ [InscricaoWizard] PDF enviado via WhatsApp com sucesso!')
+        } else {
+          console.error('❌ [InscricaoWizard] Erro ao enviar PDF via WhatsApp:', resultadoPDF.error)
+        }
+      } catch (pdfError) {
+        console.error('❌ [InscricaoWizard] Erro ao gerar/enviar PDF (não crítico):', pdfError)
+        // Não bloqueia o fluxo - a inscrição já foi salva
       }
 
       console.log('🎉 [InscricaoWizard] Processo concluído com sucesso!')
@@ -484,6 +554,42 @@ export default function InscricaoWizard() {
           console.error('❌ [InscricaoWizard] Erro ao enviar mensagem WhatsApp:', resultado.error)
           // Mesmo com erro no WhatsApp, continua o fluxo
           setWhatsappSent(false)
+        }
+
+        // 3. Gerar e enviar PDF do recibo via WhatsApp
+        try {
+          console.log('📄 [InscricaoWizard] Gerando PDF do recibo (Corrida)...')
+
+          const pdfBase64 = await gerarReciboPDFBase64({
+            nome: formData.nome,
+            email: formData.email,
+            whatsapp: formData.whatsapp,
+            numeroParticipante: numeroParticipanteRetornado,
+            tipoParticipacao: formData.tipoParticipacao as 'corrida-natal' | 'apenas-natal' | 'retirar-cesta',
+            modalidadeCorrida: formData.modalidadeCorrida,
+            tamanho: formData.tamanho,
+            whatsappSent: resultado.success
+          })
+
+          console.log('✅ [InscricaoWizard] PDF gerado com sucesso!')
+          console.log('📤 [InscricaoWizard] Enviando PDF via WhatsApp...')
+
+          const resultadoPDF = await sendWhatsAppDocument({
+            phoneNumber: formData.whatsapp,
+            message: '📋 Aqui está o comprovante da sua inscrição em PDF!',
+            documentBase64: pdfBase64,
+            fileName: `Comprovante_Inscricao_${numeroParticipanteRetornado}.pdf`,
+            mimeType: 'application/pdf'
+          })
+
+          if (resultadoPDF.success) {
+            console.log('✅ [InscricaoWizard] PDF enviado via WhatsApp com sucesso!')
+          } else {
+            console.error('❌ [InscricaoWizard] Erro ao enviar PDF via WhatsApp:', resultadoPDF.error)
+          }
+        } catch (pdfError) {
+          console.error('❌ [InscricaoWizard] Erro ao gerar/enviar PDF (não crítico):', pdfError)
+          // Não bloqueia o fluxo - a inscrição já foi salva
         }
 
         console.log('🎉 [InscricaoWizard] Processo concluído com sucesso!')

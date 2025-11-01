@@ -13,6 +13,14 @@ interface SendMessageResponse {
   data?: unknown
 }
 
+interface SendDocumentParams {
+  phoneNumber: string
+  message: string
+  documentBase64: string
+  fileName: string
+  mimeType?: string
+}
+
 /**
  * Formata o número de telefone para o padrão internacional
  * Remove caracteres especiais e adiciona código do país se necessário
@@ -333,3 +341,119 @@ Qualquer dúvida, é só chamar por aqui! 😊
   return mensagem
 }
 
+/**
+ * Envia documento (PDF) via WhatsApp usando Evolution API
+ *
+ * @param params - Parâmetros contendo número, mensagem e documento em Base64
+ * @returns Promise com resultado do envio
+ */
+export async function sendWhatsAppDocument({
+  phoneNumber,
+  message,
+  documentBase64,
+  fileName,
+  mimeType = 'application/pdf'
+}: SendDocumentParams): Promise<SendMessageResponse> {
+  try {
+    console.log('🚀 [WhatsApp Service] Iniciando envio de documento...')
+
+    // Obtém configurações do .env
+    const apiUrl = import.meta.env.VITE_EVOLUTION_API_URL
+    const apiToken = import.meta.env.VITE_EVOLUTION_API_TOKEN
+    const instanceName = import.meta.env.VITE_EVOLUTION_INSTANCE_NAME
+
+    console.log('🔧 [WhatsApp Service] Variáveis de ambiente:', {
+      apiUrl: apiUrl ? '✅ Configurada' : '❌ Não configurada',
+      apiToken: apiToken ? '✅ Configurada' : '❌ Não configurada',
+      instanceName: instanceName ? '✅ Configurada' : '❌ Não configurada'
+    })
+
+    // Valida se as variáveis de ambiente estão configuradas
+    if (!apiUrl || !apiToken || !instanceName) {
+      console.error('❌ [WhatsApp Service] Variáveis de ambiente da Evolution API não configuradas')
+      return {
+        success: false,
+        error: 'Configuração da API de WhatsApp incompleta'
+      }
+    }
+
+    // Formata o número de telefone
+    const formattedPhone = formatPhoneNumber(phoneNumber)
+    console.log('📱 [WhatsApp Service] Número formatado:', {
+      original: phoneNumber,
+      formatado: formattedPhone
+    })
+
+    // Monta o endpoint da API para envio de mídia/documento
+    const endpoint = `${apiUrl}/message/sendMedia/${instanceName}`
+
+    // Corpo da requisição para envio de documento
+    const requestBody = {
+      number: formattedPhone,
+      mediatype: 'document',
+      mimetype: mimeType,
+      caption: message,
+      fileName: fileName,
+      media: documentBase64 // Base64 do PDF (sem prefixo data:)
+    }
+
+    console.log('📤 [WhatsApp Service] Enviando documento:', {
+      endpoint,
+      phone: formattedPhone,
+      fileName,
+      mimeType,
+      documentSizeKB: (documentBase64.length / 1024).toFixed(2),
+      captionLength: message.length
+    })
+
+    // Faz a requisição para a Evolution API
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': apiToken
+      },
+      body: JSON.stringify(requestBody)
+    })
+
+    console.log('📊 [WhatsApp Service] Resposta recebida:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok
+    })
+
+    // Verifica se a resposta foi bem-sucedida
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('❌ [WhatsApp Service] Erro ao enviar documento:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText
+      })
+
+      return {
+        success: false,
+        error: `Erro ao enviar documento: ${response.statusText}`
+      }
+    }
+
+    // Processa a resposta
+    const data = await response.json()
+
+    console.log('✅ [WhatsApp Service] Documento enviado com sucesso!')
+    console.log('📋 [WhatsApp Service] Dados da resposta:', data)
+
+    return {
+      success: true,
+      data
+    }
+
+  } catch (error) {
+    console.error('❌ [WhatsApp Service] Erro ao enviar documento:', error)
+
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Erro desconhecido ao enviar documento'
+    }
+  }
+}
