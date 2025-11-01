@@ -10,7 +10,7 @@ interface SendMessageParams {
 interface SendMessageResponse {
   success: boolean
   error?: string
-  data?: any
+  data?: unknown
 }
 
 /**
@@ -185,7 +185,7 @@ export function gerarMensagemConfirmacao(
     : categoria === '10km' ? '10 km (corrida)'
     : categoria.toLowerCase()
 
-  const mensagem = `� *CONFRATERNIZAÇÃO E II Corrida FARMACE* 🏃‍♂️
+  const mensagem = `🎄 CONFRATERNIZAÇÃO E II Corrida FARMACE* 🏃‍♂️
 
 Olá, *${nomeFormatado}*! 👋
 
