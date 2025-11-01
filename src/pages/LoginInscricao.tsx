@@ -304,8 +304,8 @@ export default function LoginInscricao() {
         </button>
 
         <div className="w-full max-w-md">
-          {/* Logo FARMACE - Topo da área de login */}
-          <div className="flex justify-center mb-8">
+          {/* Logo FARMACE - Topo da área de login - Apenas Desktop */}
+          <div className="hidden lg:flex justify-center mb-8">
             <img
               src="https://farmace.com.br/wp-content/uploads/2023/12/cropped-big-logo-farmace.png"
               alt="Farmace"
