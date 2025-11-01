@@ -502,6 +502,13 @@ export default function LoginInscricao() {
               </a>
             </p>
           </div>
+
+          {/* Rodapé com Versão */}
+          <div className="mt-8 text-center">
+            <p className="text-xs text-slate-400">
+              Versão: 1.52
+            </p>
+          </div>
         </div>
 
         {/* Modal de Erro de Autenticação */}
