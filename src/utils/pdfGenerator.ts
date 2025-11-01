@@ -64,7 +64,7 @@ export async function gerarReciboPDF(dados: DadosRecibo): Promise<Blob> {
     console.log('🔄 [PDF Generator] Renderizando documento PDF...')
 
     // Gera o PDF como Blob
-    // @ts-ignore - React.createElement retorna o tipo correto mas TypeScript não infere corretamente
+    // @ts-expect-error - React.createElement retorna o tipo correto mas TypeScript não infere corretamente
     const blob = await pdf(documento).toBlob()
 
     console.log('✅ [PDF Generator] PDF gerado com sucesso!')
@@ -253,7 +253,7 @@ export async function gerarReciboPDFModerno(dados: DadosRecibo): Promise<Blob> {
 
     console.log('🔄 [PDF Generator Moderno] Renderizando documento PDF...')
 
-    // @ts-ignore - React.createElement retorna o tipo correto mas TypeScript não infere corretamente
+    // @ts-expect-error - React.createElement retorna o tipo correto mas TypeScript não infere corretamente
     const blob = await pdf(documento).toBlob()
 
     console.log('✅ [PDF Generator Moderno] PDF gerado com sucesso!')
@@ -380,7 +380,7 @@ export async function gerarReciboPDFInter(dados: DadosRecibo): Promise<Blob> {
     console.log('🔄 [PDF Generator Inter] Renderizando documento PDF...')
 
     // Gera o PDF como Blob
-    // @ts-ignore - React.createElement retorna o tipo correto mas TypeScript não infere corretamente
+    // @ts-expect-error - React.createElement retorna o tipo correto mas TypeScript não infere corretamente
     const blob = await pdf(documento).toBlob()
 
     console.log('✅ [PDF Generator Inter] PDF gerado com sucesso!')

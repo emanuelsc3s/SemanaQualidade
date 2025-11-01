@@ -201,6 +201,12 @@ export default function InscricaoWizard() {
   }
 
   const handleNext = async () => {
+    // 🔒 PROTEÇÃO: Previne múltiplas submissões simultâneas
+    if (isSubmitting) {
+      console.warn('⚠️ [InscricaoWizard] Submissão já em andamento. Ignorando clique duplicado.')
+      return
+    }
+
     // Etapa 1: Validação customizada com modal
     if (currentStep === 1) {
       if (!isWhatsappValid(formData.whatsapp)) {
@@ -260,6 +266,12 @@ export default function InscricaoWizard() {
 
   // Função específica para processar inscrição de quem escolheu participar apenas da comemoração de Natal
   const handleSubmitApenasNatal = async () => {
+    // 🔒 PROTEÇÃO: Previne múltiplas submissões simultâneas
+    if (isSubmitting) {
+      console.warn('⚠️ [InscricaoWizard] Submissão já em andamento (APENAS NATAL). Ignorando chamada duplicada.')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -375,6 +387,12 @@ export default function InscricaoWizard() {
 
   // Função específica para processar inscrição de quem escolheu apenas retirar a cesta
   const handleSubmitRetirarCesta = async () => {
+    // 🔒 PROTEÇÃO: Previne múltiplas submissões simultâneas
+    if (isSubmitting) {
+      console.warn('⚠️ [InscricaoWizard] Submissão já em andamento (RETIRAR CESTA). Ignorando chamada duplicada.')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -487,6 +505,12 @@ export default function InscricaoWizard() {
   }
 
   const handleSubmit = async () => {
+    // 🔒 PROTEÇÃO: Previne múltiplas submissões simultâneas
+    if (isSubmitting) {
+      console.warn('⚠️ [InscricaoWizard] Submissão já em andamento (CORRIDA NATAL). Ignorando chamada duplicada.')
+      return
+    }
+
     if (validateStep(4)) {
       setIsSubmitting(true)
 
@@ -803,11 +827,20 @@ export default function InscricaoWizard() {
           {currentStep < totalSteps ? (
             <Button
               onClick={handleNext}
-              disabled={currentStep === 1 ? false : !validateStep(currentStep)}
-              className="w-full sm:flex-1 order-1 sm:order-2 bg-primary-600 hover:bg-primary-700 h-11 md:h-12 text-sm md:text-base font-semibold text-white"
+              disabled={isSubmitting || (currentStep === 1 ? false : !validateStep(currentStep))}
+              className="w-full sm:flex-1 order-1 sm:order-2 bg-primary-600 hover:bg-primary-700 h-11 md:h-12 text-sm md:text-base font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Próximo
-              <ArrowRight className="w-4 h-4 ml-2" />
+              {isSubmitting ? (
+                <>
+                  <span className="animate-spin mr-2">⏳</span>
+                  Processando...
+                </>
+              ) : (
+                <>
+                  Próximo
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </>
+              )}
             </Button>
           ) : (
             <Button

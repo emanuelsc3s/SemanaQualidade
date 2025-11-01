@@ -315,6 +315,12 @@ export default function Inscricao() {
     console.log('📊 [Inscrição] currentStep:', currentStep)
     console.log('📋 [Inscrição] formData:', formData)
 
+    // 🔒 PROTEÇÃO: Previne múltiplas submissões simultâneas
+    if (isSubmitting) {
+      console.warn('⚠️ [Inscrição] Submissão já em andamento. Ignorando submit duplicado.')
+      return
+    }
+
     // Valida a etapa final antes de submeter
     let isValid = false
 
