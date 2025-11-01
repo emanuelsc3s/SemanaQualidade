@@ -620,7 +620,7 @@ export default function InscricaoWizard() {
 
             {/* Textos do Header */}
             <div className="flex-1 text-center">
-              <h1 className="text-xl md:text-3xl font-bold mb-1 md:mb-2 drop-shadow-lg">INSCRIÇÃO - ETAPA {currentStep} de {totalSteps}</h1>
+              <h1 className="text-base max-[639px]:!text-sm sm:text-lg md:text-3xl font-bold mb-1 md:mb-2 drop-shadow-lg">INSCRIÇÃO - ETAPA {currentStep} de {totalSteps}</h1>
               <p className="text-white/90 text-sm md:text-base drop-shadow-md">II Corrida FARMACE - 2025</p>
             </div>
           </div>
@@ -1533,7 +1533,7 @@ function StepRegulamento({ aceitouRegulamento, onAceiteChange }: StepRegulamento
             <section>
               <h4 className="font-semibold text-sm md:text-base text-slate-800 mb-2">9. CANAIS OFICIAIS</h4>
               <p className="text-xs md:text-sm leading-relaxed">
-                Os canais oficiais do evento serão consideradas, as mídias sociais da FARMACE, NO INSTAGRAM @farmaceoficial, site da oficial da farmace, www.farmace.com.br.
+                Os canais oficiais do evento serão considerados, as mídias sociais da FARMACE, no INSTAGRAM @farmaceoficial e site www.farmace.com.br.
               </p>
             </section>
 
