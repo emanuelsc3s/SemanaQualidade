@@ -3,20 +3,39 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
-export default defineConfig({
+// https://vitejs.dev/config/
+export default defineConfig(({ mode }) => ({
+  server: {
+    host: '::',
+    port: 5173,
+    open: true,
+  },
   plugins: [
     tailwindcss(),
-    react()
-  ],
+    react({
+      babel: {
+        plugins: mode === 'development' ? [
+          ['babel-plugin-transform-react-jsx-location', {
+            attributeName: 'data-source'
+          }]
+        ] : []
+      }
+    }),
+  ].filter(Boolean),
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
-  build: {
-    sourcemap: true,
-  },
+  envPrefix: 'VITE_',
   css: {
     devSourcemap: true,
   },
-})
+  esbuild: {
+    sourcemap: mode === 'development',
+    target: mode === 'development' ? 'es2022' : 'es2020',
+  },
+  build: {
+    sourcemap: mode === 'development',
+  },
+}))
