@@ -296,7 +296,7 @@ export default function Home() {
       </header>
 
       {/* Hero Section - Mobile-First Optimized for Small Screens */}
-      <section className="hero-section-short relative overflow-hidden h-screen max-[639px]:!min-h-[600px] max-[639px]:!h-[100svh] sm:max-h-none sm:min-h-screen text-white max-[639px]:!pt-20 pt-24 sm:pt-20 md:pt-24 flex items-center justify-center">
+      <section className="hero-section-short relative overflow-hidden h-screen max-[639px]:!min-h-[600px] max-[639px]:!h-[100svh] sm:max-h-none sm:min-h-screen text-white max-[639px]:!pt-20 pt-24 sm:pt-20 md:pt-24 flex items-center justify-center" style={{ zIndex: 0 }}>
         {/* Background Video */}
         <div className="absolute inset-0">
           <video
@@ -427,25 +427,26 @@ export default function Home() {
         </DialogContent>
       </Dialog>
 
-      {/* Event Info Section */}
-      <section id="info" className="relative py-16 md:py-24 container mx-auto px-4 overflow-hidden">
-        {/* Decorative SVG - Top of section (flipped) - Estilização FARMACE */}
-        <div className="absolute -top-24 sm:-top-32 md:-top-40 lg:-top-48 xl:-top-56 left-1/2 -translate-x-1/2 w-screen max-w-full pointer-events-none" style={{ zIndex: 1 }}>
-          <img
-            src="/lines.svg"
-            alt="Decorative lines"
-            className="w-full h-auto
-                       opacity-60 sm:opacity-65 md:opacity-70 lg:opacity-75
-                       scale-y-[-1]"
-            style={{
-              filter: 'brightness(0.8) saturate(1.2)',
-              display: 'block'
-            }}
-            width="1511"
-            height="486"
-          />
-        </div>
+      {/* Decorative SVG - Transition between Hero and Info Section */}
+      {/* z-index: 5 = acima do Hero (z-0), abaixo dos cards de info (z-10) */}
+      <div className="absolute left-1/2 -translate-x-1/2 w-screen max-w-full pointer-events-none" style={{ top: 'calc(100vh - 12rem)', zIndex: 5 }}>
+        <img
+          src="/lines.svg"
+          alt="Decorative lines"
+          className="w-full h-auto
+                     opacity-60 sm:opacity-65 md:opacity-70 lg:opacity-75
+                     scale-y-[-1]"
+          style={{
+            filter: 'brightness(0.8) saturate(1.2)',
+            display: 'block'
+          }}
+          width="1511"
+          height="486"
+        />
+      </div>
 
+      {/* Event Info Section */}
+      <section id="info" className="relative py-16 md:py-24 container mx-auto px-4">
         <div className="relative z-10 text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
             Informações do Evento
@@ -455,7 +456,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div className="relative z-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           <Card className="relative z-10 border-2 border-primary-200 hover:shadow-lg transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
@@ -548,7 +549,7 @@ export default function Home() {
         </div>
 
         {/* Decorative SVG - Positioned absolutely without affecting layout - Estilização FARMACE */}
-        <div className="absolute left-1/2 -translate-x-1/2 w-screen max-w-full h-0 overflow-visible pointer-events-none" style={{ zIndex: 1 }}>
+        <div className="absolute left-1/2 -translate-x-1/2 w-screen max-w-full h-0 overflow-visible pointer-events-none" style={{ zIndex: 5 }}>
           <img
             src="/lines.svg"
             alt="Decorative lines"
@@ -564,7 +565,7 @@ export default function Home() {
         </div>
 
         {/* FAQ Section */}
-        <div id="duvidas" className="relative mt-16 md:mt-20 scroll-mt-24" style={{ zIndex: 1 }}>
+        <div id="duvidas" className="relative mt-16 md:mt-20 scroll-mt-24" style={{ zIndex: 10 }}>
           <div className="text-center mb-8 md:mb-12">
             <div className="inline-flex items-center justify-center gap-3 mb-4">
               <div className="p-3 bg-accent-100 rounded-full">
