@@ -99,7 +99,7 @@ export default function Home() {
   }, [lastScrollY])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-sky-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-sky-50 overflow-x-hidden">
       {/* Background Music - Áudio do vídeo 0104.mp4 */}
       <audio
         ref={audioRef}
@@ -428,9 +428,9 @@ export default function Home() {
       </Dialog>
 
       {/* Event Info Section */}
-      <section id="info" className="relative py-16 md:py-24 container mx-auto px-4">
+      <section id="info" className="relative py-16 md:py-24 container mx-auto px-4 overflow-hidden">
         {/* Decorative SVG - Top of section (flipped) - Estilização FARMACE */}
-        <div className="absolute -top-24 sm:-top-32 md:-top-40 lg:-top-48 xl:-top-56 left-0 right-0 w-screen pointer-events-none" style={{ zIndex: 1, marginLeft: 'calc(-50vw + 50%)' }}>
+        <div className="absolute -top-24 sm:-top-32 md:-top-40 lg:-top-48 xl:-top-56 left-1/2 -translate-x-1/2 w-screen max-w-full pointer-events-none" style={{ zIndex: 1 }}>
           <img
             src="/lines.svg"
             alt="Decorative lines"
@@ -439,8 +439,7 @@ export default function Home() {
                        scale-y-[-1]"
             style={{
               filter: 'brightness(0.8) saturate(1.2)',
-              display: 'block',
-              minWidth: '100vw'
+              display: 'block'
             }}
             width="1511"
             height="486"
@@ -549,7 +548,7 @@ export default function Home() {
         </div>
 
         {/* Decorative SVG - Positioned absolutely without affecting layout - Estilização FARMACE */}
-        <div className="relative h-0 w-screen overflow-visible pointer-events-none" style={{ zIndex: 1, marginLeft: 'calc(-50vw + 50%)' }}>
+        <div className="absolute left-1/2 -translate-x-1/2 w-screen max-w-full h-0 overflow-visible pointer-events-none" style={{ zIndex: 1 }}>
           <img
             src="/lines.svg"
             alt="Decorative lines"
@@ -557,8 +556,7 @@ export default function Home() {
                        opacity-60 sm:opacity-65 md:opacity-70 lg:opacity-75"
             style={{
               filter: 'brightness(0.8) saturate(1.2)',
-              display: 'block',
-              minWidth: '100vw'
+              display: 'block'
             }}
             width="1511"
             height="486"
