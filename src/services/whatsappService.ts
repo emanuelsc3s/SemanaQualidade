@@ -142,25 +142,42 @@ export async function sendWhatsAppMessage({
 }
 
 /**
+ * Formata o nome com apenas a primeira letra de cada palavra em maiúscula
+ *
+ * @param nome - Nome completo do participante
+ * @returns Nome formatado (ex: "João Da Silva" -> "João Da Silva")
+ */
+function formatarNomeCapitalizado(nome: string): string {
+  return nome
+    .toLowerCase()
+    .split(' ')
+    .map(palavra => palavra.charAt(0).toUpperCase() + palavra.slice(1))
+    .join(' ')
+}
+
+/**
  * Gera a mensagem de confirmação de inscrição personalizada
  *
  * @param nome - Nome do participante
  * @param numeroParticipante - Número de inscrição do participante
  * @param categoria - Categoria escolhida (3km, 5km, 10km)
+ * @param tamanhoCamiseta - Tamanho da camiseta escolhida
  * @returns Mensagem formatada para envio
  */
 export function gerarMensagemConfirmacao(
   nome: string,
   numeroParticipante: string,
-  categoria: string
+  categoria: string,
+  tamanhoCamiseta: string
 ): string {
   console.log('📝 [WhatsApp Service] Gerando mensagem de confirmação:', {
     nome,
     numeroParticipante,
-    categoria
+    categoria,
+    tamanhoCamiseta
   })
 
-  const primeiroNome = nome.split(' ')[0]
+  const nomeFormatado = formatarNomeCapitalizado(nome)
 
   // Formata a categoria para exibição
   const categoriaFormatada = categoria === '3km' ? '3 km (caminhada)'
@@ -168,25 +185,23 @@ export function gerarMensagemConfirmacao(
     : categoria === '10km' ? '10 km (corrida)'
     : categoria.toLowerCase()
 
-  const mensagem = `🏃‍♂️ *II Corrida FARMACE - 2025* 🏃‍♀️
+  const mensagem = `� *CONFRATERNIZAÇÃO E II Corrida FARMACE* 🏃‍♂️
 
-Olá, *${primeiroNome}*! 👋
+Olá, *${nomeFormatado}*! 👋
 
 Aqui é a Lis da FARMACE 💙
 
-Sua inscrição foi confirmada! ✅
+Sua solicitação foi recebida ✅
 
 *Inscrição:*
 • Nº do participante: *#${numeroParticipante}*
 • Categoria: *${categoriaFormatada}*
-• Status: *confirmada*
+• Tamanho Camisa: *${tamanhoCamiseta}*
 • Local da Largada: Farmace às 6h30
 
-Em breve vou te avisar por aqui com:
-• Retirada do kit
-• Orientações para o dia
+📦 *Retirada do kit nos dias 18 e 19 de dezembro de 2025 na Farmace.*
 
-Fica de olho neste WhatsApp, vou falar tudo por aqui.
+Até mais e fique de olho neste WhatsApp, vou falar tudo por aqui.
 
 *Lis – FARMACE* 💙`
 

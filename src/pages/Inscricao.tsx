@@ -367,7 +367,8 @@ export default function Inscricao() {
         const mensagem = gerarMensagemConfirmacao(
           formData.nome,
           numeroGerado,
-          formData.modalidadeCorrida
+          formData.modalidadeCorrida,
+          formData.tamanho
         )
 
         const whatsappResult = await sendWhatsAppMessage({

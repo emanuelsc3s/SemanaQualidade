@@ -464,7 +464,8 @@ export default function InscricaoWizard() {
         const mensagem = gerarMensagemConfirmacao(
           formData.nome,
           numeroParticipante,
-          categoriaFormatada
+          categoriaFormatada,
+          formData.tamanho
         )
 
         const resultado = await sendWhatsAppMessage({
