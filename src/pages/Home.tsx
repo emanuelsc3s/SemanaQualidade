@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Calendar, MapPin, Award, Users, Clock, DollarSign, Menu, X, Volume2, VolumeX } from "lucide-react"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Calendar, MapPin, Award, Users, Clock, DollarSign, Menu, X, Volume2, VolumeX, HelpCircle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useRef } from "react"
 
@@ -159,6 +160,10 @@ export default function Home() {
                 <a
                   href="#duvidas"
                   className="px-5 py-2.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] hover:text-[#0a588a] font-light hover:font-bold transition-all duration-300 rounded-xl hover:bg-white/20 cursor-pointer relative group"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    document.getElementById('duvidas')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }}
                 >
                   Dúvidas
                   <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-sky-400 to-blue-500 group-hover:w-3/4 transition-all duration-300 rounded-full shadow-lg"></span>
@@ -213,7 +218,13 @@ export default function Home() {
               <a
                 href="#duvidas"
                 className="px-5 py-3.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] hover:text-[#0a588a] hover:bg-white/20 font-light hover:font-bold transition-all duration-300 rounded-xl cursor-pointer"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={(e) => {
+                  e.preventDefault()
+                  setMobileMenuOpen(false)
+                  setTimeout(() => {
+                    document.getElementById('duvidas')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }, 300)
+                }}
               >
                 Dúvidas
               </a>
@@ -476,8 +487,208 @@ export default function Home() {
           </Card>
         </div>
 
+        {/* FAQ Section */}
+        <div id="duvidas" className="mt-16 md:mt-20 scroll-mt-24">
+          <div className="text-center mb-8 md:mb-12">
+            <div className="inline-flex items-center justify-center gap-3 mb-4">
+              <div className="p-3 bg-accent-100 rounded-full">
+                <HelpCircle className="w-6 h-6 md:w-8 md:h-8 text-accent-700" />
+              </div>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3 md:mb-4">
+              Perguntas Frequentes
+            </h2>
+            <p className="text-base md:text-lg text-slate-600 max-w-2xl mx-auto px-4">
+              Tire suas dúvidas sobre a 2ª Corrida e Caminhada da Qualidade
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <Accordion type="single" collapsible className="space-y-3 md:space-y-4">
+              {/* Informações Gerais */}
+              <AccordionItem value="item-1" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  Quem pode participar da corrida?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  A 2ª Corrida e Caminhada da Qualidade é um evento <strong>exclusivo para colaboradores da FARMACE</strong>. É necessário fazer login com suas credenciais de funcionário para realizar a inscrição.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-2" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  Qual o valor da inscrição?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  A inscrição é <strong className="text-accent-700">100% GRATUITA</strong> para todos os colaboradores da FARMACE! O kit do atleta (camiseta + número de peito) também está incluso sem custo adicional.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-3" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  Até quando posso me inscrever?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  As inscrições ficam abertas até <strong>15 de dezembro de 2025</strong> ou até atingir o limite de vagas. Não deixe para a última hora!
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Modalidades e Percurso */}
+              <AccordionItem value="item-4" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  Quais são as modalidades disponíveis?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  Você pode escolher entre quatro modalidades:<br/>
+                  • <strong>Corrida 3KM</strong> - Para quem está começando ou prefere distâncias menores<br/>
+                  • <strong>Corrida 5KM</strong> - Desafio intermediário<br/>
+                  • <strong>Corrida 10KM</strong> - Para os mais experientes<br/>
+                  • <strong>Caminhada</strong> - Opção para quem prefere caminhar
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-5" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  Como é o percurso das corridas?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  O percurso é predominantemente plano, com largada e chegada na FARMACE. O trajeto passa por áreas internas e externas da empresa, com sinalização completa e equipe de apoio em todo o percurso. O mapa detalhado será disponibilizado por e-mail após a confirmação da inscrição.
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Dia do Evento */}
+              <AccordionItem value="item-6" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  Qual a data e horário do evento?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  O evento acontecerá no dia <strong>21 de dezembro de 2025</strong>, durante a Semana da Qualidade.<br/>
+                  • <strong>Concentração:</strong> 6h30<br/>
+                  • <strong>Largada:</strong> 7h00<br/>
+                  Recomendamos chegar com antecedência para retirar seu kit, alongar e se posicionar.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-7" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  Onde é o local de largada?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  A largada será na <strong>FARMACE</strong>, localizada na AV DOUTOR ANTONIO LYRIO CALLOU, S/N, KM 02. Haverá estacionamento disponível nas dependências da empresa - chegue cedo para garantir sua vaga.
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Kit do Atleta */}
+              <AccordionItem value="item-8" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  O que está incluso no kit do atleta?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  Todos os participantes receberão <strong>gratuitamente</strong>:<br/>
+                  • Camiseta oficial do evento (tamanho escolhido na inscrição)<br/>
+                  • Número de peito para identificação<br/>
+                  <br/>
+                  A retirada do kit será informada por e-mail após a confirmação da inscrição.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-9" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  Posso escolher o tamanho da camiseta?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  Sim! Durante a inscrição você escolherá entre os tamanhos: <strong>PP, P, M, G, GG e XG</strong>. Haverá possibilidade de troca no dia da retirada do kit, sujeito à disponibilidade de estoque.
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Saúde e Hidratação */}
+              <AccordionItem value="item-10" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  É obrigatório apresentar atestado médico?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  Não é obrigatório, mas <strong>recomendamos fortemente</strong> que você consulte um médico antes de participar, especialmente se for correr 5KM ou 10KM. Sua saúde é nossa prioridade!
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-11" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  Haverá pontos de hidratação no percurso?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  Sim! Teremos pontos de hidratação estrategicamente posicionados ao longo do percurso, com água e isotônico disponíveis. Também haverá suporte médico e ambulância de prontidão durante todo o evento.
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Premiação */}
+              <AccordionItem value="item-12" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  Haverá premiação?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  Sim! Premiaremos os <strong>3 primeiros colocados</strong> de cada modalidade (masculino e feminino). Além disso, haverá premiação por faixa etária. Mas lembre-se: o mais importante é participar e celebrar a saúde e a integração com os colegas!
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Inscrição */}
+              <AccordionItem value="item-13" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  Como faço minha inscrição?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  É muito simples! Clique no botão <strong>"INSCREVA-SE"</strong> no topo da página, faça login com suas credenciais de colaborador FARMACE e preencha o formulário de inscrição. Você receberá um e-mail de confirmação com todas as informações.
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="item-14" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  Posso cancelar minha inscrição?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  Sim, você pode cancelar sua inscrição até <strong>10 de dezembro</strong> através do e-mail <strong>qualidade@farmace.com.br</strong>. Após essa data não será possível cancelar devido à produção dos kits.
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Outras Dúvidas */}
+              <AccordionItem value="item-15" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
+                <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
+                  O evento acontece com chuva?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
+                  Sim, o evento será realizado mesmo com chuva leve. Apenas em casos de condições climáticas extremas (tempestades, raios) haverá adiamento, com comunicação prévia por e-mail e WhatsApp.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+
+          {/* Contact CTA */}
+          <div className="mt-10 md:mt-12 text-center bg-gradient-to-r from-sky-50 to-primary-50 rounded-2xl p-6 md:p-8 border-2 border-primary-100">
+            <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-3">
+              Ainda tem dúvidas?
+            </h3>
+            <p className="text-sm md:text-base text-slate-600 mb-4 md:mb-5">
+              Entre em contato com o Departamento de Qualidade
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+              <a
+                href="mailto:qualidade@farmace.com.br"
+                className="inline-flex items-center gap-2 px-5 md:px-6 py-2.5 md:py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md text-sm md:text-base"
+              >
+                📧 qualidade@farmace.com.br
+              </a>
+              <span className="text-slate-400 hidden sm:inline">ou</span>
+              <a
+                href="tel:+5511999999999"
+                className="inline-flex items-center gap-2 px-5 md:px-6 py-2.5 md:py-3 bg-accent-400 hover:bg-accent-500 text-slate-900 font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md text-sm md:text-base"
+              >
+                📱 WhatsApp: (11) 99999-9999
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* CTA Section */}
-        <div className="bg-gradient-to-r from-primary-500 to-sky-400 rounded-2xl p-8 md:p-12 text-white text-center">
+        <div className="bg-gradient-to-r from-primary-500 to-sky-400 rounded-2xl p-8 md:p-12 text-white text-center mt-16 md:mt-20">
           <h3 className="text-3xl md:text-4xl font-bold mb-4">
             Garanta sua vaga agora!
           </h3>

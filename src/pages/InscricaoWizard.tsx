@@ -47,6 +47,7 @@ export default function InscricaoWizard() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [whatsappSent, setWhatsappSent] = useState(false)
   const [matriculaColaborador, setMatriculaColaborador] = useState<string>('')
+  const [numeroParticipante, setNumeroParticipante] = useState<string>('0000')
   const audioRef = useRef<HTMLAudioElement>(null)
   const hasUnmutedRef = useRef(false)
 
@@ -294,15 +295,16 @@ export default function InscricaoWizard() {
       }
 
       console.log('✅ [InscricaoWizard] Inscrição salva no Supabase com sucesso!')
-      const numeroParticipante = resultadoSupabase.data?.numeroParticipante || '0000'
-      console.log('🎫 [InscricaoWizard] Número do participante:', numeroParticipante)
+      const numeroParticipanteRetornado = resultadoSupabase.data?.numeroParticipante || matriculaColaborador || '0000'
+      setNumeroParticipante(numeroParticipanteRetornado)
+      console.log('🎫 [InscricaoWizard] Número do participante:', numeroParticipanteRetornado)
 
       // 2. Enviar mensagem de confirmação via WhatsApp
       console.log('📱 [InscricaoWizard] Enviando mensagem de confirmação via WhatsApp (Apenas Natal)...')
 
       const mensagem = gerarMensagemApenasNatal(
         formData.nome,
-        numeroParticipante,
+        numeroParticipanteRetornado,
         formData.tamanho
       )
 
@@ -373,15 +375,16 @@ export default function InscricaoWizard() {
       }
 
       console.log('✅ [InscricaoWizard] Inscrição salva no Supabase com sucesso!')
-      const numeroParticipante = resultadoSupabase.data?.numeroParticipante || '0000'
-      console.log('🎫 [InscricaoWizard] Número do participante:', numeroParticipante)
+      const numeroParticipanteRetornado = resultadoSupabase.data?.numeroParticipante || matriculaColaborador || '0000'
+      setNumeroParticipante(numeroParticipanteRetornado)
+      console.log('🎫 [InscricaoWizard] Número do participante:', numeroParticipanteRetornado)
 
       // 2. Enviar mensagem de confirmação via WhatsApp
       console.log('📱 [InscricaoWizard] Enviando mensagem de confirmação via WhatsApp (Retirar Cesta)...')
 
       const mensagem = gerarMensagemRetirarCesta(
         formData.nome,
-        numeroParticipante
+        numeroParticipanteRetornado
       )
 
       const resultado = await sendWhatsAppMessage({
@@ -453,8 +456,9 @@ export default function InscricaoWizard() {
         }
 
         console.log('✅ [InscricaoWizard] Inscrição salva no Supabase com sucesso!')
-        const numeroParticipante = resultadoSupabase.data?.numeroParticipante || '0000'
-        console.log('🎫 [InscricaoWizard] Número do participante:', numeroParticipante)
+        const numeroParticipanteRetornado = resultadoSupabase.data?.numeroParticipante || matriculaColaborador || '0000'
+        setNumeroParticipante(numeroParticipanteRetornado)
+        console.log('🎫 [InscricaoWizard] Número do participante:', numeroParticipanteRetornado)
 
         // 2. Enviar mensagem de confirmação via WhatsApp
         console.log('📱 [InscricaoWizard] Enviando mensagem de confirmação via WhatsApp...')
@@ -463,7 +467,7 @@ export default function InscricaoWizard() {
 
         const mensagem = gerarMensagemConfirmacao(
           formData.nome,
-          numeroParticipante,
+          numeroParticipanteRetornado,
           categoriaFormatada,
           formData.tamanho
         )
@@ -787,7 +791,7 @@ export default function InscricaoWizard() {
                   : 'Número do Participante'}
               </p>
               <p className="text-xl sm:text-2xl font-bold text-primary-700 tracking-wider">
-                #{(JSON.parse(localStorage.getItem('inscricoes') || '[]').length).toString().padStart(4, '0')}
+                #{numeroParticipante}
               </p>
             </div>
 
