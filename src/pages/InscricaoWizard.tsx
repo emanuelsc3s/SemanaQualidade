@@ -735,8 +735,23 @@ export default function InscricaoWizard() {
       </div>
 
       {/* Modal de Sucesso - Formato Recibo */}
-      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <Dialog open={showSuccessModal} onOpenChange={() => {}}>
+        <DialogContent
+          className="max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto"
+          onInteractOutside={(e) => {
+            // Previne o fechamento ao clicar fora do modal
+            e.preventDefault()
+            // Redireciona para a home (mesma ação do botão "Voltar para a Página Inicial")
+            handleCloseSuccess()
+          }}
+          onEscapeKeyDown={(e) => {
+            // Previne o fechamento ao pressionar ESC
+            e.preventDefault()
+            // Redireciona para a home (mesma ação do botão "Voltar para a Página Inicial")
+            handleCloseSuccess()
+          }}
+          hideCloseButton={true}
+        >
           {/* Cabeçalho do Recibo - Customizado para "Retirar Cesta" */}
           <div className="text-center border-b-2 border-dashed border-slate-300 pb-3 mb-3">
             <div className={`mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-2 ${
