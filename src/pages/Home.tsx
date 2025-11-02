@@ -23,25 +23,33 @@ export default function Home() {
     window.scrollTo(0, 0)
   }, [])
 
-  // Posiciona o segundo SVG dinamicamente baseado no spacer
+  // Posiciona o segundo SVG dinamicamente baseado no primeiro item do acordeão FAQ
   useEffect(() => {
     const updateSvgPosition = () => {
-      const spacer = document.getElementById('svg-spacer-before-faq')
-      if (spacer) {
-        const rect = spacer.getBoundingClientRect()
-        const topPosition = rect.top + window.scrollY
+      // Busca o primeiro AccordionItem do FAQ
+      const firstAccordionItem = document.querySelector('[data-state][data-orientation="vertical"]')
+      if (firstAccordionItem) {
+        const rect = firstAccordionItem.getBoundingClientRect()
+        const accordionTop = rect.top + window.scrollY
+        // Sobe o SVG 40% da distância entre o topo do acordeão e a altura do próprio SVG
+        // Altura aproximada do SVG é 486px, então subimos ~195px (40% de 486px)
+        const svgOffset = 195
+        const topPosition = accordionTop - svgOffset
         document.documentElement.style.setProperty('--svg-before-faq-top', `${topPosition}px`)
       }
     }
 
-    // Atualiza posição inicial
-    updateSvgPosition()
+    // Atualiza posição inicial com delay para garantir que o DOM está pronto
+    const timer = setTimeout(updateSvgPosition, 100)
 
     // Atualiza posição ao redimensionar
     window.addEventListener('resize', updateSvgPosition)
 
     // Cleanup
-    return () => window.removeEventListener('resize', updateSvgPosition)
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('resize', updateSvgPosition)
+    }
   }, [])
 
   // Ativa som do áudio automaticamente após mover o mouse
@@ -571,23 +579,33 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* Spacer para criar espaço onde o SVG absoluto será renderizado */}
-        <div className="relative w-full h-16 md:h-20" id="svg-spacer-before-faq"></div>
-
         {/* FAQ Section */}
-        <div id="duvidas" className="relative mt-0 scroll-mt-24" style={{ zIndex: 10 }}>
-          <div className="text-center mb-8 md:mb-12">
-            <div className="inline-flex items-center justify-center gap-3 mb-4">
-              <div className="p-3 bg-accent-100 rounded-full">
-                <HelpCircle className="w-6 h-6 md:w-8 md:h-8 text-accent-700" />
+        <div id="duvidas" className="relative mt-12 md:mt-16 scroll-mt-24" style={{ zIndex: 10 }}>
+          {/* Layout Mobile-First: Coluna única em mobile, duas colunas em tablet/desktop */}
+          <div className="max-w-4xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-8 mb-8 md:mb-12 px-4">
+            {/* Coluna Esquerda: Textos e Ícone */}
+            <div className="flex-1 text-center md:text-left">
+              <div className="inline-flex items-center justify-center md:justify-start gap-3 mb-4">
+                <div className="p-3 bg-accent-100 rounded-full">
+                  <HelpCircle className="w-6 h-6 md:w-8 md:h-8 text-accent-700" />
+                </div>
               </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3 md:mb-4">
+                Perguntas Frequentes
+              </h2>
+              <p className="text-base md:text-lg text-slate-600 md:max-w-xl">
+                Tire suas dúvidas sobre a Confraternização e II Corrida
+              </p>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3 md:mb-4">
-              Perguntas Frequentes
-            </h2>
-            <p className="text-base md:text-lg text-slate-600 max-w-2xl mx-auto px-4">
-              Tire suas dúvidas sobre a Confraternização e II Corrida da Qualidade
-            </p>
+
+            {/* Coluna Direita: Imagem (oculta em mobile pequeno, visível em md+) */}
+            <div className="hidden md:block flex-shrink-0">
+              <img
+                src="/faq.png"
+                alt="Ilustração de perguntas frequentes - pessoa pensando com ícones de interrogação"
+                className="w-64 lg:w-80 h-auto object-contain rounded-lg"
+              />
+            </div>
           </div>
 
           <div className="max-w-4xl mx-auto">
@@ -598,7 +616,7 @@ export default function Home() {
                   Quem pode participar da corrida?
                 </AccordionTrigger>
                 <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
-                  A 2ª Corrida e Caminhada da Qualidade é um evento <strong>exclusivo para colaboradores da FARMACE</strong>. É necessário fazer login com suas credenciais de funcionário para realizar a inscrição.
+                  A Confraternização e II Corrida da Qualidade é um evento <strong>exclusivo para colaboradores da FARMACE</strong>. É necessário fazer login com suas credenciais de funcionário para realizar a inscrição.
                 </AccordionContent>
               </AccordionItem>
 
@@ -607,7 +625,7 @@ export default function Home() {
                   Qual o valor da inscrição?
                 </AccordionTrigger>
                 <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
-                  A inscrição é <strong className="text-accent-700">100% GRATUITA</strong> para todos os colaboradores da FARMACE! O kit do atleta (camiseta + número de peito) também está incluso sem custo adicional.
+                  A inscrição é <strong className="text-accent-700">100% GRATUITA</strong> para <strong>todos os colaboradores da FARMACE!</strong> O kit do atleta (camiseta + número de peito) também está incluso sem custo adicional.
                 </AccordionContent>
               </AccordionItem>
 
@@ -616,7 +634,7 @@ export default function Home() {
                   Até quando posso me inscrever?
                 </AccordionTrigger>
                 <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
-                  As inscrições ficam abertas até <strong>15 de dezembro de 2025</strong> ou até atingir o limite de vagas. Não deixe para a última hora!
+                  As inscrições ficam abertas até <strong>10 de Novembro de 2025</strong>. Não deixe para a última hora!
                 </AccordionContent>
               </AccordionItem>
 
@@ -791,8 +809,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Decorative SVG - Positioned absolutely before FAQ section */}
+      {/* Decorative SVG - Positioned absolutely aligned with first FAQ accordion item */}
       {/* Este SVG está FORA do container para ocupar 100% da largura da viewport */}
+      {/* Posicionado dinamicamente via JavaScript para alinhar com o primeiro item do acordeão */}
       <div
         className="absolute left-1/2 -translate-x-1/2 w-screen max-w-full pointer-events-none"
         style={{
