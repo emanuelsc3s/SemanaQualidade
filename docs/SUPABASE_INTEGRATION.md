@@ -47,7 +47,7 @@ src/
 │   ├── inscricaoCorridaSupabaseService.ts   # Serviço de inscrições
 │   └── whatsappService.ts                   # Serviço WhatsApp (já existente)
 ├── pages/
-│   └── Inscricao.tsx                        # Formulário de inscrição (atualizado)
+│   └── InscricaoWizard.tsx                  # Formulário de inscrição wizard (ativo)
 └── vite-env.d.ts                            # Tipos das variáveis de ambiente
 ```
 

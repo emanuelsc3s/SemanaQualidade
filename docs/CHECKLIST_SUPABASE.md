@@ -26,7 +26,7 @@
 - [x] `src/services/supabase.ts` - Cliente Supabase
 - [x] `src/services/inscricaoCorridaSupabaseService.ts` - Serviço de inscrições
 - [x] `src/vite-env.d.ts` - Tipos TypeScript atualizados
-- [x] `src/pages/Inscricao.tsx` - Componente atualizado
+- [x] `src/pages/InscricaoWizard.tsx` - Componente wizard atualizado
 - [x] `.env.example` - Template atualizado
 - [x] `docs/SUPABASE_INTEGRATION.md` - Documentação completa
 - [x] `docs/CHECKLIST_SUPABASE.md` - Este checklist

@@ -354,7 +354,7 @@ Sempre que possível, testar em dispositivos reais além do DevTools:
 
 ## 🚀 Próximas Páginas a Implementar
 
-### Página de Inscrição (`Inscricao.tsx`)
+### Página de Inscrição (`InscricaoWizard.tsx`)
 
 **Desafio:** Formulário longo com muitos campos
 

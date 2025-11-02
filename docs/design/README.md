@@ -165,7 +165,7 @@ Media query CSS baseada em altura (`@media (max-height: 800px)`) com classes cus
 
 ### Páginas Pendentes
 
-1. **Inscricao.tsx** - Formulário de inscrição
+1. **InscricaoWizard.tsx** - Formulário de inscrição wizard
    - Desafio: Formulário longo com muitos campos
    - Estratégia: Layout em 2 colunas + redução de espaçamentos
 

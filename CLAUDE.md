@@ -76,8 +76,8 @@ SemanaQualidade/
 │   │   └── utils.ts              # Funções utilitárias (cn, etc)
 │   ├── pages/
 │   │   ├── Home.tsx              # Landing page principal
-│   │   ├── LoginInscricao.tsx   # Página de login/autenticação (NOVO)
-│   │   └── Inscricao.tsx         # Formulário de inscrição
+│   │   ├── LoginInscricao.tsx   # Página de login/autenticação
+│   │   └── InscricaoWizard.tsx   # Formulário de inscrição wizard (ativo)
 │   ├── App.tsx                   # Componente raiz com rotas
 │   └── main.tsx                  # Entry point da aplicação
 ├── components.json               # Configuração shadcn/ui
@@ -140,10 +140,11 @@ SemanaQualidade/
 - Persistência em localStorage
 - Tela de confirmação com número do participante
 
-### 🚧 Login/Autenticação (Em Desenvolvimento)
-- Arquivo `LoginInscricao.tsx` foi criado mas ainda não está implementado
+### ✅ Login/Autenticação
+- Arquivo `LoginInscricao.tsx` implementado e funcional
 - **Objetivo:** Validar que apenas colaboradores da FARMACE possam se inscrever
-- Deve redirecionar para `/inscricao` após autenticação bem-sucedida
+- Redireciona para `/inscricao` após autenticação bem-sucedida
+- Integrado com dados de funcionários e Supabase
 
 ## Design System
 
@@ -266,7 +267,7 @@ Desktop Large:     1536px+   (2xl:)
 - Testar sempre em mobile primeiro
 
 ### Nomenclatura
-- Componentes: PascalCase (ex: `Home.tsx`, `LoginInscricao.tsx`)
+- Componentes: PascalCase (ex: `Home.tsx`, `LoginInscricao.tsx`, `InscricaoWizard.tsx`)
 - Funções/variáveis: camelCase
 - Constantes: UPPER_SNAKE_CASE (quando aplicável)
 
@@ -274,10 +275,11 @@ Desktop Large:     1536px+   (2xl:)
 
 ### Arquivos Modificados (Git Status)
 ```
-M  src/App.tsx               # Rotas atualizadas
-M  src/pages/Home.tsx        # Hero e navegação ajustados
-?? public/0104.mp4           # Novo vídeo adicionado
-?? src/pages/LoginInscricao.tsx  # Nova página (ainda não implementada)
+M  src/App.tsx                    # Rotas atualizadas
+M  src/pages/Home.tsx             # Hero e navegação ajustados
+M  src/pages/LoginInscricao.tsx   # Página de login implementada
+M  src/pages/InscricaoWizard.tsx  # Formulário wizard ativo
+?? public/0104.mp4                # Vídeo adicionado
 ```
 
 ### Commits Recentes
@@ -342,11 +344,11 @@ d3d32da docs: remove seções técnicas do README
   - Verificar touch interactions em mobile/tablet
 
 ### Alta Prioridade
-- [ ] **Implementar página LoginInscricao.tsx**
+- [x] **Implementar página LoginInscricao.tsx** ✅
   - Sistema de autenticação para colaboradores (MOBILE-FIRST)
   - Integração com base de dados de funcionários da FARMACE
   - Proteção de rota `/inscricao`
-  - Garantir funcionamento perfeito em mobile
+  - Funcionamento perfeito em mobile
 
 - [ ] **Backend/API**
   - Endpoint para salvar inscrições

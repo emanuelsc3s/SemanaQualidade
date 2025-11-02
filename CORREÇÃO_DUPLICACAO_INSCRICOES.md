@@ -228,8 +228,7 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 - ✅ `retirar-cesta` - Proteção em `handleSubmitRetirarCesta`
 
 ### Arquivos Modificados
-- ✅ `src/pages/InscricaoWizard.tsx` - 5 pontos de correção
-- ✅ `src/pages/Inscricao.tsx` - 1 ponto de correção
+- ✅ `src/pages/InscricaoWizard.tsx` - 5 pontos de correção (arquivo ativo)
 
 ### Comportamento Esperado
 - ❌ **ANTES:** Múltiplos cliques = múltiplos registros no banco

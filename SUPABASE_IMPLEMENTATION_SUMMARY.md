@@ -89,7 +89,7 @@ export interface TbCorridaInsert         // Dados para inserção
 
 ### 5. **Atualização do Componente de Inscrição**
 
-**Arquivo modificado:** `src/pages/Inscricao.tsx`
+**Arquivo modificado:** `src/pages/InscricaoWizard.tsx`
 
 **Mudanças principais:**
 
@@ -182,7 +182,7 @@ SUPABASE_IMPLEMENTATION_SUMMARY.md       # Este arquivo
 src/
 ├── vite-env.d.ts                        # Tipos de variáveis de ambiente
 └── pages/
-    └── Inscricao.tsx                    # Componente de inscrição
+    └── InscricaoWizard.tsx              # Componente de inscrição wizard
 
 .env.example                             # Template de variáveis de ambiente
 ```
