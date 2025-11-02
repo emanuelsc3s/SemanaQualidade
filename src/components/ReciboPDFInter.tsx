@@ -33,14 +33,14 @@ const styles = StyleSheet.create({
   // Header Azul FARMACE (inspirado no header laranja do Inter)
   header: {
     backgroundColor: '#0ea5e9', // Azul FARMACE (substitui laranja Inter)
-    padding: 24,
+    padding: 16, // Reduzido de 24 para 16
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center'
   },
   logoContainer: {
-    width: 60,
-    height: 60
+    width: 45, // Reduzido de 60 para 45
+    height: 45 // Reduzido de 60 para 45
   },
   logo: {
     width: '100%',
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     objectFit: 'contain'
   },
   headerTitle: {
-    fontSize: 16,
+    fontSize: 14, // Reduzido de 16 para 14
     fontFamily: 'Helvetica-Bold',
     color: '#ffffff',
     letterSpacing: 0.5
@@ -56,132 +56,132 @@ const styles = StyleSheet.create({
 
   // Conteúdo Principal
   content: {
-    padding: 40
+    padding: 24 // Reduzido de 40 para 24
   },
 
   // Saudação Personalizada (inspirado no "Olá, Maria!")
   greeting: {
-    fontSize: 18,
+    fontSize: 15, // Reduzido de 18 para 15
     fontFamily: 'Helvetica-Bold',
     color: '#333333',
-    marginBottom: 24
+    marginBottom: 16 // Reduzido de 24 para 16
   },
 
   // Card Principal com Borda Azul (inspirado no card laranja do Inter)
   mainCard: {
-    border: '3 solid #0ea5e9', // Borda azul FARMACE
-    borderRadius: 16,
-    padding: 32,
-    marginBottom: 24,
+    border: '2 solid #0ea5e9', // Borda reduzida de 3 para 2
+    borderRadius: 12, // Reduzido de 16 para 12
+    padding: 20, // Reduzido de 32 para 20
+    marginBottom: 16, // Reduzido de 24 para 16
     backgroundColor: '#ffffff'
   },
   mainCardContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 32
+    gap: 20 // Reduzido de 32 para 20
   },
   mainCardLeft: {
     flex: 1
   },
   mainCardRight: {
     flex: 1,
-    gap: 16
+    gap: 10 // Reduzido de 16 para 10
   },
 
   // Número do Participante em Destaque (inspirado no R$ 522,82)
   participantLabel: {
-    fontSize: 12,
+    fontSize: 10, // Reduzido de 12 para 10
     color: '#666666',
-    marginBottom: 8
+    marginBottom: 4 // Reduzido de 8 para 4
   },
   participantNumber: {
-    fontSize: 42, // Grande como o valor da fatura
+    fontSize: 32, // Reduzido de 42 para 32
     fontFamily: 'Helvetica-Bold',
     color: '#0ea5e9', // Azul FARMACE em destaque
-    marginBottom: 8,
-    letterSpacing: 2
+    marginBottom: 4, // Reduzido de 8 para 4
+    letterSpacing: 1.5 // Reduzido de 2 para 1.5
   },
   participantSubtext: {
-    fontSize: 10,
+    fontSize: 9, // Reduzido de 10 para 9
     color: '#999999',
-    lineHeight: 1.5
+    lineHeight: 1.4 // Reduzido de 1.5 para 1.4
   },
 
   // Info Row com Ícone (lado direito do card)
   infoRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 8
+    gap: 6 // Reduzido de 8 para 6
   },
   iconContainer: {
-    width: 16,
-    height: 16,
-    marginTop: 2
+    width: 14, // Reduzido de 16 para 14
+    height: 14, // Reduzido de 16 para 14
+    marginTop: 1 // Reduzido de 2 para 1
   },
   infoContent: {
     flex: 1
   },
   infoLabel: {
-    fontSize: 10,
+    fontSize: 9, // Reduzido de 10 para 9
     color: '#666666',
-    marginBottom: 2
+    marginBottom: 1 // Reduzido de 2 para 1
   },
   infoValue: {
-    fontSize: 12,
+    fontSize: 10, // Reduzido de 12 para 10
     fontFamily: 'Helvetica-Bold',
     color: '#333333'
   },
 
   // Seção de Destaque (inspirado no "Pagamento mínimo")
   highlightSection: {
-    marginBottom: 24
+    marginBottom: 12 // Reduzido de 24 para 12
   },
   highlightTitle: {
-    fontSize: 14,
+    fontSize: 12, // Reduzido de 14 para 12
     fontFamily: 'Helvetica-Bold',
     color: '#333333'
   },
   highlightValue: {
-    fontSize: 14,
+    fontSize: 12, // Reduzido de 14 para 12
     fontFamily: 'Helvetica-Bold',
     color: '#0ea5e9'
   },
   highlightText: {
-    fontSize: 10,
+    fontSize: 9, // Reduzido de 10 para 9
     color: '#666666',
-    marginTop: 8,
-    lineHeight: 1.5
+    marginTop: 4, // Reduzido de 8 para 4
+    lineHeight: 1.4 // Reduzido de 1.5 para 1.4
   },
 
   // Tabela de Informações (inspirado na tabela de encargos)
   table: {
-    marginBottom: 24
+    marginBottom: 12 // Reduzido de 24 para 12
   },
   tableHeader: {
     backgroundColor: '#f8fafc',
-    padding: 12,
+    padding: 8, // Reduzido de 12 para 8
     borderTop: '1 solid #333333',
     borderBottom: '1 solid #e0e0e0'
   },
   tableHeaderText: {
-    fontSize: 11,
+    fontSize: 10, // Reduzido de 11 para 10
     fontFamily: 'Helvetica-Bold',
     color: '#333333'
   },
   tableRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: 6, // Reduzido de 10 para 6
+    paddingHorizontal: 8, // Reduzido de 12 para 8
     borderBottom: '1 solid #f1f5f9'
   },
   tableLabel: {
-    fontSize: 10,
+    fontSize: 9, // Reduzido de 10 para 9
     color: '#666666',
     flex: 1
   },
   tableValue: {
-    fontSize: 10,
+    fontSize: 9, // Reduzido de 10 para 9
     fontFamily: 'Helvetica-Bold',
     color: '#333333',
     textAlign: 'right'
@@ -190,61 +190,86 @@ const styles = StyleSheet.create({
   // Seção de Validação (2 colunas - inspirado em Boleto/Pix)
   validationSection: {
     flexDirection: 'row',
-    gap: 24,
-    marginTop: 24
+    gap: 16, // Reduzido de 24 para 16
+    marginTop: 12 // Reduzido de 24 para 12
   },
   validationColumn: {
     flex: 1
   },
   validationTitle: {
-    fontSize: 12,
+    fontSize: 10, // Reduzido de 12 para 10
     fontFamily: 'Helvetica-Bold',
     color: '#333333',
-    marginBottom: 8
+    marginBottom: 4 // Reduzido de 8 para 4
   },
   validationText: {
-    fontSize: 9,
+    fontSize: 8, // Reduzido de 9 para 8
     color: '#666666',
-    lineHeight: 1.5,
-    marginBottom: 16
+    lineHeight: 1.4, // Reduzido de 1.5 para 1.4
+    marginBottom: 8 // Reduzido de 16 para 8
   },
   qrContainer: {
-    width: 120,
-    height: 120,
+    width: 90, // Reduzido de 120 para 90
+    height: 90, // Reduzido de 120 para 90
     alignSelf: 'center',
-    marginTop: 8
+    marginTop: 4 // Reduzido de 8 para 4
   },
   qrCode: {
     width: '100%',
     height: '100%'
   },
   validationCode: {
-    fontSize: 10,
+    fontSize: 9, // Reduzido de 10 para 9
     fontFamily: 'Helvetica',
     color: '#333333',
     textAlign: 'center',
-    marginTop: 12,
-    letterSpacing: 1
+    marginTop: 6, // Reduzido de 12 para 6
+    letterSpacing: 0.8 // Reduzido de 1 para 0.8
   },
   authText: {
-    fontSize: 8,
+    fontSize: 7, // Reduzido de 8 para 7
     fontFamily: 'Helvetica-Bold',
     color: '#16a34a', // Verde (inspirado no texto verde do Inter)
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: 4, // Reduzido de 8 para 4
     textTransform: 'uppercase'
   },
 
-  // Rodapé
-  footer: {
-    marginTop: 32,
-    paddingTop: 16,
+  // Rodapé Superior (informações do evento)
+  footerTop: {
+    marginTop: 12,
+    paddingTop: 6,
     borderTop: '1 solid #e0e0e0',
-    textAlign: 'center'
+    textAlign: 'center',
+    marginBottom: 8 // Espaço entre rodapé superior e inferior
   },
   footerText: {
-    fontSize: 8,
+    fontSize: 7,
+    color: '#999999',
+    marginBottom: 2 // Espaçamento entre linhas
+  },
+
+  // Rodapé Inferior (copyright SICFAR) - Posicionado no final absoluto da página
+  footerBottom: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingTop: 6,
+    paddingBottom: 8,
+    borderTop: '1 solid #e0e0e0', // Linha divisória
+    textAlign: 'center',
+    backgroundColor: '#ffffff' // Fundo branco para cobrir qualquer conteúdo abaixo
+  },
+  footerTextBold: {
+    fontSize: 7,
+    fontFamily: 'Helvetica-Bold',
     color: '#999999'
+  },
+  footerTextHighlight: {
+    fontSize: 7,
+    fontFamily: 'Helvetica-Bold',
+    color: '#0ea5e9' // Cor primária azul FARMACE
   }
 })
 
@@ -252,7 +277,7 @@ const styles = StyleSheet.create({
  * Componente de ícone SVG - Calendário
  */
 const IconCalendar: React.FC = () => (
-  <Svg width="16" height="16" viewBox="0 0 24 24">
+  <Svg width="14" height="14" viewBox="0 0 24 24">
     <Path
       d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"
       fill="none"
@@ -266,7 +291,7 @@ const IconCalendar: React.FC = () => (
  * Componente de ícone SVG - Camiseta
  */
 const IconShirt: React.FC = () => (
-  <Svg width="16" height="16" viewBox="0 0 24 24">
+  <Svg width="14" height="14" viewBox="0 0 24 24">
     <Path
       d="M16 4l1.29 1.29c.63.63 1.71.18 1.71-.71V2H5v2.58c0 .89 1.08 1.34 1.71.71L8 4l4-2 4 2zm0 2v14H8V6h8z"
       fill="none"
@@ -280,7 +305,7 @@ const IconShirt: React.FC = () => (
  * Componente de ícone SVG - Corrida
  */
 const IconRun: React.FC = () => (
-  <Svg width="16" height="16" viewBox="0 0 24 24">
+  <Svg width="14" height="14" viewBox="0 0 24 24">
     <Path
       d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"
       fill="none"
@@ -461,8 +486,8 @@ const ReciboPDFInterPage: React.FC<{ dados: DadosRecibo }> = ({ dados }) => {
             )}
           </View>
 
-          {/* Rodapé */}
-          <View style={styles.footer}>
+          {/* Rodapé Superior - Informações do Evento */}
+          <View style={styles.footerTop}>
             <Text style={styles.footerText}>
               FARMACE - II Corrida e Caminhada da Qualidade - 2025
             </Text>
@@ -470,6 +495,15 @@ const ReciboPDFInterPage: React.FC<{ dados: DadosRecibo }> = ({ dados }) => {
               Este documento é válido como comprovante de inscrição
             </Text>
           </View>
+        </View>
+
+        {/* Rodapé Inferior - Copyright SICFAR (Posicionado no final absoluto da página) */}
+        <View style={styles.footerBottom}>
+          <Text style={styles.footerTextBold}>
+            <Text style={styles.footerTextHighlight}>SICFAR</Text>
+            <Text> Manager - Plataforma Computacional </Text>
+            <Text style={styles.footerTextHighlight}>FARMACE</Text>
+          </Text>
         </View>
       </Page>
   )
