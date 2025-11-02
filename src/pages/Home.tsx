@@ -586,7 +586,7 @@ export default function Home() {
               Perguntas Frequentes
             </h2>
             <p className="text-base md:text-lg text-slate-600 max-w-2xl mx-auto px-4">
-              Tire suas dúvidas sobre a 2ª Corrida e Caminhada da Qualidade
+              Tire suas dúvidas sobre a Confraternização e II Corrida da Qualidade
             </p>
           </div>
 
@@ -623,14 +623,13 @@ export default function Home() {
               {/* Modalidades e Percurso */}
               <AccordionItem value="item-4" className="bg-white rounded-xl border-2 border-slate-200 px-4 md:px-6 shadow-sm hover:shadow-md transition-shadow">
                 <AccordionTrigger className="text-left text-base md:text-lg font-semibold text-slate-900 hover:text-primary-600 hover:no-underline py-4 md:py-5">
-                  Quais são as modalidades disponíveis?
+                  Quais são as modalidades de corrida disponíveis?
                 </AccordionTrigger>
                 <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
-                  Você pode escolher entre quatro modalidades:<br/>
-                  • <strong>Corrida 3KM</strong> - Para quem está começando ou prefere distâncias menores<br/>
-                  • <strong>Corrida 5KM</strong> - Desafio intermediário<br/>
-                  • <strong>Corrida 10KM</strong> - Para os mais experientes<br/>
-                  • <strong>Caminhada</strong> - Opção para quem prefere caminhar
+                  Você pode escolher entre três modalidades:<br/>
+                  • <strong>Corrida 3KM</strong> - Para quem está começando ou prefere distâncias menores, mas sem Premiação.<br/>
+                  • <strong>Corrida 5KM</strong> - Desafio intermediário, com Premiação.<br/>
+                  • <strong>Corrida 10KM</strong> - Para os mais experientes, com Premiação.<br/>
                 </AccordionContent>
               </AccordionItem>
 
@@ -639,7 +638,7 @@ export default function Home() {
                   Como é o percurso das corridas?
                 </AccordionTrigger>
                 <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
-                  O percurso é predominantemente plano, com largada e chegada na FARMACE. O trajeto passa por áreas internas e externas da empresa, com sinalização completa e equipe de apoio em todo o percurso. O mapa detalhado será disponibilizado por e-mail após a confirmação da inscrição.
+                  O percurso é predominantemente plano, com largada e chegada na FARMACE. O trajeto passa por áreas internas e externas da empresa, com sinalização completa e equipe de apoio em todo o percurso. O mapa detalhado será disponibilizado por e-mail/WhatsApp após revisão e confirmação da inscrição.
                 </AccordionContent>
               </AccordionItem>
 

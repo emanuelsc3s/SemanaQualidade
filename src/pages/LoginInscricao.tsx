@@ -147,12 +147,14 @@ export default function LoginInscricao() {
       try {
         // Consulta o Supabase para verificar se já existe inscrição
         console.log("📡 [Login] Iniciando consulta ao Supabase...")
-        console.log("📡 [Login] Filtros: matricula =", matriculaFormatada, "AND deleted_at IS NULL")
+        console.log("📡 [Login] Filtros: matricula =", matriculaFormatada, "AND deleted_at IS NULL AND status = 'Confirmada'")
 
         const { data, error, count } = await supabase
           .from('tbcorrida')
-          .select('corrida_id, data_inscricao, matricula, created_at, deleted_at', { count: 'exact' })
+          .select('corrida_id, data_inscricao, matricula, created_at, deleted_at, status', { count: 'exact' })
           .eq('matricula', matriculaFormatada)
+          .is('deleted_at', null)
+          .eq('status', 'Confirmada')
 
         console.log("📡 [Login] Resposta do Supabase:")
         console.log("  - Total de registros encontrados:", count)
@@ -174,14 +176,13 @@ export default function LoginInscricao() {
           return
         }
 
-        // Filtra manualmente registros com deleted_at NULL (inscrições ativas)
-        const inscricoesAtivas = data?.filter(registro => registro.deleted_at === null) || []
-        console.log("🔍 [Login] Inscrições ativas (deleted_at IS NULL):", inscricoesAtivas.length)
+        // Query já filtra deleted_at IS NULL e status = 'Confirmada'
+        console.log("🔍 [Login] Inscrições confirmadas encontradas:", count)
 
-        if (inscricoesAtivas.length > 0) {
-          // JÁ EXISTE INSCRIÇÃO ATIVA - Mostra modal de alerta
-          const inscricao = inscricoesAtivas[0]
-          console.log('⚠️ [Login] Inscrição ativa encontrada:', inscricao)
+        if (data && data.length > 0) {
+          // JÁ EXISTE INSCRIÇÃO CONFIRMADA - Mostra modal de alerta
+          const inscricao = data[0]
+          console.log('⚠️ [Login] Inscrição confirmada encontrada:', inscricao)
           setInscricaoExistente({
             dataInscricao: inscricao.data_inscricao || inscricao.created_at || new Date().toISOString(),
             matricula: inscricao.matricula || matriculaFormatada
@@ -190,8 +191,8 @@ export default function LoginInscricao() {
           return // NÃO redireciona
         }
 
-        // NÃO existe inscrição ativa - Prossegue normalmente
-        console.log('✅ [Login] Nenhuma inscrição ativa encontrada, prosseguindo...')
+        // NÃO existe inscrição confirmada - Prossegue normalmente
+        console.log('✅ [Login] Nenhuma inscrição confirmada encontrada, prosseguindo...')
 
         const colaboradorData = {
           matricula: funcionario.MATRICULA,
@@ -545,7 +546,7 @@ export default function LoginInscricao() {
               </DialogTitle>
               <DialogDescription className="text-slate-600 pt-4 space-y-3">
                 <p className="font-medium text-slate-800">
-                  Identificamos que você já realizou sua inscrição para a II Corrida FARMACE.
+                  Identificamos que você já possui uma inscrição confirmada para a II Corrida FARMACE.
                 </p>
 
                 {inscricaoExistente && (
