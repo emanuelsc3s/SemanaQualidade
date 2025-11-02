@@ -1,8 +1,8 @@
-# 🔄 Guia de Migração - whatsapp_queue → tbwhatsapp
+# 🔄 Guia de Migração - whatsapp_queue → tbwhatsapp_send
 
 ## 📋 Visão Geral
 
-Este guia ajuda você a migrar do sistema antigo (`whatsapp_queue` com autenticação) para o novo sistema (`tbwhatsapp` sem autenticação).
+Este guia ajuda você a migrar do sistema antigo (`whatsapp_queue` com autenticação) para o novo sistema (`tbwhatsapp_send` sem autenticação).
 
 **Tempo estimado:** 30 minutos
 
@@ -38,22 +38,22 @@ Use esta opção se você **já tem dados** na tabela `whatsapp_queue` e quer ma
 
 ```sql
 -- Renomear tabela existente
-ALTER TABLE whatsapp_queue RENAME TO tbwhatsapp;
+ALTER TABLE whatsapp_queue RENAME TO tbwhatsapp_send;
 
 -- Verificar
-SELECT tablename FROM pg_tables WHERE tablename = 'tbwhatsapp';
+SELECT tablename FROM pg_tables WHERE tablename = 'tbwhatsapp_send';
 ```
 
 ### Passo 2: Atualizar Políticas RLS
 
 ```sql
 -- Remover políticas antigas
-DROP POLICY IF EXISTS "Allow insert for authenticated users" ON tbwhatsapp;
-DROP POLICY IF EXISTS "Allow select own messages for authenticated users" ON tbwhatsapp;
+DROP POLICY IF EXISTS "Allow insert for authenticated users" ON tbwhatsapp_send;
+DROP POLICY IF EXISTS "Allow select own messages for authenticated users" ON tbwhatsapp_send;
 
 -- Criar nova política pública
 CREATE POLICY "Allow public insert" 
-  ON tbwhatsapp
+  ON tbwhatsapp_send
   FOR INSERT 
   TO public
   WITH CHECK (true);
@@ -62,19 +62,19 @@ CREATE POLICY "Allow public insert"
 -- Se não existirem, criar:
 
 CREATE POLICY "Allow select for service role" 
-  ON tbwhatsapp
+  ON tbwhatsapp_send
   FOR SELECT 
   TO service_role
   USING (true);
 
 CREATE POLICY "Allow update for service role" 
-  ON tbwhatsapp
+  ON tbwhatsapp_send
   FOR UPDATE 
   TO service_role
   USING (true);
 
 CREATE POLICY "Allow delete for service role" 
-  ON tbwhatsapp
+  ON tbwhatsapp_send
   FOR DELETE 
   TO service_role
   USING (true);
@@ -85,7 +85,7 @@ CREATE POLICY "Allow delete for service role"
 ```sql
 SELECT policyname, roles, cmd
 FROM pg_policies
-WHERE tablename = 'tbwhatsapp'
+WHERE tablename = 'tbwhatsapp_send'
 ORDER BY policyname;
 ```
 
@@ -109,7 +109,7 @@ cd /home/emanuel/SemanaQualidade
 nano supabase/functions/process-whatsapp-queue/index.ts
 ```
 
-**Substituir todas as ocorrências de `whatsapp_queue` por `tbwhatsapp`:**
+**Substituir todas as ocorrências de `whatsapp_queue` por `tbwhatsapp_send`:**
 
 ```typescript
 // ANTES:
@@ -119,14 +119,14 @@ const { data: messages } = await supabaseAdmin
 
 // DEPOIS:
 const { data: messages } = await supabaseAdmin
-  .from('tbwhatsapp')  // ✅
+  .from('tbwhatsapp_send')  // ✅
   .select('*')
 ```
 
 **Ou usar comando sed:**
 
 ```bash
-sed -i "s/whatsapp_queue/tbwhatsapp/g" supabase/functions/process-whatsapp-queue/index.ts
+sed -i "s/whatsapp_queue/tbwhatsapp_send/g" supabase/functions/process-whatsapp-queue/index.ts
 ```
 
 ### Passo 5: Redeploy Edge Function
@@ -139,14 +139,14 @@ supabase functions deploy process-whatsapp-queue
 
 ```bash
 # Atualizar whatsappQueueService.ts
-sed -i "s/whatsapp_queue/tbwhatsapp/g" src/services/whatsappQueueService.ts
+sed -i "s/whatsapp_queue/tbwhatsapp_send/g" src/services/whatsappQueueService.ts
 ```
 
 ### Passo 7: Testar
 
 ```sql
 -- Inserir mensagem de teste
-INSERT INTO tbwhatsapp (phone_number, message, priority, metadata)
+INSERT INTO tbwhatsapp_send (phone_number, message, priority, metadata)
 VALUES (
   '5588996420521',
   'Teste de migração',
@@ -155,7 +155,7 @@ VALUES (
 );
 
 -- Verificar
-SELECT * FROM tbwhatsapp ORDER BY created_at DESC LIMIT 1;
+SELECT * FROM tbwhatsapp_send ORDER BY created_at DESC LIMIT 1;
 ```
 
 ✅ **Migração concluída!**
@@ -178,7 +178,7 @@ DROP TABLE IF EXISTS whatsapp_queue CASCADE;
 Siga o arquivo `02_CONFIGURACAO_SUPABASE.md` completo, seção 1.
 
 ```sql
-CREATE TABLE IF NOT EXISTS tbwhatsapp (
+CREATE TABLE IF NOT EXISTS tbwhatsapp_send (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   phone_number VARCHAR(20) NOT NULL,
   message TEXT NOT NULL,
@@ -202,29 +202,29 @@ CREATE TABLE IF NOT EXISTS tbwhatsapp (
 ### Passo 3: Criar Índices
 
 ```sql
-CREATE INDEX idx_tbwhatsapp_status ON tbwhatsapp(status);
-CREATE INDEX idx_tbwhatsapp_priority_scheduled ON tbwhatsapp(priority DESC, scheduled_for ASC);
-CREATE INDEX idx_tbwhatsapp_created ON tbwhatsapp(created_at DESC);
-CREATE INDEX idx_tbwhatsapp_phone ON tbwhatsapp(phone_number);
-CREATE INDEX idx_tbwhatsapp_processable ON tbwhatsapp(status, scheduled_for) WHERE status = 'pending';
+CREATE INDEX idx_tbwhatsapp_status ON tbwhatsapp_send(status);
+CREATE INDEX idx_tbwhatsapp_priority_scheduled ON tbwhatsapp_send(priority DESC, scheduled_for ASC);
+CREATE INDEX idx_tbwhatsapp_created ON tbwhatsapp_send(created_at DESC);
+CREATE INDEX idx_tbwhatsapp_phone ON tbwhatsapp_send(phone_number);
+CREATE INDEX idx_tbwhatsapp_processable ON tbwhatsapp_send(status, scheduled_for) WHERE status = 'pending';
 ```
 
 ### Passo 4: Configurar RLS
 
 ```sql
-ALTER TABLE tbwhatsapp ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tbwhatsapp_send ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow public insert" 
-  ON tbwhatsapp FOR INSERT TO public WITH CHECK (true);
+  ON tbwhatsapp_send FOR INSERT TO public WITH CHECK (true);
 
 CREATE POLICY "Allow select for service role" 
-  ON tbwhatsapp FOR SELECT TO service_role USING (true);
+  ON tbwhatsapp_send FOR SELECT TO service_role USING (true);
 
 CREATE POLICY "Allow update for service role" 
-  ON tbwhatsapp FOR UPDATE TO service_role USING (true);
+  ON tbwhatsapp_send FOR UPDATE TO service_role USING (true);
 
 CREATE POLICY "Allow delete for service role" 
-  ON tbwhatsapp FOR DELETE TO service_role USING (true);
+  ON tbwhatsapp_send FOR DELETE TO service_role USING (true);
 ```
 
 ### Passo 5: Seguir Documentação
@@ -237,7 +237,7 @@ Continue com `INICIO_RAPIDO.md` a partir do Passo 2 (Edge Function).
 
 ### Checklist de Validação
 
-- [ ] Tabela `tbwhatsapp` existe
+- [ ] Tabela `tbwhatsapp_send` existe
 - [ ] Políticas RLS corretas (4 políticas)
 - [ ] Índices criados (5 índices)
 - [ ] Edge Function atualizada e deployada
@@ -250,21 +250,21 @@ Continue com `INICIO_RAPIDO.md` a partir do Passo 2 (Edge Function).
 
 ```sql
 -- 1. Verificar tabela
-SELECT tablename FROM pg_tables WHERE tablename = 'tbwhatsapp';
+SELECT tablename FROM pg_tables WHERE tablename = 'tbwhatsapp_send';
 
 -- 2. Verificar políticas
-SELECT COUNT(*) FROM pg_policies WHERE tablename = 'tbwhatsapp';
+SELECT COUNT(*) FROM pg_policies WHERE tablename = 'tbwhatsapp_send';
 -- Deve retornar: 4
 
 -- 3. Verificar índices
-SELECT COUNT(*) FROM pg_indexes WHERE tablename = 'tbwhatsapp';
+SELECT COUNT(*) FROM pg_indexes WHERE tablename = 'tbwhatsapp_send';
 -- Deve retornar: 6 (5 criados + 1 primary key)
 
 -- 4. Verificar dados (se migrou)
-SELECT COUNT(*) FROM tbwhatsapp;
+SELECT COUNT(*) FROM tbwhatsapp_send;
 
 -- 5. Verificar estrutura
-\d tbwhatsapp
+\d tbwhatsapp_send
 ```
 
 ---
@@ -284,10 +284,10 @@ grep -n "whatsapp_queue" supabase/functions/process-whatsapp-queue/index.ts
 grep -n "whatsapp_queue" src/services/whatsappQueueService.ts
 
 # Substituir
-sed -i "s/whatsapp_queue/tbwhatsapp/g" <arquivo>
+sed -i "s/whatsapp_queue/tbwhatsapp_send/g" <arquivo>
 ```
 
-### Erro: "permission denied for table tbwhatsapp"
+### Erro: "permission denied for table tbwhatsapp_send"
 
 **Causa:** Políticas RLS não configuradas corretamente.
 
@@ -296,7 +296,7 @@ sed -i "s/whatsapp_queue/tbwhatsapp/g" <arquivo>
 -- Verificar se RLS está habilitado
 SELECT tablename, rowsecurity 
 FROM pg_tables 
-WHERE tablename = 'tbwhatsapp';
+WHERE tablename = 'tbwhatsapp_send';
 
 -- Recriar políticas
 -- (ver Passo 2 da Opção 1)
@@ -310,7 +310,7 @@ WHERE tablename = 'tbwhatsapp';
 ```sql
 -- Verificar política de INSERT
 SELECT * FROM pg_policies 
-WHERE tablename = 'tbwhatsapp' 
+WHERE tablename = 'tbwhatsapp_send' 
   AND cmd = 'INSERT';
 
 -- Deve existir política "Allow public insert" para role "public"
@@ -322,7 +322,7 @@ WHERE tablename = 'tbwhatsapp'
 
 | Aspecto | Antes | Depois |
 |---------|-------|--------|
-| **Nome da tabela** | `whatsapp_queue` | `tbwhatsapp` |
+| **Nome da tabela** | `whatsapp_queue` | `tbwhatsapp_send` |
 | **Autenticação** | Requerida (`authenticated`) | Não requerida (`public`) |
 | **INSERT** | Apenas usuários autenticados | Qualquer pessoa (público) |
 | **SELECT** | Usuários autenticados + service_role | Apenas service_role |
@@ -382,7 +382,7 @@ BEGIN
   SELECT 
     t.phone_number,
     COUNT(*) as message_count
-  FROM tbwhatsapp t
+  FROM tbwhatsapp_send t
   WHERE t.created_at >= NOW() - INTERVAL '1 hour'
   GROUP BY t.phone_number
   HAVING COUNT(*) > 20;
@@ -399,7 +399,7 @@ SELECT * FROM check_suspicious_inserts();
 
 Após seguir este guia, você terá:
 
-- ✅ Tabela renomeada para `tbwhatsapp`
+- ✅ Tabela renomeada para `tbwhatsapp_send`
 - ✅ Políticas RLS atualizadas (sem autenticação)
 - ✅ Edge Function atualizada
 - ✅ Código React atualizado

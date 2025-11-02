@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Script para atualizar nome da tabela de whatsapp_queue para tbwhatsapp
-# e ajustar políticas RLS para não usar autenticação
+# Script para atualizar nome da tabela de tbwhatsapp para tbwhatsapp_send
+# Diferenciando mensagens ENVIADAS (send) de mensagens RECEBIDAS (receive)
 
-echo "🔄 Atualizando documentação..."
+echo "🔄 Atualizando documentação: tbwhatsapp → tbwhatsapp_send"
 echo ""
 
 # Diretório da documentação
@@ -22,29 +22,32 @@ FILES=(
   "$DOCS_DIR/INDICE.md"
   "$DOCS_DIR/INICIO_RAPIDO.md"
   "$DOCS_DIR/RESUMO_EXECUTIVO.md"
+  "$DOCS_DIR/CHANGELOG_ATUALIZACAO.md"
+  "$DOCS_DIR/GUIA_MIGRACAO.md"
+  "$DOCS_DIR/ATUALIZACOES_RESUMO.md"
 )
 
 # Contador de substituições
 total_replacements=0
 
-# Substituir whatsapp_queue por tbwhatsapp em todos os arquivos
+# Substituir tbwhatsapp por tbwhatsapp_send em todos os arquivos
 for file in "${FILES[@]}"; do
   if [ -f "$file" ]; then
     echo "📝 Processando: $file"
-    
+
     # Contar ocorrências antes
-    before=$(grep -o "whatsapp_queue" "$file" | wc -l)
-    
-    # Fazer substituição
-    sed -i 's/whatsapp_queue/tbwhatsapp/g' "$file"
-    
+    before=$(grep -o "tbwhatsapp" "$file" | wc -l)
+
+    # Fazer substituição (usar palavra completa para não substituir tbwhatsapp_send)
+    sed -i 's/\btbwhatsapp\b/tbwhatsapp_send/g' "$file"
+
     # Contar ocorrências depois
-    after=$(grep -o "whatsapp_queue" "$file" | wc -l)
-    
+    after=$(grep -o "tbwhatsapp_send" "$file" | wc -l)
+
     # Calcular substituições
-    replacements=$((before - after))
+    replacements=$after
     total_replacements=$((total_replacements + replacements))
-    
+
     echo "   ✅ $replacements substituições realizadas"
   else
     echo "   ⚠️  Arquivo não encontrado: $file"
@@ -55,8 +58,8 @@ echo ""
 echo "✅ Atualização concluída!"
 echo "📊 Total de substituições: $total_replacements"
 echo ""
-echo "⚠️  ATENÇÃO: Você ainda precisa atualizar manualmente:"
-echo "   1. Políticas RLS no arquivo 02_CONFIGURACAO_SUPABASE.md"
-echo "   2. Referências a 'authenticated' devem ser removidas ou ajustadas"
+echo "📌 Estrutura de tabelas WhatsApp:"
+echo "   • tbwhatsapp_send    → Mensagens ENVIADAS (fila de envio)"
+echo "   • tbwhatsapp_receive → Mensagens RECEBIDAS (webhook)"
 echo ""
 

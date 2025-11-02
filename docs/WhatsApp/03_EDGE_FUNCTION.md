@@ -194,7 +194,7 @@ serve(async (req) => {
     console.log('📋 [Edge Function] Buscando mensagens pendentes...')
     
     const { data: messages, error: fetchError } = await supabaseAdmin
-      .from('tbwhatsapp')
+      .from('tbwhatsapp_send')
       .select('*')
       .eq('status', 'pending')
       .lte('scheduled_for', new Date().toISOString())
@@ -251,7 +251,7 @@ serve(async (req) => {
         // --------------------------------------------------------------------
         
         const { error: updateError } = await supabaseAdmin
-          .from('tbwhatsapp')
+          .from('tbwhatsapp_send')
           .update({ 
             status: 'processing',
             processed_at: new Date().toISOString(),
@@ -278,7 +278,7 @@ serve(async (req) => {
           // ------------------------------------------------------------------
           
           const { error: sentError } = await supabaseAdmin
-            .from('tbwhatsapp')
+            .from('tbwhatsapp_send')
             .update({ 
               status: 'sent',
               sent_at: new Date().toISOString()
@@ -311,7 +311,7 @@ serve(async (req) => {
         console.log(`📌 [Edge Function] Novo status: ${newStatus}`)
         
         const { error: failError } = await supabaseAdmin
-          .from('tbwhatsapp')
+          .from('tbwhatsapp_send')
           .update({ 
             status: newStatus,
             last_error: errorMessage,
@@ -655,7 +655,7 @@ LIMIT 10;
 
 ```sql
 -- Inserir mensagem de teste
-INSERT INTO tbwhatsapp (
+INSERT INTO tbwhatsapp_send (
   phone_number,
   message,
   priority,
@@ -701,7 +701,7 @@ SELECT
   processed_at,
   sent_at,
   last_error
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE phone_number = '5588996420521'
 ORDER BY created_at DESC
 LIMIT 5;
@@ -743,7 +743,7 @@ supabase secrets set EVOLUTION_INSTANCE_NAME=...
 
 ### Erro: "Permission denied"
 
-**Solução:** Verifique as políticas RLS da tabela `tbwhatsapp`. A Edge Function usa `service_role` que deve ter acesso total.
+**Solução:** Verifique as políticas RLS da tabela `tbwhatsapp_send`. A Edge Function usa `service_role` que deve ter acesso total.
 
 ### Mensagens não estão sendo processadas
 

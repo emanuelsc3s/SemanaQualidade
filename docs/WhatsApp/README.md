@@ -16,10 +16,18 @@ Esta documentação descreve a implementação completa de um **sistema de fila 
 
 ⚠️ **IMPORTANTE:** A documentação foi atualizada com mudanças significativas:
 
-1. **Nome da tabela:** `whatsapp_queue` → `tbwhatsapp`
-2. **RLS:** Configurado para **SEM autenticação** do Supabase (acesso público controlado)
+### Versão 2.1 (ATUAL)
+1. **Nome da tabela:** `tbwhatsapp_send` (mensagens ENVIADAS)
+2. **Nova tabela:** `tbwhatsapp_receive` (mensagens RECEBIDAS)
+3. **RLS:** Configurado para **SEM autenticação** do Supabase (acesso público controlado)
+
+### Estrutura de Tabelas
+O sistema agora utiliza **duas tabelas separadas**:
+- 📤 `tbwhatsapp_send` - Fila de mensagens a serem enviadas (outbound)
+- 📥 `tbwhatsapp_receive` - Histórico de mensagens recebidas (inbound)
 
 **Arquivos novos:**
+- 📄 [ESTRUTURA_TABELAS.md](./ESTRUTURA_TABELAS.md) - **NOVO!** Estrutura completa das duas tabelas
 - 📄 [ATUALIZACOES_RESUMO.md](./ATUALIZACOES_RESUMO.md) - Resumo das mudanças
 - 📄 [CHANGELOG_ATUALIZACAO.md](./CHANGELOG_ATUALIZACAO.md) - Detalhes completos
 - 📄 [GUIA_MIGRACAO.md](./GUIA_MIGRACAO.md) - Como migrar sistema antigo
@@ -49,7 +57,7 @@ Esta documentação descreve a implementação completa de um **sistema de fila 
 **Implementação prática!** Configure o banco de dados Supabase.
 
 **Conteúdo:**
-- 🗄️ Criar tabela `tbwhatsapp`
+- 🗄️ Criar tabela `tbwhatsapp_send`
 - 🔍 Configurar índices de performance
 - 🔒 Configurar Row Level Security (RLS)
 - 📊 Criar views de monitoramento
@@ -216,7 +224,7 @@ Esta documentação descreve a implementação completa de um **sistema de fila 
 - [ ] Verificar pré-requisitos
 
 ### Fase 2: Configuração
-- [ ] Criar tabela `tbwhatsapp` no Supabase
+- [ ] Criar tabela `tbwhatsapp_send` no Supabase
 - [ ] Configurar índices
 - [ ] Habilitar RLS e criar políticas
 - [ ] Criar views de monitoramento

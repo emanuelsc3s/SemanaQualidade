@@ -94,9 +94,9 @@ export async function addToWhatsAppQueue({
       status: 'pending' as const
     }
 
-    // Insere na tabela tbwhatsapp
+    // Insere na tabela tbwhatsapp_send
     const { data, error } = await supabase
-      .from('tbwhatsapp')
+      .from('tbwhatsapp_send')
       .insert(queueData)
       .select()
       .single()
@@ -135,7 +135,7 @@ export async function getQueueMessageStatus(queueId: string): Promise<QueueStatu
     console.log('🔍 [WhatsApp Queue] Consultando status da mensagem:', queueId)
 
     const { data, error } = await supabase
-      .from('tbwhatsapp')
+      .from('tbwhatsapp_send')
       .select('status, sent_at, last_error')
       .eq('id', queueId)
       .single()
@@ -490,7 +490,7 @@ http://localhost:5173/inscricao
 
 ```sql
 -- Ver mensagens na fila
-SELECT * FROM tbwhatsapp 
+SELECT * FROM tbwhatsapp_send 
 WHERE phone_number = '5588996420521' 
 ORDER BY created_at DESC;
 

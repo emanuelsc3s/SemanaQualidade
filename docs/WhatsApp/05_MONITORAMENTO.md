@@ -41,7 +41,7 @@ SELECT
   created_at,
   metadata->>'tipo' as tipo,
   metadata->>'numeroParticipante' as numero_participante
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE status = 'pending'
   AND scheduled_for <= NOW()
 ORDER BY priority DESC, scheduled_for ASC
@@ -61,7 +61,7 @@ SELECT
   last_error,
   created_at,
   metadata->>'tipo' as tipo
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE status = 'failed'
 ORDER BY created_at DESC
 LIMIT 20;
@@ -90,7 +90,7 @@ SELECT
   metadata->>'tipo' as tipo,
   status,
   COUNT(*) as total
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE created_at >= NOW() - INTERVAL '7 days'
 GROUP BY metadata->>'tipo', status
 ORDER BY tipo, status;
@@ -115,7 +115,7 @@ SELECT
   AVG(EXTRACT(EPOCH FROM (sent_at - created_at))) / 60 as avg_minutes,
   MIN(EXTRACT(EPOCH FROM (sent_at - created_at))) / 60 as min_minutes,
   MAX(EXTRACT(EPOCH FROM (sent_at - created_at))) / 60 as max_minutes
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE status = 'sent'
   AND sent_at IS NOT NULL
   AND created_at >= NOW() - INTERVAL '7 days'
@@ -143,7 +143,7 @@ SELECT
   attempts,
   last_error,
   metadata
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE metadata->>'numeroParticipante' = '0123'
 ORDER BY created_at DESC;
 ```
@@ -161,7 +161,7 @@ SELECT
   NOW() - scheduled_for as atraso,
   attempts,
   metadata->>'tipo' as tipo
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE status = 'pending'
   AND scheduled_for < NOW() - INTERVAL '30 minutes'
 ORDER BY scheduled_for ASC;
@@ -178,30 +178,30 @@ ORDER BY scheduled_for ASC;
 CREATE OR REPLACE VIEW tbwhatsapp_dashboard AS
 SELECT 
   -- Estatísticas gerais
-  (SELECT COUNT(*) FROM tbwhatsapp WHERE status = 'pending') as pending_count,
-  (SELECT COUNT(*) FROM tbwhatsapp WHERE status = 'processing') as processing_count,
-  (SELECT COUNT(*) FROM tbwhatsapp WHERE status = 'sent' AND sent_at >= NOW() - INTERVAL '24 hours') as sent_today,
-  (SELECT COUNT(*) FROM tbwhatsapp WHERE status = 'failed') as failed_count,
+  (SELECT COUNT(*) FROM tbwhatsapp_send WHERE status = 'pending') as pending_count,
+  (SELECT COUNT(*) FROM tbwhatsapp_send WHERE status = 'processing') as processing_count,
+  (SELECT COUNT(*) FROM tbwhatsapp_send WHERE status = 'sent' AND sent_at >= NOW() - INTERVAL '24 hours') as sent_today,
+  (SELECT COUNT(*) FROM tbwhatsapp_send WHERE status = 'failed') as failed_count,
   
   -- Tempo médio de processamento (últimas 24h)
   (SELECT AVG(EXTRACT(EPOCH FROM (sent_at - created_at))) / 60 
-   FROM tbwhatsapp 
+   FROM tbwhatsapp_send 
    WHERE status = 'sent' 
      AND sent_at >= NOW() - INTERVAL '24 hours') as avg_processing_minutes,
   
   -- Taxa de sucesso (últimas 24h)
   (SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'sent') / NULLIF(COUNT(*), 0), 2)
-   FROM tbwhatsapp 
+   FROM tbwhatsapp_send 
    WHERE created_at >= NOW() - INTERVAL '24 hours') as success_rate_24h,
   
   -- Mensagens atrasadas
   (SELECT COUNT(*) 
-   FROM tbwhatsapp 
+   FROM tbwhatsapp_send 
    WHERE status = 'pending' 
      AND scheduled_for < NOW() - INTERVAL '30 minutes') as delayed_count,
   
   -- Última execução da Edge Function (aproximado)
-  (SELECT MAX(processed_at) FROM tbwhatsapp) as last_processing;
+  (SELECT MAX(processed_at) FROM tbwhatsapp_send) as last_processing;
 
 -- Usar:
 SELECT * FROM tbwhatsapp_dashboard;
@@ -214,7 +214,7 @@ SELECT * FROM tbwhatsapp_dashboard;
 SELECT 
   DATE_TRUNC('hour', sent_at) as hour,
   COUNT(*) as messages_sent
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE status = 'sent'
   AND sent_at >= NOW() - INTERVAL '24 hours'
 GROUP BY DATE_TRUNC('hour', sent_at)
@@ -244,7 +244,7 @@ BEGIN
     'high'::TEXT,
     'Há muitas mensagens falhadas'::TEXT,
     COUNT(*)
-  FROM tbwhatsapp
+  FROM tbwhatsapp_send
   WHERE status = 'failed'
   HAVING COUNT(*) > 10;
   
@@ -255,7 +255,7 @@ BEGIN
     'medium'::TEXT,
     'Há mensagens atrasadas há mais de 1 hora'::TEXT,
     COUNT(*)
-  FROM tbwhatsapp
+  FROM tbwhatsapp_send
   WHERE status = 'pending'
     AND scheduled_for < NOW() - INTERVAL '1 hour'
   HAVING COUNT(*) > 0;
@@ -267,7 +267,7 @@ BEGIN
     'low'::TEXT,
     'Fila de mensagens pendentes está grande'::TEXT,
     COUNT(*)
-  FROM tbwhatsapp
+  FROM tbwhatsapp_send
   WHERE status = 'pending'
   HAVING COUNT(*) > 100;
   
@@ -278,8 +278,8 @@ BEGIN
     'high'::TEXT,
     'Edge Function pode estar parada (sem processamento há mais de 15 min)'::TEXT,
     1::BIGINT
-  WHERE (SELECT MAX(processed_at) FROM tbwhatsapp) < NOW() - INTERVAL '15 minutes'
-    AND (SELECT COUNT(*) FROM tbwhatsapp WHERE status = 'pending') > 0;
+  WHERE (SELECT MAX(processed_at) FROM tbwhatsapp_send) < NOW() - INTERVAL '15 minutes'
+    AND (SELECT COUNT(*) FROM tbwhatsapp_send WHERE status = 'pending') > 0;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -298,7 +298,7 @@ DECLARE
 BEGIN
   -- Conta mensagens falhadas nas últimas 24h
   SELECT COUNT(*) INTO failed_count
-  FROM tbwhatsapp
+  FROM tbwhatsapp_send
   WHERE status = 'failed'
     AND created_at >= NOW() - INTERVAL '24 hours';
   
@@ -320,7 +320,7 @@ $$ LANGUAGE plpgsql;
 
 -- Criar trigger
 CREATE TRIGGER trigger_notify_failures
-AFTER UPDATE ON tbwhatsapp
+AFTER UPDATE ON tbwhatsapp_send
 FOR EACH ROW
 WHEN (NEW.status = 'failed')
 EXECUTE FUNCTION notify_on_failures();
@@ -349,7 +349,7 @@ SELECT
   
   -- Taxa de retry (mensagens que precisaram de mais de 1 tentativa)
   ROUND(100.0 * COUNT(*) FILTER (WHERE attempts > 1) / NULLIF(COUNT(*), 0), 2) as retry_rate
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE created_at >= NOW() - INTERVAL '30 days';
 ```
 
@@ -363,7 +363,7 @@ SELECT
   COUNT(*) FILTER (WHERE status = 'sent') as sent,
   COUNT(*) FILTER (WHERE status = 'failed') as failed,
   ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'sent') / NULLIF(COUNT(*), 0), 2) as success_rate
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE created_at >= NOW() - INTERVAL '8 weeks'
 GROUP BY DATE_TRUNC('week', created_at)
 ORDER BY week DESC;
@@ -394,7 +394,7 @@ SELECT
   MAX(processed_at) as last_execution,
   NOW() - MAX(processed_at) as time_since_last_execution,
   COUNT(*) FILTER (WHERE processed_at >= NOW() - INTERVAL '5 minutes') as processed_last_5min
-FROM tbwhatsapp;
+FROM tbwhatsapp_send;
 
 -- Ver mensagens que estão travadas em 'processing'
 SELECT 
@@ -404,12 +404,12 @@ SELECT
   NOW() - processed_at as stuck_for,
   attempts,
   metadata
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE status = 'processing'
   AND processed_at < NOW() - INTERVAL '10 minutes';
 
 -- Resetar mensagens travadas (se necessário)
-UPDATE tbwhatsapp
+UPDATE tbwhatsapp_send
 SET 
   status = 'pending',
   scheduled_for = NOW()
@@ -435,7 +435,7 @@ COPY (
     metadata->>'tipo' as tipo,
     metadata->>'numeroParticipante' as numero_participante,
     last_error
-  FROM tbwhatsapp
+  FROM tbwhatsapp_send
   WHERE created_at >= NOW() - INTERVAL '7 days'
   ORDER BY created_at DESC
 ) TO '/tmp/tbwhatsapp_report.csv' WITH CSV HEADER;

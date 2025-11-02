@@ -10,7 +10,7 @@
 
 | Antes | Depois |
 |-------|--------|
-| `whatsapp_queue` | `tbwhatsapp` |
+| `whatsapp_queue` | `tbwhatsapp_send` |
 
 **Motivo:** Padronização de nomenclatura do projeto.
 
@@ -35,11 +35,11 @@
 ```sql
 -- ❌ REMOVIDO (autenticação)
 CREATE POLICY "Allow insert for authenticated users" 
-  ON tbwhatsapp FOR INSERT TO authenticated WITH CHECK (true);
+  ON tbwhatsapp_send FOR INSERT TO authenticated WITH CHECK (true);
 
 -- ✅ ADICIONADO (público)
 CREATE POLICY "Allow public insert" 
-  ON tbwhatsapp FOR INSERT TO public WITH CHECK (true);
+  ON tbwhatsapp_send FOR INSERT TO public WITH CHECK (true);
 ```
 
 ---
@@ -121,7 +121,7 @@ function checkLimit(): boolean {
 ```sql
 -- Política com validação
 CREATE POLICY "Allow public insert with validation" 
-  ON tbwhatsapp FOR INSERT TO public
+  ON tbwhatsapp_send FOR INSERT TO public
   WITH CHECK (
     phone_number ~ '^\d{10,15}$' AND
     LENGTH(message) > 0 AND
@@ -134,7 +134,7 @@ CREATE POLICY "Allow public insert with validation"
 ```sql
 -- Detectar abusos
 SELECT phone_number, COUNT(*) as total
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE created_at >= NOW() - INTERVAL '1 hour'
 GROUP BY phone_number
 HAVING COUNT(*) > 20;
@@ -146,7 +146,7 @@ HAVING COUNT(*) > 20;
 
 ### Para Novos Projetos
 
-- [ ] Usar nome `tbwhatsapp` para a tabela
+- [ ] Usar nome `tbwhatsapp_send` para a tabela
 - [ ] Usar políticas RLS sem autenticação (`public`)
 - [ ] Implementar validações de segurança no frontend
 - [ ] Configurar rate limiting
@@ -156,7 +156,7 @@ HAVING COUNT(*) > 20;
 ### Para Projetos Existentes (Migração)
 
 - [ ] Fazer backup da tabela `whatsapp_queue`
-- [ ] Renomear para `tbwhatsapp` OU criar nova tabela
+- [ ] Renomear para `tbwhatsapp_send` OU criar nova tabela
 - [ ] Atualizar políticas RLS
 - [ ] Atualizar Edge Function (redeploy)
 - [ ] Atualizar código React
@@ -174,24 +174,24 @@ HAVING COUNT(*) > 20;
 CREATE TABLE whatsapp_queue_backup AS SELECT * FROM whatsapp_queue;
 
 -- 2. Renomear
-ALTER TABLE whatsapp_queue RENAME TO tbwhatsapp;
+ALTER TABLE whatsapp_queue RENAME TO tbwhatsapp_send;
 
 -- 3. Remover políticas antigas
-DROP POLICY IF EXISTS "Allow insert for authenticated users" ON tbwhatsapp;
+DROP POLICY IF EXISTS "Allow insert for authenticated users" ON tbwhatsapp_send;
 
 -- 4. Criar nova política pública
 CREATE POLICY "Allow public insert" 
-  ON tbwhatsapp FOR INSERT TO public WITH CHECK (true);
+  ON tbwhatsapp_send FOR INSERT TO public WITH CHECK (true);
 
 -- 5. Verificar
-SELECT policyname, roles FROM pg_policies WHERE tablename = 'tbwhatsapp';
+SELECT policyname, roles FROM pg_policies WHERE tablename = 'tbwhatsapp_send';
 ```
 
 ### Se você está começando do zero:
 
 ```sql
 -- Seguir arquivo 02_CONFIGURACAO_SUPABASE.md completo
--- Usar nome tbwhatsapp
+-- Usar nome tbwhatsapp_send
 -- Usar políticas RLS sem autenticação
 ```
 
@@ -203,20 +203,20 @@ SELECT policyname, roles FROM pg_policies WHERE tablename = 'tbwhatsapp';
 
 ```sql
 -- 1. Verificar tabela existe
-SELECT tablename FROM pg_tables WHERE tablename = 'tbwhatsapp';
+SELECT tablename FROM pg_tables WHERE tablename = 'tbwhatsapp_send';
 
 -- 2. Verificar políticas (deve retornar 4)
-SELECT COUNT(*) FROM pg_policies WHERE tablename = 'tbwhatsapp';
+SELECT COUNT(*) FROM pg_policies WHERE tablename = 'tbwhatsapp_send';
 
 -- 3. Testar INSERT público
-INSERT INTO tbwhatsapp (phone_number, message)
+INSERT INTO tbwhatsapp_send (phone_number, message)
 VALUES ('5588996420521', 'Teste de migração');
 
 -- 4. Verificar inserção
-SELECT * FROM tbwhatsapp ORDER BY created_at DESC LIMIT 1;
+SELECT * FROM tbwhatsapp_send ORDER BY created_at DESC LIMIT 1;
 
 -- 5. Limpar teste
-DELETE FROM tbwhatsapp WHERE message = 'Teste de migração';
+DELETE FROM tbwhatsapp_send WHERE message = 'Teste de migração';
 ```
 
 ---
@@ -276,17 +276,17 @@ DELETE FROM tbwhatsapp WHERE message = 'Teste de migração';
 psql -c "SELECT tablename FROM pg_tables WHERE tablename LIKE '%whatsapp%';"
 
 # Ver políticas
-psql -c "SELECT policyname, roles FROM pg_policies WHERE tablename = 'tbwhatsapp';"
+psql -c "SELECT policyname, roles FROM pg_policies WHERE tablename = 'tbwhatsapp_send';"
 ```
 
 ### Atualizar Código
 
 ```bash
 # Atualizar Edge Function
-sed -i 's/whatsapp_queue/tbwhatsapp/g' supabase/functions/process-whatsapp-queue/index.ts
+sed -i 's/whatsapp_queue/tbwhatsapp_send/g' supabase/functions/process-whatsapp-queue/index.ts
 
 # Atualizar serviço React
-sed -i 's/whatsapp_queue/tbwhatsapp/g' src/services/whatsappQueueService.ts
+sed -i 's/whatsapp_queue/tbwhatsapp_send/g' src/services/whatsappQueueService.ts
 
 # Redeploy
 supabase functions deploy process-whatsapp-queue
@@ -314,7 +314,7 @@ supabase functions deploy process-whatsapp-queue
 
 ### O que mudou?
 
-1. ✅ Nome da tabela: `whatsapp_queue` → `tbwhatsapp`
+1. ✅ Nome da tabela: `whatsapp_queue` → `tbwhatsapp_send`
 2. ✅ RLS: `authenticated` → `public`
 3. ✅ Documentação: 195 substituições + ajustes de segurança
 4. ✅ Novos arquivos: Changelog, Guia de Migração, Resumo

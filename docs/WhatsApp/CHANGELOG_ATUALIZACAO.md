@@ -4,14 +4,22 @@
 
 ## 🔄 Mudanças Realizadas
 
-### 1. Nome da Tabela Alterado
+### 1. Nome da Tabela Alterado (Atualização v2.1)
 
-**Antes:** `whatsapp_queue`  
-**Depois:** `tbwhatsapp`
+**Evolução do nome:**
+1. `whatsapp_queue` (versão original)
+2. `tbwhatsapp` (versão 2.0)
+3. `tbwhatsapp_send` (versão 2.1 - ATUAL) ✅
 
-**Arquivos afetados:** Todos os 11 arquivos de documentação
+**Motivo da mudança para `_send`:**
+Diferenciar mensagens **ENVIADAS** (`tbwhatsapp_send`) de mensagens **RECEBIDAS** (`tbwhatsapp_receive`).
 
-**Total de substituições:** 195 ocorrências
+**Arquivos afetados:** Todos os 14 arquivos de documentação
+
+**Total de substituições:**
+- v2.0: 195 ocorrências (`whatsapp_queue` → `tbwhatsapp`)
+- v2.1: 232 ocorrências (`tbwhatsapp` → `tbwhatsapp_send`)
+- **Total acumulado:** 427 substituições
 
 ---
 
@@ -25,9 +33,9 @@ Como o projeto **não usa autenticação do Supabase** (sem tabela `auth.users`)
 
 ```sql
 -- Política para usuários autenticados
-CREATE POLICY "Allow insert for authenticated users" 
+CREATE POLICY "Allow insert for authenticated users"
   ON whatsapp_queue
-  FOR INSERT 
+  FOR INSERT
   TO authenticated  -- ❌ Requer autenticação
   WITH CHECK (true);
 ```
@@ -36,12 +44,31 @@ CREATE POLICY "Allow insert for authenticated users"
 
 ```sql
 -- Política para acesso público
-CREATE POLICY "Allow public insert" 
-  ON tbwhatsapp
-  FOR INSERT 
+CREATE POLICY "Allow public insert"
+  ON tbwhatsapp_send
+  FOR INSERT
   TO public  -- ✅ Permite acesso público
   WITH CHECK (true);
 ```
+
+---
+
+### 3. Estrutura de Duas Tabelas (NOVO)
+
+O sistema agora prevê **duas tabelas separadas** para gerenciar mensagens WhatsApp:
+
+| Tabela | Propósito | Direção |
+|--------|-----------|---------|
+| `tbwhatsapp_send` | Fila de mensagens a serem **ENVIADAS** | Saída (Outbound) |
+| `tbwhatsapp_receive` | Histórico de mensagens **RECEBIDAS** | Entrada (Inbound) |
+
+**Arquivo criado:** `ESTRUTURA_TABELAS.md` - Documentação completa das duas tabelas
+
+**Benefícios:**
+- ✅ Separação clara de responsabilidades
+- ✅ Facilita implementação de chatbot/respostas automáticas
+- ✅ Permite análise de conversas bidirecionais
+- ✅ Melhor organização e performance
 
 ---
 
@@ -109,10 +136,10 @@ function checkRateLimit(userId: string): boolean {
 
 ```sql
 -- Política com validação de campos
-DROP POLICY IF EXISTS "Allow public insert" ON tbwhatsapp;
+DROP POLICY IF EXISTS "Allow public insert" ON tbwhatsapp_send;
 
 CREATE POLICY "Allow public insert with validation" 
-  ON tbwhatsapp
+  ON tbwhatsapp_send
   FOR INSERT 
   TO public
   WITH CHECK (
@@ -134,7 +161,7 @@ SELECT
   MIN(created_at) as first_message,
   MAX(created_at) as last_message,
   EXTRACT(EPOCH FROM (MAX(created_at) - MIN(created_at))) / 60 as duration_minutes
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE created_at >= NOW() - INTERVAL '1 hour'
 GROUP BY phone_number
 HAVING COUNT(*) > 20  -- Mais de 20 mensagens em 1 hora
@@ -148,7 +175,7 @@ ORDER BY total_messages DESC;
 ### Para Implementar as Mudanças
 
 1. **Atualizar SQL de Criação da Tabela:**
-   - Use `tbwhatsapp` em vez de `whatsapp_queue`
+   - Use `tbwhatsapp_send` em vez de `whatsapp_queue`
    - Execute o SQL atualizado do arquivo `02_CONFIGURACAO_SUPABASE.md`
 
 2. **Atualizar Políticas RLS:**
@@ -157,11 +184,11 @@ ORDER BY total_messages DESC;
 
 3. **Atualizar Edge Function:**
    - O código da Edge Function já foi atualizado automaticamente
-   - Verifique se está usando `tbwhatsapp` nas queries
+   - Verifique se está usando `tbwhatsapp_send` nas queries
 
 4. **Atualizar Serviço React:**
    - O arquivo `whatsappQueueService.ts` já foi atualizado
-   - Verifique se está usando `tbwhatsapp` nas queries
+   - Verifique se está usando `tbwhatsapp_send` nas queries
 
 ---
 
@@ -170,7 +197,7 @@ ORDER BY total_messages DESC;
 ### Se você já tinha implementado o sistema antigo:
 
 - [ ] Fazer backup da tabela `whatsapp_queue` (se existir)
-- [ ] Renomear tabela: `ALTER TABLE whatsapp_queue RENAME TO tbwhatsapp;`
+- [ ] Renomear tabela: `ALTER TABLE whatsapp_queue RENAME TO tbwhatsapp_send;`
 - [ ] Atualizar políticas RLS conforme nova documentação
 - [ ] Atualizar Edge Function (redeploy)
 - [ ] Atualizar código React (whatsappQueueService.ts)
@@ -181,7 +208,7 @@ ORDER BY total_messages DESC;
 ### Se você está implementando pela primeira vez:
 
 - [ ] Seguir documentação atualizada normalmente
-- [ ] Usar `tbwhatsapp` como nome da tabela
+- [ ] Usar `tbwhatsapp_send` como nome da tabela
 - [ ] Usar políticas RLS sem autenticação
 - [ ] Implementar validações de segurança recomendadas
 
@@ -198,14 +225,14 @@ WHERE schemaname = 'public'
   AND tablename LIKE '%whatsapp%';
 ```
 
-**Resultado esperado:** `tbwhatsapp`
+**Resultado esperado:** `tbwhatsapp_send`
 
 ### 2. Verificar Políticas RLS
 
 ```sql
 SELECT policyname, roles
 FROM pg_policies
-WHERE tablename = 'tbwhatsapp';
+WHERE tablename = 'tbwhatsapp_send';
 ```
 
 **Resultado esperado:**
@@ -221,7 +248,7 @@ WHERE tablename = 'tbwhatsapp';
 cat supabase/functions/process-whatsapp-queue/index.ts | grep "FROM"
 ```
 
-**Resultado esperado:** Deve aparecer `FROM tbwhatsapp`
+**Resultado esperado:** Deve aparecer `FROM tbwhatsapp_send`
 
 ---
 

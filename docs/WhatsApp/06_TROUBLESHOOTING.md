@@ -23,10 +23,10 @@
 **Diagnóstico:**
 ```sql
 -- Verificar se há mensagens pendentes
-SELECT COUNT(*) FROM tbwhatsapp WHERE status = 'pending';
+SELECT COUNT(*) FROM tbwhatsapp_send WHERE status = 'pending';
 
 -- Verificar última execução da Edge Function
-SELECT MAX(processed_at) FROM tbwhatsapp;
+SELECT MAX(processed_at) FROM tbwhatsapp_send;
 
 -- Verificar se Cron Job está ativo
 SELECT * FROM cron.job WHERE jobname = 'process-whatsapp-queue';
@@ -99,7 +99,7 @@ SELECT
   phone_number,
   message,
   COUNT(*) as duplicates
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE created_at >= NOW() - INTERVAL '1 hour'
 GROUP BY phone_number, message
 HAVING COUNT(*) > 1;
@@ -112,7 +112,7 @@ HAVING COUNT(*) > 1;
 ```typescript
 // Antes de adicionar à fila, verificar se já existe
 const { data: existing } = await supabase
-  .from('tbwhatsapp')
+  .from('tbwhatsapp_send')
   .select('id')
   .eq('phone_number', formattedPhone)
   .eq('metadata->>numeroParticipante', numeroParticipante)
@@ -134,19 +134,19 @@ if (existing) {
 
 ```sql
 -- 1. Há mensagens pendentes?
-SELECT COUNT(*) FROM tbwhatsapp WHERE status = 'pending';
+SELECT COUNT(*) FROM tbwhatsapp_send WHERE status = 'pending';
 
 -- 2. Mensagens estão agendadas para o futuro?
 SELECT 
   COUNT(*) as total_pending,
   COUNT(*) FILTER (WHERE scheduled_for <= NOW()) as ready_to_send,
   COUNT(*) FILTER (WHERE scheduled_for > NOW()) as scheduled_future
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE status = 'pending';
 
 -- 3. Mensagens atingiram max_attempts?
 SELECT COUNT(*) 
-FROM tbwhatsapp 
+FROM tbwhatsapp_send 
 WHERE status = 'pending' 
   AND attempts >= max_attempts;
 
@@ -154,13 +154,13 @@ WHERE status = 'pending'
 SELECT 
   MAX(processed_at) as last_processing,
   NOW() - MAX(processed_at) as time_since_last
-FROM tbwhatsapp;
+FROM tbwhatsapp_send;
 
 -- 5. Há erros recentes?
 SELECT 
   last_error,
   COUNT(*) as occurrences
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE status = 'failed'
   AND created_at >= NOW() - INTERVAL '24 hours'
 GROUP BY last_error
@@ -172,7 +172,7 @@ ORDER BY occurrences DESC;
 **Se mensagens estão agendadas para o futuro:**
 ```sql
 -- Reagendar para agora
-UPDATE tbwhatsapp
+UPDATE tbwhatsapp_send
 SET scheduled_for = NOW()
 WHERE status = 'pending'
   AND scheduled_for > NOW();
@@ -181,7 +181,7 @@ WHERE status = 'pending'
 **Se atingiram max_attempts:**
 ```sql
 -- Resetar tentativas
-UPDATE tbwhatsapp
+UPDATE tbwhatsapp_send
 SET 
   attempts = 0,
   status = 'pending',
@@ -216,7 +216,7 @@ SELECT
   last_error,
   created_at,
   metadata
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE status = 'failed'
 ORDER BY created_at DESC
 LIMIT 20;
@@ -227,7 +227,7 @@ SELECT
   COUNT(*) as occurrences,
   MIN(created_at) as first_occurrence,
   MAX(created_at) as last_occurrence
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE status = 'failed'
 GROUP BY last_error
 ORDER BY occurrences DESC;
@@ -245,12 +245,12 @@ ORDER BY occurrences DESC;
 ```sql
 -- Verificar números inválidos
 SELECT DISTINCT phone_number
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE status = 'failed'
   AND last_error LIKE '%Invalid phone%';
 
 -- Corrigir formato (se possível)
-UPDATE tbwhatsapp
+UPDATE tbwhatsapp_send
 SET phone_number = '55' || REGEXP_REPLACE(phone_number, '\D', '', 'g')
 WHERE status = 'failed'
   AND last_error LIKE '%Invalid phone%'
@@ -267,13 +267,13 @@ SELECT
   phone_number,
   LENGTH(document_base64) / 1024 / 1024 as size_mb,
   document_filename
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE status = 'failed'
   AND last_error LIKE '%too large%'
 ORDER BY size_mb DESC;
 
 -- Marcar como cancelado (não há como reduzir tamanho)
-UPDATE tbwhatsapp
+UPDATE tbwhatsapp_send
 SET status = 'cancelled'
 WHERE status = 'failed'
   AND last_error LIKE '%too large%';
@@ -315,13 +315,13 @@ supabase secrets set EVOLUTION_INSTANCE_NAME=FARMACE
 **Erro de permissão:**
 ```sql
 -- Verificar políticas RLS
-SELECT * FROM pg_policies WHERE tablename = 'tbwhatsapp';
+SELECT * FROM pg_policies WHERE tablename = 'tbwhatsapp_send';
 
 -- Garantir que service_role tem acesso
-ALTER TABLE tbwhatsapp ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tbwhatsapp_send ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow all for service role" 
-  ON tbwhatsapp
+  ON tbwhatsapp_send
   FOR ALL 
   TO service_role
   USING (true)
@@ -337,16 +337,16 @@ CREATE POLICY "Allow all for service role"
 ```sql
 -- Verificar tamanho da tabela
 SELECT 
-  pg_size_pretty(pg_total_relation_size('tbwhatsapp')) as total_size,
+  pg_size_pretty(pg_total_relation_size('tbwhatsapp_send')) as total_size,
   COUNT(*) as total_rows
-FROM tbwhatsapp;
+FROM tbwhatsapp_send;
 
 -- Verificar índices
 SELECT 
   indexname,
   indexdef
 FROM pg_indexes
-WHERE tablename = 'tbwhatsapp';
+WHERE tablename = 'tbwhatsapp_send';
 
 -- Verificar queries lentas
 SELECT 
@@ -355,7 +355,7 @@ SELECT
   total_time,
   mean_time
 FROM pg_stat_statements
-WHERE query LIKE '%tbwhatsapp%'
+WHERE query LIKE '%tbwhatsapp_send%'
 ORDER BY mean_time DESC
 LIMIT 10;
 ```
@@ -368,7 +368,7 @@ LIMIT 10;
 SELECT * FROM cleanup_old_messages(30);
 
 -- Ou manualmente:
-DELETE FROM tbwhatsapp
+DELETE FROM tbwhatsapp_send
 WHERE status = 'sent'
   AND sent_at < NOW() - INTERVAL '30 days';
 ```
@@ -377,16 +377,16 @@ WHERE status = 'sent'
 ```sql
 -- Recriar índices (ver arquivo 02_CONFIGURACAO_SUPABASE.md)
 CREATE INDEX IF NOT EXISTS idx_tbwhatsapp_status 
-  ON tbwhatsapp(status);
+  ON tbwhatsapp_send(status);
 
 CREATE INDEX IF NOT EXISTS idx_tbwhatsapp_priority_scheduled 
-  ON tbwhatsapp(priority DESC, scheduled_for ASC);
+  ON tbwhatsapp_send(priority DESC, scheduled_for ASC);
 ```
 
 **Vacuum da tabela:**
 ```sql
 -- Otimizar tabela
-VACUUM ANALYZE tbwhatsapp;
+VACUUM ANALYZE tbwhatsapp_send;
 ```
 
 ---
@@ -399,11 +399,11 @@ VACUUM ANALYZE tbwhatsapp;
 **Solução:**
 ```sql
 -- Verificar políticas
-SELECT * FROM pg_policies WHERE tablename = 'tbwhatsapp';
+SELECT * FROM pg_policies WHERE tablename = 'tbwhatsapp_send';
 
 -- Garantir política para service_role
 CREATE POLICY "Allow all for service role" 
-  ON tbwhatsapp
+  ON tbwhatsapp_send
   FOR ALL 
   TO service_role
   USING (true)
@@ -446,7 +446,7 @@ const RATE_LIMITS = {
 -- ⚠️ CUIDADO: Isso reseta TODAS as mensagens pendentes/processing
 
 -- Resetar mensagens travadas
-UPDATE tbwhatsapp
+UPDATE tbwhatsapp_send
 SET 
   status = 'pending',
   attempts = 0,
@@ -455,7 +455,7 @@ SET
 WHERE status IN ('processing', 'failed');
 
 -- Limpar fila completamente (CUIDADO!)
--- DELETE FROM tbwhatsapp WHERE status IN ('sent', 'failed', 'cancelled');
+-- DELETE FROM tbwhatsapp_send WHERE status IN ('sent', 'failed', 'cancelled');
 ```
 
 ### Pausar Processamento
@@ -479,7 +479,7 @@ SELECT cron.schedule(
 SELECT * FROM retry_failed_messages(24);
 
 -- Ou manualmente:
-UPDATE tbwhatsapp
+UPDATE tbwhatsapp_send
 SET 
   status = 'pending',
   attempts = 0,

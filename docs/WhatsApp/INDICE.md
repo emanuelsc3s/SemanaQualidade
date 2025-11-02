@@ -9,6 +9,13 @@
 
 ## 📚 Documentos por Ordem de Leitura
 
+### 🆕 Atualizações e Referências
+| Arquivo | Descrição | Tempo | Status |
+|---------|-----------|-------|--------|
+| [ESTRUTURA_TABELAS.md](./ESTRUTURA_TABELAS.md) | **NOVO!** Estrutura completa das tabelas | 15 min | ⭐ Importante |
+| [ATUALIZACOES_RESUMO.md](./ATUALIZACOES_RESUMO.md) | Resumo das mudanças v2.1 | 5 min | 📌 Leia se migrar |
+| [GUIA_MIGRACAO.md](./GUIA_MIGRACAO.md) | Como migrar sistema antigo | 30 min | 🔄 Se já implementou |
+
 ### 1️⃣ Entendimento
 | Arquivo | Descrição | Tempo | Status |
 |---------|-----------|-------|--------|
@@ -39,7 +46,7 @@
 ### 🗄️ Banco de Dados (Supabase)
 
 #### Tabelas
-- **Criar tabela `tbwhatsapp`** → [02_CONFIGURACAO_SUPABASE.md](./02_CONFIGURACAO_SUPABASE.md#1-criar-tabela-tbwhatsapp)
+- **Criar tabela `tbwhatsapp_send`** → [02_CONFIGURACAO_SUPABASE.md](./02_CONFIGURACAO_SUPABASE.md#1-criar-tabela-tbwhatsapp_send)
 - **Estrutura da tabela** → [02_CONFIGURACAO_SUPABASE.md](./02_CONFIGURACAO_SUPABASE.md#passo-12-executar-script-de-criação-da-tabela)
 - **Campos e tipos** → [02_CONFIGURACAO_SUPABASE.md](./02_CONFIGURACAO_SUPABASE.md#passo-12-executar-script-de-criação-da-tabela)
 
@@ -243,7 +250,7 @@
 | Preciso de... | Vá para... |
 |---------------|------------|
 | Entender o problema | [01_VISAO_GERAL.md](./01_VISAO_GERAL.md) |
-| Criar tabela no banco | [02_CONFIGURACAO_SUPABASE.md](./02_CONFIGURACAO_SUPABASE.md#1-criar-tabela-tbwhatsapp) |
+| Criar tabela no banco | [02_CONFIGURACAO_SUPABASE.md](./02_CONFIGURACAO_SUPABASE.md#1-criar-tabela-tbwhatsapp_send) |
 | Código da Edge Function | [03_EDGE_FUNCTION.md](./03_EDGE_FUNCTION.md#4-implementar-código) |
 | Modificar React | [04_INTEGRACAO_REACT.md](./04_INTEGRACAO_REACT.md#2-modificar-inscricaowizard) |
 | Ver estatísticas | [05_MONITORAMENTO.md](./05_MONITORAMENTO.md#1-queries-úteis) |

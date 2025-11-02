@@ -44,8 +44,8 @@ EVOLUTION_INSTANCE_NAME=FARMACE
 Cole e execute este SQL:
 
 ```sql
--- Criar tabela tbwhatsapp
-CREATE TABLE IF NOT EXISTS tbwhatsapp (
+-- Criar tabela tbwhatsapp_send
+CREATE TABLE IF NOT EXISTS tbwhatsapp_send (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   phone_number VARCHAR(20) NOT NULL,
   message TEXT NOT NULL,
@@ -66,13 +66,13 @@ CREATE TABLE IF NOT EXISTS tbwhatsapp (
 );
 ```
 
-✅ **Verificar:** Execute `SELECT * FROM tbwhatsapp;` - deve retornar tabela vazia.
+✅ **Verificar:** Execute `SELECT * FROM tbwhatsapp_send;` - deve retornar tabela vazia.
 
 ### 1.3. Criar Índices
 
 ```sql
-CREATE INDEX idx_tbwhatsapp_status ON tbwhatsapp(status);
-CREATE INDEX idx_tbwhatsapp_priority_scheduled ON tbwhatsapp(priority DESC, scheduled_for ASC);
+CREATE INDEX idx_tbwhatsapp_status ON tbwhatsapp_send(status);
+CREATE INDEX idx_tbwhatsapp_priority_scheduled ON tbwhatsapp_send(priority DESC, scheduled_for ASC);
 ```
 
 ### 1.4. Habilitar RLS (SEM Autenticação)
@@ -80,15 +80,15 @@ CREATE INDEX idx_tbwhatsapp_priority_scheduled ON tbwhatsapp(priority DESC, sche
 **⚠️ Como você não usa autenticação do Supabase**, vamos configurar RLS para acesso público controlado:
 
 ```sql
-ALTER TABLE tbwhatsapp ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tbwhatsapp_send ENABLE ROW LEVEL SECURITY;
 
 -- Permitir INSERT público (aplicação React)
 CREATE POLICY "Allow public insert"
-  ON tbwhatsapp FOR INSERT TO public WITH CHECK (true);
+  ON tbwhatsapp_send FOR INSERT TO public WITH CHECK (true);
 
 -- Permitir tudo para service_role (Edge Function)
 CREATE POLICY "Allow all for service role"
-  ON tbwhatsapp FOR ALL TO service_role USING (true);
+  ON tbwhatsapp_send FOR ALL TO service_role USING (true);
 ```
 
 ✅ **Checkpoint 1:** Tabela criada e configurada!
@@ -278,7 +278,7 @@ npm run dev
 
 ```sql
 -- Ver mensagem na fila
-SELECT * FROM tbwhatsapp 
+SELECT * FROM tbwhatsapp_send 
 WHERE phone_number = '5588996420521' 
 ORDER BY created_at DESC;
 ```
@@ -306,7 +306,7 @@ supabase functions logs process-whatsapp-queue --limit 50
 - Verifique se status mudou para 'sent'
 
 ```sql
-SELECT * FROM tbwhatsapp 
+SELECT * FROM tbwhatsapp_send 
 WHERE phone_number = '5588996420521' 
 ORDER BY created_at DESC;
 ```
@@ -324,21 +324,21 @@ ORDER BY created_at DESC;
 SELECT 
   status,
   COUNT(*) as total
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 GROUP BY status;
 
 -- Mensagens pendentes
-SELECT COUNT(*) FROM tbwhatsapp WHERE status = 'pending';
+SELECT COUNT(*) FROM tbwhatsapp_send WHERE status = 'pending';
 
 -- Mensagens falhadas
-SELECT * FROM tbwhatsapp WHERE status = 'failed';
+SELECT * FROM tbwhatsapp_send WHERE status = 'failed';
 
 -- Taxa de sucesso (últimas 24h)
 SELECT 
   COUNT(*) FILTER (WHERE status = 'sent') as enviadas,
   COUNT(*) FILTER (WHERE status = 'failed') as falhadas,
   ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'sent') / COUNT(*), 2) as taxa_sucesso
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE created_at >= NOW() - INTERVAL '24 hours';
 ```
 
@@ -347,7 +347,7 @@ WHERE created_at >= NOW() - INTERVAL '24 hours';
 ## ✅ Checklist Final
 
 ### Implementação
-- [ ] Tabela `tbwhatsapp` criada
+- [ ] Tabela `tbwhatsapp_send` criada
 - [ ] Índices configurados
 - [ ] RLS habilitado
 - [ ] Edge Function deployada
@@ -389,7 +389,7 @@ supabase functions invoke process-whatsapp-queue
 **Solução:**
 ```sql
 CREATE POLICY "Allow all for service role" 
-  ON tbwhatsapp FOR ALL TO service_role USING (true);
+  ON tbwhatsapp_send FOR ALL TO service_role USING (true);
 ```
 
 ### "Edge Function não encontrada"

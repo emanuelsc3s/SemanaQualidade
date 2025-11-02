@@ -35,7 +35,7 @@ Implementar um sistema de fila de mensagens WhatsApp para evitar suspensões da 
    ↓
 2. SALVAR NA FILA (não envia imediatamente)
    ↓
-   [Supabase Database - Tabela tbwhatsapp]
+   [Supabase Database - Tabela tbwhatsapp_send]
    - Mensagem de confirmação → status: pending
    - PDF do comprovante → status: pending
    - Dados armazenados com prioridade e agendamento
@@ -66,7 +66,7 @@ Implementar um sistema de fila de mensagens WhatsApp para evitar suspensões da 
 
 ### Componentes Principais
 
-#### 1. **Tabela `tbwhatsapp` (Supabase)**
+#### 1. **Tabela `tbwhatsapp_send` (Supabase)**
 - Armazena todas as mensagens a serem enviadas
 - Controla status, prioridade, tentativas
 - Permite agendamento e retry automático
@@ -243,7 +243,7 @@ await addToWhatsAppQueue({ phoneNumber, pdf, priority: 2 })
 ## 🛠️ Componentes a Implementar
 
 ### 1. **Banco de Dados** (Supabase)
-- [ ] Criar tabela `tbwhatsapp`
+- [ ] Criar tabela `tbwhatsapp_send`
 - [ ] Configurar índices
 - [ ] Configurar RLS (Row Level Security)
 - [ ] Criar views de monitoramento

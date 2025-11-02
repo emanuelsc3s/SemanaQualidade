@@ -46,7 +46,7 @@ serve(async (req) => {
     
     // Atualizar na fila (precisa armazenar messageId ao enviar)
     await supabase
-      .from('tbwhatsapp')
+      .from('tbwhatsapp_send')
       .update({ 
         delivery_status: status,
         delivered_at: status === 'delivered' ? new Date().toISOString() : null,
@@ -61,14 +61,14 @@ serve(async (req) => {
 
 ```sql
 -- Adicionar colunas na tabela
-ALTER TABLE tbwhatsapp
+ALTER TABLE tbwhatsapp_send
 ADD COLUMN evolution_message_id VARCHAR(255),
 ADD COLUMN delivery_status VARCHAR(20),
 ADD COLUMN delivered_at TIMESTAMP WITH TIME ZONE,
 ADD COLUMN read_at TIMESTAMP WITH TIME ZONE;
 
 CREATE INDEX idx_tbwhatsapp_evolution_message_id 
-  ON tbwhatsapp(evolution_message_id);
+  ON tbwhatsapp_send(evolution_message_id);
 ```
 
 **Configurar webhook na Evolution API:**
@@ -116,7 +116,7 @@ function InscricaoWizard() {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'tbwhatsapp',
+          table: 'tbwhatsapp_send',
           filter: `id=eq.${queueId}`
         },
         (payload) => {
@@ -190,7 +190,7 @@ export function AdminWhatsAppQueue() {
 
   async function loadMessages() {
     const { data } = await supabase
-      .from('tbwhatsapp')
+      .from('tbwhatsapp_send')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(50)
@@ -323,7 +323,7 @@ await addToWhatsAppQueue({
 
 ```sql
 -- Adicionar coluna de variante
-ALTER TABLE tbwhatsapp
+ALTER TABLE tbwhatsapp_send
 ADD COLUMN message_variant VARCHAR(10);
 
 -- Criar tabela de templates
@@ -350,7 +350,7 @@ SELECT
   AVG(EXTRACT(EPOCH FROM (delivered_at - sent_at))) as avg_delivery_time,
   COUNT(*) FILTER (WHERE read_at IS NOT NULL) as read_count,
   ROUND(100.0 * COUNT(*) FILTER (WHERE read_at IS NOT NULL) / COUNT(*), 2) as read_rate
-FROM tbwhatsapp
+FROM tbwhatsapp_send
 WHERE status = 'sent'
   AND message_variant IS NOT NULL
 GROUP BY metadata->>'tipo', message_variant;
@@ -378,7 +378,7 @@ const retryDelay = calculateRetryDelay(msg.attempts)
 const nextAttempt = new Date(Date.now() + retryDelay)
 
 await supabaseAdmin
-  .from('tbwhatsapp')
+  .from('tbwhatsapp_send')
   .update({ 
     status: 'pending',
     scheduled_for: nextAttempt.toISOString(),
@@ -442,7 +442,7 @@ INSERT INTO user_segments (name, criteria) VALUES
 ('Primeira Inscrição', '{"primeira_vez": true}'::jsonb);
 
 -- Enviar mensagem para segmento
-INSERT INTO tbwhatsapp (phone_number, message, metadata)
+INSERT INTO tbwhatsapp_send (phone_number, message, metadata)
 SELECT 
   whatsapp,
   'Mensagem personalizada para corredores 5K...',
@@ -485,7 +485,7 @@ WHERE status = 'incomplete'
   AND created_at >= NOW() - INTERVAL '24 hours';
 
 -- Agendar mensagem de remarketing
-INSERT INTO tbwhatsapp (phone_number, message, scheduled_for, metadata)
+INSERT INTO tbwhatsapp_send (phone_number, message, scheduled_for, metadata)
 SELECT 
   whatsapp,
   'Olá! Notamos que você começou sua inscrição mas não finalizou. Podemos ajudar?',
@@ -517,10 +517,10 @@ FROM incomplete_registrations;
 
 ```sql
 -- Particionar por mês
-CREATE TABLE tbwhatsapp_2025_11 PARTITION OF tbwhatsapp
+CREATE TABLE tbwhatsapp_2025_11 PARTITION OF tbwhatsapp_send
 FOR VALUES FROM ('2025-11-01') TO ('2025-12-01');
 
-CREATE TABLE tbwhatsapp_2025_12 PARTITION OF tbwhatsapp
+CREATE TABLE tbwhatsapp_2025_12 PARTITION OF tbwhatsapp_send
 FOR VALUES FROM ('2025-12-01') TO ('2026-01-01');
 ```
 

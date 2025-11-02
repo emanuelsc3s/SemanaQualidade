@@ -79,7 +79,7 @@ Mensagem entregue ao participante
 │                  SUPABASE DATABASE                          │
 │                                                             │
 │  ┌───────────────────────────────────────────────────────┐ │
-│  │  Tabela: tbwhatsapp                               │ │
+│  │  Tabela: tbwhatsapp_send                               │ │
 │  │  - id, phone_number, message, document_base64         │ │
 │  │  - status (pending → processing → sent/failed)        │ │
 │  │  - priority, scheduled_for, attempts                  │ │
@@ -115,7 +115,7 @@ Mensagem entregue ao participante
 ### Tempo Total: ~3 horas
 
 #### Fase 1: Configuração Supabase (30 min)
-- Criar tabela `tbwhatsapp`
+- Criar tabela `tbwhatsapp_send`
 - Configurar índices
 - Habilitar RLS
 - Criar views de monitoramento
@@ -211,7 +211,7 @@ Mensagem entregue ao participante
 - [ ] Node.js instalado
 
 ### Implementação
-- [ ] Tabela `tbwhatsapp` criada
+- [ ] Tabela `tbwhatsapp_send` criada
 - [ ] Índices configurados
 - [ ] RLS habilitado
 - [ ] Edge Function deployada
