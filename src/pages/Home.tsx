@@ -766,27 +766,41 @@ export default function Home() {
           </div>
 
           {/* Contact CTA */}
-          <div className="mt-10 md:mt-12 text-center bg-gradient-to-r from-sky-50 to-primary-50 rounded-2xl p-6 md:p-8 border-2 border-primary-100">
-            <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-3">
-              Ainda tem dúvidas?
-            </h3>
-            <p className="text-sm md:text-base text-slate-600 mb-4 md:mb-5">
-              Entre em contato com o Departamento de Qualidade
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-              <a
-                href="mailto:qualidade@farmace.com.br"
-                className="inline-flex items-center gap-2 px-5 md:px-6 py-2.5 md:py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md text-sm md:text-base"
-              >
-                regulatorios@farmace.com.br
-              </a>
-              <span className="text-slate-400 hidden sm:inline">ou</span>
-              <a
-                href="tel:+5511999999999"
-                className="inline-flex items-center gap-2 px-5 md:px-6 py-2.5 md:py-3 bg-accent-400 hover:bg-accent-500 text-slate-900 font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md text-sm md:text-base"
-              >
-                (88) 3532-7000
-              </a>
+          <div className="mt-10 md:mt-12">
+            {/* Layout Mobile-First: Coluna única em mobile, duas colunas em tablet/desktop */}
+            <div className="max-w-4xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-8 bg-gradient-to-r from-sky-50 to-primary-50 rounded-2xl p-6 md:p-8 border-2 border-primary-100 px-4">
+              {/* Coluna Esquerda: Conteúdo de Contato */}
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-3">
+                  Ainda tem dúvidas?
+                </h3>
+                <p className="text-sm md:text-base text-slate-600 mb-4 md:mb-5">
+                  Entre em contato com o Departamento de Qualidade
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start items-center">
+                  <a
+                    href="mailto:qualidade@farmace.com.br"
+                    className="inline-flex items-center gap-2 px-5 md:px-6 py-2.5 md:py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md text-sm md:text-base"
+                  >
+                    regulatorios@farmace.com.br
+                  </a>
+                  <a
+                    href="tel:+5511999999999"
+                    className="inline-flex items-center gap-2 px-5 md:px-6 py-2.5 md:py-3 bg-accent-400 hover:bg-accent-500 text-slate-900 font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-md text-sm md:text-base"
+                  >
+                    (88) 3532-7000
+                  </a>
+                </div>
+              </div>
+
+              {/* Coluna Direita: Imagem (oculta em mobile pequeno, visível em md+) */}
+              <div className="hidden md:block flex-shrink-0">
+                <img
+                  src="/contato-section.png"
+                  alt="Ilustração de contato - atendimento e suporte ao cliente"
+                  className="w-64 lg:w-80 h-auto object-contain rounded-lg"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -843,7 +857,7 @@ export default function Home() {
             className="mx-auto mb-4"
           />
           <p className="text-slate-400">
-            © 2025 FARMACE - II Corrida e Caminhada da Qualidade
+            © 2025 <strong>SICFAR</strong> Manager - Plataforma de Gestão Computacional <strong>FARMACE</strong>
           </p>
         </div>
       </footer>
