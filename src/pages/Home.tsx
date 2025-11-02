@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Calendar, MapPin, Award, Users, Clock, DollarSign, Menu, X, Volume2, VolumeX, HelpCircle } from "lucide-react"
+import { Calendar, MapPin, Award, Users, Clock, DollarSign, Menu, X, Volume2, VolumeX, HelpCircle, ChevronUp } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useRef } from "react"
 
@@ -14,6 +14,7 @@ export default function Home() {
   const [isMuted, setIsMuted] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [isOverLightBackground, setIsOverLightBackground] = useState(false)
+  const [showScrollToTop, setShowScrollToTop] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const hasUnmutedRef = useRef(false)
@@ -116,6 +117,9 @@ export default function Home() {
       const heroHeight = window.innerHeight * 0.8
       setIsOverLightBackground(currentScrollY > heroHeight)
 
+      // Mostrar botão "Voltar ao Topo" após 300px de scroll
+      setShowScrollToTop(currentScrollY > 300)
+
       setLastScrollY(currentScrollY)
     }
 
@@ -141,27 +145,18 @@ export default function Home() {
         Seu navegador não suporta áudio HTML5.
       </audio>
 
-      {/* Botão de Controle de Som Flutuante */}
-      <button
-        onClick={() => {
-          if (audioRef.current) {
-            const newMutedState = !isMuted
-            audioRef.current.muted = newMutedState
-            setIsMuted(newMutedState)
-
-            // Se está desmutando, garante que o áudio está tocando
-            if (!newMutedState) {
-              audioRef.current.play().catch(error => {
-                console.log('Erro ao tentar reproduzir áudio:', error)
-              })
-            }
-          }
-        }}
-        className="fixed bottom-6 right-6 z-50 bg-primary-600 hover:bg-primary-700 text-white rounded-full p-4 shadow-2xl transition-all duration-300 transform hover:scale-110 border-2 border-white/20 backdrop-blur-sm"
-        aria-label={isMuted ? "Ativar som" : "Desativar som"}
-      >
-        {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6 animate-pulse" />}
-      </button>
+      {/* Botão Voltar ao Topo */}
+      {showScrollToTop && (
+        <button
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }}
+          className="fixed bottom-6 right-6 z-50 bg-primary-600 hover:bg-primary-700 text-white rounded-full p-4 shadow-2xl transition-all duration-300 transform hover:scale-110 border-2 border-white/20 backdrop-blur-sm"
+          aria-label="Voltar ao topo"
+        >
+          <ChevronUp className="w-6 h-6" />
+        </button>
+      )}
 
       {/* Floating Liquid Glass Header */}
       <header className={`fixed left-4 right-4 z-50 transition-all duration-500 ${
@@ -238,6 +233,28 @@ export default function Home() {
                     INSCREVA-SE
                   </Button>
                 </div>
+
+                {/* Botão de Controle de Áudio */}
+                <button
+                  onClick={() => {
+                    if (audioRef.current) {
+                      const newMutedState = !isMuted
+                      audioRef.current.muted = newMutedState
+                      setIsMuted(newMutedState)
+
+                      // Se está desmutando, garante que o áudio está tocando
+                      if (!newMutedState) {
+                        audioRef.current.play().catch(error => {
+                          console.log('Erro ao tentar reproduzir áudio:', error)
+                        })
+                      }
+                    }
+                  }}
+                  className="ml-2 h-10 px-4 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-2 border-white/20 backdrop-blur-sm"
+                  aria-label={isMuted ? "Ativar som" : "Desativar som"}
+                >
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5 animate-pulse" />}
+                </button>
               </nav>
 
               {/* Mobile Menu Button - Glass Effect */}
@@ -319,6 +336,42 @@ export default function Home() {
                   Inscreva-se
                 </Button>
               </div>
+
+              {/* Botão de Controle de Áudio - Mobile */}
+              <button
+                onClick={() => {
+                  if (audioRef.current) {
+                    const newMutedState = !isMuted
+                    audioRef.current.muted = newMutedState
+                    setIsMuted(newMutedState)
+
+                    // Se está desmutando, garante que o áudio está tocando
+                    if (!newMutedState) {
+                      audioRef.current.play().catch(error => {
+                        console.log('Erro ao tentar reproduzir áudio:', error)
+                      })
+                    }
+                  }
+                }}
+                className={`mt-2 w-full h-12 px-4 bg-primary-600 hover:bg-primary-700 text-white rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 border-2 border-white/20 backdrop-blur-sm ${
+                  isOverLightBackground
+                    ? 'hover:bg-primary-700'
+                    : 'hover:bg-primary-700'
+                }`}
+                aria-label={isMuted ? "Ativar som" : "Desativar som"}
+              >
+                {isMuted ? (
+                  <>
+                    <VolumeX className="w-5 h-5" />
+                    <span className="font-medium">Som Desativado</span>
+                  </>
+                ) : (
+                  <>
+                    <Volume2 className="w-5 h-5 animate-pulse" />
+                    <span className="font-medium">Som Ativado</span>
+                  </>
+                )}
+              </button>
             </nav>
           </div>
         )}
