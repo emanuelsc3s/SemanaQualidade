@@ -61,6 +61,28 @@
   }
 }
 
+/* Animação suave de bounce para a seta de scroll */
+@keyframes smoothBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* Animação de pulsação para o círculo da seta */
+@keyframes circlePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
 /* Adaptações para telas com altura reduzida (≤800px) */
 @media (max-height: 800px) {
   .hero-section-short {

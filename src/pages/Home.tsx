@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Calendar, MapPin, Award, Users, Clock, DollarSign, Menu, X, Volume2, VolumeX, HelpCircle, ChevronUp } from "lucide-react"
+import { Calendar, MapPin, Award, Users, Clock, DollarSign, Menu, X, Volume2, VolumeX, HelpCircle, ChevronUp, ChevronDown } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useRef } from "react"
 
@@ -442,6 +442,21 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Animated Scroll Down Arrow - Mobile-First */}
+        <div
+          className="absolute bottom-6 sm:bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 z-20 cursor-pointer group"
+          style={{ animation: 'smoothBounce 2s ease-in-out infinite' }}
+          onClick={() => {
+            window.scrollTo({
+              top: window.innerHeight,
+              behavior: 'smooth'
+            })
+          }}
+          aria-label="Rolar para baixo para ver mais conteúdo"
+        >
+          <ChevronDown className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] group-hover:scale-110 transition-transform duration-300" />
         </div>
       </section>
 
