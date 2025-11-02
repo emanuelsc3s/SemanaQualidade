@@ -1,5 +1,5 @@
 import React from 'react'
-import { Document, Page, Text, View, StyleSheet, Image, Svg, Path } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
 
 /**
  * Interface de dados para o recibo
@@ -7,6 +7,7 @@ import { Document, Page, Text, View, StyleSheet, Image, Svg, Path } from '@react
 interface DadosRecibo {
   nome: string
   email: string
+  cpf?: string
   whatsapp: string
   numeroParticipante: string
   tipoParticipacao: 'corrida-natal' | 'apenas-natal' | 'retirar-cesta'
@@ -15,6 +16,45 @@ interface DadosRecibo {
   dataInscricao?: string
   whatsappSent?: boolean
   qrCodeDataUrl?: string
+}
+
+/**
+ * Função utilitária para ocultar os últimos 3 dígitos do CPF
+ * Exemplo: 123.456.789-10 → 123.456.789-**
+ */
+const ocultarCPF = (cpf: string): string => {
+  if (!cpf) return 'Não informado'
+
+  // Remove caracteres não numéricos
+  const cpfNumeros = cpf.replace(/\D/g, '')
+
+  // Se não tiver 11 dígitos, retorna como está
+  if (cpfNumeros.length !== 11) return cpf
+
+  // Formata: XXX.XXX.XXX-**
+  return `${cpfNumeros.slice(0, 3)}.${cpfNumeros.slice(3, 6)}.${cpfNumeros.slice(6, 9)}-**`
+}
+
+/**
+ * Função utilitária para ocultar parte do email
+ * Mantém visível apenas os primeiros 3 caracteres antes do @ e o domínio completo
+ * Exemplo: joao.silva@farmace.com.br → joa*****@farmace.com.br
+ */
+const ocultarEmail = (email: string): string => {
+  if (!email) return 'Não informado'
+
+  const partes = email.split('@')
+  if (partes.length !== 2) return email
+
+  const [usuario, dominio] = partes
+
+  // Se o usuário tiver 3 ou menos caracteres, mostra tudo
+  if (usuario.length <= 3) return email
+
+  // Mostra os primeiros 3 caracteres + asteriscos + @ + domínio
+  const usuarioOculto = usuario.slice(0, 3) + '*****'
+
+  return `${usuarioOculto}@${dominio}`
 }
 
 /**
@@ -33,25 +73,41 @@ const styles = StyleSheet.create({
   // Header Azul FARMACE (inspirado no header laranja do Inter)
   header: {
     backgroundColor: '#0ea5e9', // Azul FARMACE (substitui laranja Inter)
-    padding: 16, // Reduzido de 24 para 16
+    paddingVertical: 10, // Padding vertical
+    paddingHorizontal: 20, // Padding horizontal mantido para espaçamento lateral
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    minHeight: 50 // Altura mínima do header
   },
   logoContainer: {
-    width: 45, // Reduzido de 60 para 45
-    height: 45 // Reduzido de 60 para 45
+    width: 35, // Tamanho reduzido para header mais compacto
+    height: 35, // Tamanho reduzido para header mais compacto
+    alignSelf: 'flex-start' // Alinhamento à esquerda
   },
   logo: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'contain'
+    width: '90px',
+    height: '90px',
+    objectFit: 'contain' // Mantém a proporção da imagem
+  },
+  headerTextContainer: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: 2
+  },
+  headerEventName: {
+    fontSize: 10,
+    fontFamily: 'Helvetica',
+    color: '#ffffff',
+    letterSpacing: 0.3,
+    textAlign: 'right'
   },
   headerTitle: {
     fontSize: 14, // Reduzido de 16 para 14
     fontFamily: 'Helvetica-Bold',
     color: '#ffffff',
-    letterSpacing: 0.5
+    letterSpacing: 0.5,
+    textAlign: 'right'
   },
 
   // Conteúdo Principal
@@ -78,14 +134,18 @@ const styles = StyleSheet.create({
   mainCardContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 20 // Reduzido de 32 para 20
+    gap: 16 // Reduzido para acomodar 3 colunas
   },
   mainCardLeft: {
-    flex: 1
+    flex: 2 // Dobro da largura das outras colunas
+  },
+  mainCardCenter: {
+    flex: 1,
+    gap: 12 // Espaçamento entre os itens da coluna central
   },
   mainCardRight: {
     flex: 1,
-    gap: 10 // Reduzido de 16 para 10
+    gap: 12 // Espaçamento entre os itens da coluna direita
   },
 
   // Número do Participante em Destaque (inspirado no R$ 522,82)
@@ -107,27 +167,19 @@ const styles = StyleSheet.create({
     lineHeight: 1.4 // Reduzido de 1.5 para 1.4
   },
 
-  // Info Row com Ícone (lado direito do card)
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 6 // Reduzido de 8 para 6
+
+
+  // Info simples (sem ícone) para colunas 2 e 3
+  infoSimple: {
+    marginBottom: 12 // Espaçamento entre os itens
   },
-  iconContainer: {
-    width: 14, // Reduzido de 16 para 14
-    height: 14, // Reduzido de 16 para 14
-    marginTop: 1 // Reduzido de 2 para 1
-  },
-  infoContent: {
-    flex: 1
-  },
-  infoLabel: {
-    fontSize: 9, // Reduzido de 10 para 9
+  infoSimpleLabel: {
+    fontSize: 9,
     color: '#666666',
-    marginBottom: 1 // Reduzido de 2 para 1
+    marginBottom: 2
   },
-  infoValue: {
-    fontSize: 10, // Reduzido de 12 para 10
+  infoSimpleValue: {
+    fontSize: 10,
     fontFamily: 'Helvetica-Bold',
     color: '#333333'
   },
@@ -235,6 +287,15 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase'
   },
 
+  // SICFAR Header (logo após o header azul)
+  sicfarHeader: {
+    paddingTop: 6,
+    paddingBottom: 8,
+    borderTop: '1 solid #e0e0e0', // Linha divisória
+    textAlign: 'center',
+    backgroundColor: '#ffffff'
+  },
+
   // Rodapé Superior (informações do evento)
   footerTop: {
     marginTop: 12,
@@ -273,47 +334,7 @@ const styles = StyleSheet.create({
   }
 })
 
-/**
- * Componente de ícone SVG - Calendário
- */
-const IconCalendar: React.FC = () => (
-  <Svg width="14" height="14" viewBox="0 0 24 24">
-    <Path
-      d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10z"
-      fill="none"
-      stroke="#666666"
-      strokeWidth="1.5"
-    />
-  </Svg>
-)
 
-/**
- * Componente de ícone SVG - Camiseta
- */
-const IconShirt: React.FC = () => (
-  <Svg width="14" height="14" viewBox="0 0 24 24">
-    <Path
-      d="M16 4l1.29 1.29c.63.63 1.71.18 1.71-.71V2H5v2.58c0 .89 1.08 1.34 1.71.71L8 4l4-2 4 2zm0 2v14H8V6h8z"
-      fill="none"
-      stroke="#666666"
-      strokeWidth="1.5"
-    />
-  </Svg>
-)
-
-/**
- * Componente de ícone SVG - Corrida
- */
-const IconRun: React.FC = () => (
-  <Svg width="14" height="14" viewBox="0 0 24 24">
-    <Path
-      d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"
-      fill="none"
-      stroke="#666666"
-      strokeWidth="1.5"
-    />
-  </Svg>
-)
 
 /**
  * Componente ReciboPDFInter - Conteúdo do PDF (Page)
@@ -323,6 +344,7 @@ const ReciboPDFInterPage: React.FC<{ dados: DadosRecibo }> = ({ dados }) => {
   const {
     nome,
     email,
+    cpf,
     whatsapp,
     numeroParticipante,
     tipoParticipacao,
@@ -336,6 +358,10 @@ const ReciboPDFInterPage: React.FC<{ dados: DadosRecibo }> = ({ dados }) => {
   const isCorridaNatal = tipoParticipacao === 'corrida-natal'
   const isApenasNatal = tipoParticipacao === 'apenas-natal'
   const isRetirarCesta = tipoParticipacao === 'retirar-cesta'
+
+  // Formata dados sensíveis para exibição segura
+  const cpfOculto = cpf ? ocultarCPF(cpf) : 'Não informado'
+  const emailOculto = ocultarEmail(email)
 
   const primeiroNome = nome.split(' ')[0]
   const saudacao = isRetirarCesta
@@ -359,7 +385,19 @@ const ReciboPDFInterPage: React.FC<{ dados: DadosRecibo }> = ({ dados }) => {
           <View style={styles.logoContainer}>
             <Image src="/logomarca.png" style={styles.logo} />
           </View>
-          <Text style={styles.headerTitle}>Comprovante de Inscrição</Text>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerEventName}>CONFRATERNIZAÇÃO E II CORRIDA DA QUALIDADE - 2025</Text>
+            <Text style={styles.headerTitle}>Comprovante de Inscrição</Text>
+          </View>
+        </View>
+
+        {/* SICFAR Header - logo após o header azul */}
+        <View style={styles.sicfarHeader}>
+          <Text style={styles.footerTextBold}>
+            <Text style={styles.footerTextHighlight}>SICFAR</Text>
+            <Text> Manager - Plataforma de GestãoComputacional </Text>
+            <Text style={styles.footerTextHighlight}>FARMACE</Text>
+          </Text>
         </View>
 
         {/* Conteúdo Principal */}
@@ -370,7 +408,7 @@ const ReciboPDFInterPage: React.FC<{ dados: DadosRecibo }> = ({ dados }) => {
           {/* Card Principal com Borda Azul */}
           <View style={styles.mainCard}>
             <View style={styles.mainCardContent}>
-              {/* Coluna Esquerda: Número em Destaque */}
+              {/* Coluna 1 (Esquerda): Número em Destaque */}
               <View style={styles.mainCardLeft}>
                 <Text style={styles.participantLabel}>
                   {isRetirarCesta
@@ -383,45 +421,45 @@ const ReciboPDFInterPage: React.FC<{ dados: DadosRecibo }> = ({ dados }) => {
                 <Text style={styles.participantSubtext}>{participantSubtext}</Text>
               </View>
 
-              {/* Coluna Direita: Informações com Ícones */}
-              <View style={styles.mainCardRight}>
+              {/* Coluna 2 (Centro): Modalidade e Tamanho (sem ícones) */}
+              <View style={styles.mainCardCenter}>
                 {/* Modalidade (apenas para corrida) */}
                 {isCorridaNatal && modalidadeCorrida && (
-                  <View style={styles.infoRow}>
-                    <View style={styles.iconContainer}>
-                      <IconRun />
-                    </View>
-                    <View style={styles.infoContent}>
-                      <Text style={styles.infoLabel}>Modalidade</Text>
-                      <Text style={styles.infoValue}>{modalidadeCorrida}</Text>
-                    </View>
+                  <View style={styles.infoSimple}>
+                    <Text style={styles.infoSimpleLabel}>Modalidade</Text>
+                    <Text style={styles.infoSimpleValue}>{modalidadeCorrida}</Text>
                   </View>
                 )}
 
                 {/* Tamanho da Camiseta */}
                 {tamanho && !isRetirarCesta && (
-                  <View style={styles.infoRow}>
-                    <View style={styles.iconContainer}>
-                      <IconShirt />
-                    </View>
-                    <View style={styles.infoContent}>
-                      <Text style={styles.infoLabel}>Tamanho da Camiseta</Text>
-                      <Text style={styles.infoValue}>{tamanho}</Text>
-                    </View>
+                  <View style={styles.infoSimple}>
+                    <Text style={styles.infoSimpleLabel}>Tamanho da Camiseta</Text>
+                    <Text style={styles.infoSimpleValue}>{tamanho}</Text>
                   </View>
                 )}
+              </View>
 
+              {/* Coluna 3 (Direita): Datas (sem ícones) */}
+              <View style={styles.mainCardRight}>
                 {/* Data de Inscrição */}
-                <View style={styles.infoRow}>
-                  <View style={styles.iconContainer}>
-                    <IconCalendar />
-                  </View>
-                  <View style={styles.infoContent}>
-                    <Text style={styles.infoLabel}>Data de Inscrição</Text>
-                    <Text style={styles.infoValue}>
-                      {dataInscricao || new Date().toLocaleDateString('pt-BR')}
-                    </Text>
-                  </View>
+                <View style={styles.infoSimple}>
+                  <Text style={styles.infoSimpleLabel}>Data de Inscrição</Text>
+                  <Text style={styles.infoSimpleValue}>
+                    {dataInscricao || new Date().toLocaleDateString('pt-BR')}
+                  </Text>
+                </View>
+
+                {/* Data do Evento */}
+                <View style={styles.infoSimple}>
+                  <Text style={styles.infoSimpleLabel}>Data do Evento</Text>
+                  <Text style={styles.infoSimpleValue}>
+                    {isRetirarCesta
+                      ? 'A confirmar'
+                      : isApenasNatal
+                      ? 'A confirmar'
+                      : 'A confirmar'}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -451,8 +489,12 @@ const ReciboPDFInterPage: React.FC<{ dados: DadosRecibo }> = ({ dados }) => {
               <Text style={styles.tableValue}>{nome}</Text>
             </View>
             <View style={styles.tableRow}>
+              <Text style={styles.tableLabel}>CPF</Text>
+              <Text style={styles.tableValue}>{cpfOculto}</Text>
+            </View>
+            <View style={styles.tableRow}>
               <Text style={styles.tableLabel}>Email</Text>
-              <Text style={styles.tableValue}>{email}</Text>
+              <Text style={styles.tableValue}>{emailOculto}</Text>
             </View>
             <View style={styles.tableRow}>
               <Text style={styles.tableLabel}>WhatsApp</Text>
@@ -489,9 +531,6 @@ const ReciboPDFInterPage: React.FC<{ dados: DadosRecibo }> = ({ dados }) => {
           {/* Rodapé Superior - Informações do Evento */}
           <View style={styles.footerTop}>
             <Text style={styles.footerText}>
-              FARMACE - II Corrida e Caminhada da Qualidade - 2025
-            </Text>
-            <Text style={styles.footerText}>
               Este documento é válido como comprovante de inscrição
             </Text>
           </View>
@@ -501,7 +540,7 @@ const ReciboPDFInterPage: React.FC<{ dados: DadosRecibo }> = ({ dados }) => {
         <View style={styles.footerBottom}>
           <Text style={styles.footerTextBold}>
             <Text style={styles.footerTextHighlight}>SICFAR</Text>
-            <Text> Manager - Plataforma Computacional </Text>
+            <Text> Manager - Plataforma de Gestão Computacional </Text>
             <Text style={styles.footerTextHighlight}>FARMACE</Text>
           </Text>
         </View>
