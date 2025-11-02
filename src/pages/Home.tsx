@@ -802,7 +802,7 @@ export default function Home() {
                   Posso cancelar minha inscrição?
                 </AccordionTrigger>
                 <AccordionContent className="text-sm md:text-base text-slate-700 leading-relaxed">
-                  Sim, você pode cancelar sua inscrição até <strong>10 de dezembro</strong> através do e-mail <strong>qualidade@farmace.com.br</strong>. Após essa data não será possível cancelar devido à produção dos kits.
+                  Sim, você pode cancelar sua inscrição até <strong>10 de dezembro</strong> entrando em contato com a Garantia da Qualidade, RH e/ou TI. Após essa data não será possível cancelar devido à produção dos kits.
                 </AccordionContent>
               </AccordionItem>
 
@@ -858,21 +858,92 @@ export default function Home() {
           </div>
         </div>
 
-        {/* CTA Section */}
-        <div className="bg-gradient-to-r from-primary-500 to-sky-400 rounded-2xl p-8 md:p-12 text-white text-center mt-16 md:mt-20">
-          <h3 className="text-3xl md:text-4xl font-bold mb-4">
-            Garanta sua vaga agora!
-          </h3>
-          <p className="text-lg md:text-xl mb-8 text-white/90">
-            Inscrições limitadas. Não perca essa oportunidade de fazer parte deste evento incrível!
-          </p>
-          <Button
-            size="xl"
-            onClick={() => navigate('/loginInscricao')}
-            className="bg-accent-400 hover:bg-accent-500 text-slate-900 font-bold shadow-xl transform hover:scale-105 transition-all duration-300"
-          >
-            FAZER INSCRIÇÃO
-          </Button>
+        {/* CTA Section - Professional Design Aligned with Hero */}
+        <div className="relative overflow-hidden mt-16 md:mt-20 rounded-2xl">
+          {/* Background Image/Gradient - Similar to Hero */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-primary-900 to-slate-900">
+            {/* Overlay Pattern */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(14,165,233,0.15),transparent_50%),radial-gradient(circle_at_70%_50%,rgba(250,204,21,0.1),transparent_50%)]"></div>
+            {/* Dark Overlay for Text Contrast */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40"></div>
+          </div>
+
+          {/* Content Container */}
+          <div className="relative z-10 px-6 py-16 md:px-12 md:py-20 lg:px-16 lg:py-24 text-center">
+            {/* Main Heading - Montserrat Typography like Hero */}
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)] mb-4 md:mb-6" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+              <span style={{ fontWeight: 800 }}>GARANTA SUA VAGA</span>
+              <br />
+              <span style={{ fontWeight: 200 }} className="text-white/90">AGORA</span>
+            </h2>
+
+            {/* Subheading */}
+            <p className="text-base sm:text-lg md:text-xl text-white/80 max-w-3xl mx-auto mb-10 md:mb-12 leading-relaxed" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 300 }}>
+              Inscrições limitadas para colaboradores FARMACE.<br className="hidden sm:block" />
+              Celebre a qualidade e a saúde com toda a equipe.
+            </p>
+
+            {/* CTA Buttons - Same style as Hero */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 md:mb-16">
+              <Button
+                onClick={() => navigate('/loginInscricao')}
+                className="h-12 sm:h-14 md:h-16 px-8 sm:px-10 md:px-12 text-base sm:text-lg md:text-xl bg-accent-400 hover:bg-accent-500 text-slate-900 font-bold shadow-2xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto"
+                style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700 }}
+              >
+                FAZER INSCRIÇÃO
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const infoSection = document.getElementById('info')
+                  infoSection?.scrollIntoView({ behavior: 'smooth' })
+                }}
+                className="h-12 sm:h-14 md:h-16 px-8 sm:px-10 md:px-12 text-base sm:text-lg md:text-xl bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white/20 w-full sm:w-auto"
+                style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600 }}
+              >
+                VER INFORMAÇÕES
+              </Button>
+            </div>
+
+            {/* Info Stats - Minimalist Design */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 max-w-6xl mx-auto">
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 md:p-8 hover:bg-white/10 transition-all duration-300">
+                <div className="text-accent-400 text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
+                  GRATUITO
+                </div>
+                <div className="text-white/70 text-sm md:text-base" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 300 }}>
+                  Para Colaboradores
+                </div>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 md:p-8 hover:bg-white/10 transition-all duration-300">
+                <div className="text-accent-400 text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
+                  CORRIDA
+                </div>
+                <div className="text-white/70 text-sm md:text-base" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 300 }}>
+                  3KM, 5KM e 10KM
+                </div>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 md:p-8 hover:bg-white/10 transition-all duration-300">
+                <div className="text-accent-400 text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
+                  PRÊMIOS
+                </div>
+                <div className="text-white/70 text-sm md:text-base" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 300 }}>
+                  Confraternização
+                </div>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 md:p-8 hover:bg-white/10 transition-all duration-300">
+                <div className="text-accent-400 text-3xl md:text-4xl font-bold mb-2" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800 }}>
+                  21 DEZ
+                </div>
+                <div className="text-white/70 text-sm md:text-base" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 300 }}>
+                  Às 6h30
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
