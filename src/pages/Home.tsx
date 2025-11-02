@@ -23,6 +23,27 @@ export default function Home() {
     window.scrollTo(0, 0)
   }, [])
 
+  // Posiciona o segundo SVG dinamicamente baseado no spacer
+  useEffect(() => {
+    const updateSvgPosition = () => {
+      const spacer = document.getElementById('svg-spacer-before-faq')
+      if (spacer) {
+        const rect = spacer.getBoundingClientRect()
+        const topPosition = rect.top + window.scrollY
+        document.documentElement.style.setProperty('--svg-before-faq-top', `${topPosition}px`)
+      }
+    }
+
+    // Atualiza posição inicial
+    updateSvgPosition()
+
+    // Atualiza posição ao redimensionar
+    window.addEventListener('resize', updateSvgPosition)
+
+    // Cleanup
+    return () => window.removeEventListener('resize', updateSvgPosition)
+  }, [])
+
   // Ativa som do áudio automaticamente após mover o mouse
   useEffect(() => {
     const handleMouseMove = () => {
@@ -548,24 +569,11 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* Decorative SVG - Positioned absolutely without affecting layout - Estilização FARMACE */}
-        <div className="absolute left-1/2 -translate-x-1/2 w-screen max-w-full h-0 overflow-visible pointer-events-none" style={{ zIndex: 5 }}>
-          <img
-            src="/lines.svg"
-            alt="Decorative lines"
-            className="absolute left-0 top-0 w-full h-auto
-                       opacity-60 sm:opacity-65 md:opacity-70 lg:opacity-75"
-            style={{
-              filter: 'brightness(0.8) saturate(1.2)',
-              display: 'block'
-            }}
-            width="1511"
-            height="486"
-          />
-        </div>
+        {/* Spacer para criar espaço onde o SVG absoluto será renderizado */}
+        <div className="relative w-full h-16 md:h-20" id="svg-spacer-before-faq"></div>
 
         {/* FAQ Section */}
-        <div id="duvidas" className="relative mt-16 md:mt-20 scroll-mt-24" style={{ zIndex: 10 }}>
+        <div id="duvidas" className="relative mt-0 scroll-mt-24" style={{ zIndex: 10 }}>
           <div className="text-center mb-8 md:mb-12">
             <div className="inline-flex items-center justify-center gap-3 mb-4">
               <div className="p-3 bg-accent-100 rounded-full">
@@ -781,6 +789,29 @@ export default function Home() {
           </Button>
         </div>
       </section>
+
+      {/* Decorative SVG - Positioned absolutely before FAQ section */}
+      {/* Este SVG está FORA do container para ocupar 100% da largura da viewport */}
+      <div
+        className="absolute left-1/2 -translate-x-1/2 w-screen max-w-full pointer-events-none"
+        style={{
+          top: 'var(--svg-before-faq-top, 1200px)',
+          zIndex: 5
+        }}
+      >
+        <img
+          src="/lines.svg"
+          alt="Decorative lines"
+          className="w-full h-auto
+                     opacity-60 sm:opacity-65 md:opacity-70 lg:opacity-75"
+          style={{
+            filter: 'brightness(0.8) saturate(1.2)',
+            display: 'block'
+          }}
+          width="1511"
+          height="486"
+        />
+      </div>
 
       {/* Footer */}
       <footer className="bg-slate-900 text-white py-8">
