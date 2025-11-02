@@ -13,7 +13,7 @@ import Confetti from "react-confetti"
 import { useWindowSize } from "@/hooks/useWindowSize"
 import { sendWhatsAppMessage, sendWhatsAppDocument, gerarMensagemConfirmacao, gerarMensagemRetirarCesta, gerarMensagemApenasNatal } from "@/services/whatsappService"
 import { salvarInscricaoSupabase } from "@/services/inscricaoCorridaSupabaseService"
-import { gerarReciboPDFBase64 } from "@/utils/pdfGenerator"
+import { gerarReciboPDFInterBase64 } from "@/utils/pdfGenerator"
 import { ProcessingModal, ProcessStep } from "@/components/ProcessingModal"
 
 // Interface para os dados do formulário
@@ -372,15 +372,21 @@ export default function InscricaoWizard() {
         setProcessingSteps(prev => prev.map(s => s.id === 'pdf' ? { ...s, status: 'processing' } : s))
         setProcessingProgress(70)
 
-        const pdfBase64 = await gerarReciboPDFBase64({
+        const pdfBase64String = await gerarReciboPDFInterBase64({
           nome: formData.nome,
           email: formData.email,
+          cpf: formData.cpf,
           whatsapp: formData.whatsapp,
           numeroParticipante: numeroParticipanteRetornado,
           tipoParticipacao: 'apenas-natal',
           tamanho: formData.tamanho,
           whatsappSent: resultado.success
         })
+
+        // Remove o prefixo "data:application/pdf;base64," se existir
+        const pdfBase64 = pdfBase64String.includes(',')
+          ? pdfBase64String.split(',')[1]
+          : pdfBase64String
 
         console.log('✅ [InscricaoWizard] PDF gerado com sucesso!')
         console.log('📤 [InscricaoWizard] Enviando PDF via WhatsApp...')
@@ -535,14 +541,20 @@ export default function InscricaoWizard() {
         setProcessingSteps(prev => prev.map(s => s.id === 'pdf' ? { ...s, status: 'processing' } : s))
         setProcessingProgress(70)
 
-        const pdfBase64 = await gerarReciboPDFBase64({
+        const pdfBase64String = await gerarReciboPDFInterBase64({
           nome: formData.nome,
           email: formData.email,
+          cpf: formData.cpf,
           whatsapp: formData.whatsapp,
           numeroParticipante: numeroParticipanteRetornado,
           tipoParticipacao: 'retirar-cesta',
           whatsappSent: resultado.success
         })
+
+        // Remove o prefixo "data:application/pdf;base64," se existir
+        const pdfBase64 = pdfBase64String.includes(',')
+          ? pdfBase64String.split(',')[1]
+          : pdfBase64String
 
         console.log('✅ [InscricaoWizard] PDF gerado com sucesso!')
         console.log('📤 [InscricaoWizard] Enviando PDF via WhatsApp...')
@@ -704,9 +716,10 @@ export default function InscricaoWizard() {
           setProcessingSteps(prev => prev.map(s => s.id === 'pdf' ? { ...s, status: 'processing' } : s))
           setProcessingProgress(70)
 
-          const pdfBase64 = await gerarReciboPDFBase64({
+          const pdfBase64String = await gerarReciboPDFInterBase64({
             nome: formData.nome,
             email: formData.email,
+            cpf: formData.cpf,
             whatsapp: formData.whatsapp,
             numeroParticipante: numeroParticipanteRetornado,
             tipoParticipacao: formData.tipoParticipacao as 'corrida-natal' | 'apenas-natal' | 'retirar-cesta',
@@ -714,6 +727,11 @@ export default function InscricaoWizard() {
             tamanho: formData.tamanho,
             whatsappSent: resultado.success
           })
+
+          // Remove o prefixo "data:application/pdf;base64," se existir
+          const pdfBase64 = pdfBase64String.includes(',')
+            ? pdfBase64String.split(',')[1]
+            : pdfBase64String
 
           console.log('✅ [InscricaoWizard] PDF gerado com sucesso!')
           console.log('📤 [InscricaoWizard] Enviando PDF via WhatsApp...')

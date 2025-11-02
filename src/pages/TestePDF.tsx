@@ -23,6 +23,7 @@ export default function TestePDF() {
   const dadosExemplo = {
     nome: 'João Silva Santos',
     email: 'joao.silva@farmace.com.br',
+    cpf: '123.456.789-01',
     whatsapp: '(85) 98765-4321',
     numeroParticipante: '0042',
     tipoParticipacao: 'corrida-natal' as const,
@@ -34,6 +35,7 @@ export default function TestePDF() {
   const dadosExemploApenasNatal = {
     nome: 'Maria Oliveira Costa',
     email: 'maria.oliveira@farmace.com.br',
+    cpf: '987.654.321-09',
     whatsapp: '(85) 99876-5432',
     numeroParticipante: '0043',
     tipoParticipacao: 'apenas-natal' as const,
@@ -44,6 +46,7 @@ export default function TestePDF() {
   const dadosExemploRetirarCesta = {
     nome: 'Pedro Henrique Alves',
     email: 'pedro.alves@farmace.com.br',
+    cpf: '456.789.123-45',
     whatsapp: '(85) 97654-3210',
     numeroParticipante: '0044',
     tipoParticipacao: 'retirar-cesta' as const,

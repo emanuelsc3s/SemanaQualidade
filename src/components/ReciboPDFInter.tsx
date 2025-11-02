@@ -455,10 +455,10 @@ const ReciboPDFInterPage: React.FC<{ dados: DadosRecibo }> = ({ dados }) => {
                   <Text style={styles.infoSimpleLabel}>Data do Evento</Text>
                   <Text style={styles.infoSimpleValue}>
                     {isRetirarCesta
-                      ? 'A confirmar'
+                      ? '22 e 23 de Dezembro de 2025'
                       : isApenasNatal
-                      ? 'A confirmar'
-                      : 'A confirmar'}
+                      ? '21 de Dezembro de 2025'
+                      : '21 de Dezembro de 2025'}
                   </Text>
                 </View>
               </View>

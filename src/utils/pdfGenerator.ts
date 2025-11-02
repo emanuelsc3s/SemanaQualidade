@@ -11,6 +11,7 @@ import React from 'react'
 interface DadosRecibo {
   nome: string
   email: string
+  cpf?: string
   whatsapp: string
   numeroParticipante: string
   tipoParticipacao: 'corrida-natal' | 'apenas-natal' | 'retirar-cesta'
