@@ -557,7 +557,7 @@ export default function Home() {
 
         <div className="relative z-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           <Card className="relative z-10 border-2 border-primary-200 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
+            <CardContent className="p-6 bg-gradient-to-br from-slate-50 to-sky-50 rounded-lg">
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-primary-100 rounded-lg">
                   <Calendar className="w-6 h-6 text-primary-600" />
@@ -572,7 +572,7 @@ export default function Home() {
           </Card>
 
           <Card className="relative z-10 border-2 border-primary-200 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
+            <CardContent className="p-6 bg-gradient-to-br from-slate-50 to-sky-50 rounded-lg">
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-primary-100 rounded-lg">
                   <Clock className="w-6 h-6 text-primary-600" />
@@ -587,7 +587,7 @@ export default function Home() {
           </Card>
 
           <Card className="relative z-10 border-2 border-primary-200 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
+            <CardContent className="p-6 bg-gradient-to-br from-slate-50 to-sky-50 rounded-lg">
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-primary-100 rounded-lg">
                   <MapPin className="w-6 h-6 text-primary-600" />
@@ -602,7 +602,7 @@ export default function Home() {
           </Card>
 
           <Card className="relative z-10 border-2 border-accent-200 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
+            <CardContent className="p-6 bg-gradient-to-br from-slate-50 to-sky-50 rounded-lg">
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-accent-100 rounded-lg">
                   <DollarSign className="w-6 h-6 text-accent-700" />
@@ -617,7 +617,7 @@ export default function Home() {
           </Card>
 
           <Card className="relative z-10 border-2 border-accent-200 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
+            <CardContent className="p-6 bg-gradient-to-br from-slate-50 to-sky-50 rounded-lg">
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-accent-100 rounded-lg">
                   <Award className="w-6 h-6 text-accent-700" />
@@ -632,7 +632,7 @@ export default function Home() {
           </Card>
 
           <Card className="relative z-10 border-2 border-accent-200 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
+            <CardContent className="p-6 bg-gradient-to-br from-slate-50 to-sky-50 rounded-lg">
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-accent-100 rounded-lg">
                   <Users className="w-6 h-6 text-accent-700" />
