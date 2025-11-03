@@ -451,39 +451,60 @@ export default function WhatsApp() {
   // Calcular total de páginas
   const totalPages = Math.ceil(totalItems / itemsPerPage)
 
-  // Badge de status com cores
+  // Badge de status com cores (seguindo padrão do ModalWhatsAppEnvio)
   const getStatusBadge = (status: WhatsAppStatus) => {
     const badges = {
-      pendente: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      enviando: 'bg-blue-100 text-blue-800 border-blue-300',
-      enviado: 'bg-green-100 text-green-800 border-green-300',
-      falhou: 'bg-red-100 text-red-800 border-red-300',
-      cancelado: 'bg-gray-100 text-gray-800 border-gray-300'
+      pendente: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+      enviando: 'bg-sky-100 text-primary-700 border border-sky-300',
+      enviado: 'bg-green-100 text-green-700 border border-green-200',
+      falhou: 'bg-red-100 text-red-700 border border-red-200',
+      cancelado: 'bg-slate-100 text-slate-700 border border-slate-200'
     }
 
     return (
-      <span className={`px-2 py-1 rounded-md text-xs font-medium border ${badges[status]}`}>
+      <span className={`px-2 py-1 rounded-full text-xs font-semibold transition-colors duration-300 ${badges[status]}`}>
         {status.toUpperCase()}
       </span>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-sky-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-sky-50 p-4 sm:p-6">
+      {/* Aviso de Modo Teste */}
+      {modoTesteAtivo && (
+        <div className="mb-4 bg-yellow-50 border-2 border-yellow-400 rounded-lg p-3 sm:p-4 shadow-sm animate-in fade-in duration-300">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center">
+                <span className="text-lg">🧪</span>
+              </div>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-yellow-800">
+                MODO TESTE ATIVADO
+              </p>
+              <p className="text-xs text-yellow-700 mt-1">
+                As mensagens NÃO serão enviadas de verdade. Acesse as configurações para desativar.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigate('/')}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 hover:bg-slate-100 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Voltar</span>
           </Button>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
               Mensagens WhatsApp
             </h1>
             <p className="text-sm text-slate-600 mt-1">
@@ -497,7 +518,7 @@ export default function WhatsApp() {
             variant="outline"
             size="sm"
             onClick={() => setModalConfigAberto(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 hover:bg-slate-100 transition-colors"
             title="Configurações"
           >
             <Settings className="w-4 h-4" />
@@ -508,7 +529,7 @@ export default function WhatsApp() {
             size="sm"
             onClick={carregarMensagens}
             disabled={loading}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 hover:bg-slate-100 transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Atualizar</span>
@@ -517,9 +538,9 @@ export default function WhatsApp() {
       </div>
 
       {/* Card Principal */}
-      <Card className="shadow-lg">
-        <CardHeader className="border-b bg-white/50 backdrop-blur">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <Card className="shadow-lg border-0">
+        <CardHeader className="border-b bg-white/50 backdrop-blur p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {/* Total de mensagens */}
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-slate-700">
@@ -529,14 +550,14 @@ export default function WhatsApp() {
             </div>
 
             {/* Busca local */}
-            <div className="relative w-full md:w-64">
+            <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input
                 type="text"
                 placeholder="Buscar..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 transition-all duration-300"
               />
             </div>
           </div>
@@ -545,11 +566,16 @@ export default function WhatsApp() {
         <CardContent className="p-0">
           {/* Erro */}
           {erro && (
-            <div className="p-6 text-center">
-              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
-              <p className="text-red-600 font-medium">Erro ao carregar mensagens</p>
-              <p className="text-sm text-slate-600 mt-1">{erro}</p>
-              <Button onClick={carregarMensagens} className="mt-4">
+            <div className="p-6 sm:p-12 text-center space-y-3">
+              <AlertCircle className="w-12 h-12 text-red-600 mx-auto" />
+              <div>
+                <p className="text-red-700 font-semibold">Erro ao carregar mensagens</p>
+                <p className="text-sm text-slate-600 mt-1">{erro}</p>
+              </div>
+              <Button
+                onClick={carregarMensagens}
+                className="bg-primary-600 hover:bg-primary-700 text-white transition-colors duration-300"
+              >
                 Tentar novamente
               </Button>
             </div>
@@ -557,9 +583,9 @@ export default function WhatsApp() {
 
           {/* Loading inicial */}
           {loading && mensagens.length === 0 && !erro && (
-            <div className="p-12 text-center">
-              <Loader2 className="w-12 h-12 animate-spin text-primary-600 mx-auto mb-3" />
-              <p className="text-slate-600">Carregando mensagens...</p>
+            <div className="p-12 text-center space-y-3">
+              <Loader2 className="w-12 h-12 animate-spin text-primary-600 mx-auto" />
+              <p className="text-sm text-slate-600">Carregando mensagens...</p>
             </div>
           )}
 
@@ -567,20 +593,20 @@ export default function WhatsApp() {
           {!loading && !erro && mensagens.length > 0 && (
             <>
               {/* Barra de ações */}
-              <div className="p-4 border-b bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="p-4 sm:p-6 border-b bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <Checkbox
                     checked={mensagensSelecionadas.size === mensagensFiltradas.length && mensagensFiltradas.length > 0}
                     onCheckedChange={toggleSelecionarTodas}
                     id="select-all"
                   />
-                  <label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
+                  <label htmlFor="select-all" className="text-sm font-medium text-slate-700 cursor-pointer">
                     {mensagensSelecionadas.size === mensagensFiltradas.length && mensagensFiltradas.length > 0
                       ? 'Desselecionar todas'
                       : 'Selecionar todas'}
                   </label>
                   {mensagensSelecionadas.size > 0 && (
-                    <span className="text-sm text-slate-600">
+                    <span className="text-sm font-semibold text-primary-600">
                       ({mensagensSelecionadas.size} selecionada(s))
                     </span>
                   )}
@@ -589,7 +615,7 @@ export default function WhatsApp() {
                 <Button
                   onClick={enviarMensagensSelecionadas}
                   disabled={mensagensSelecionadas.size === 0 || enviando}
-                  className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+                  className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {enviando ? (
                     <>
@@ -610,22 +636,22 @@ export default function WhatsApp() {
                 <table className="w-full">
                   <thead className="bg-slate-100 border-b">
                     <tr>
-                      <th className="p-3 text-left text-xs font-medium text-slate-700 uppercase w-12">
+                      <th className="p-3 text-left text-xs font-semibold text-slate-700 uppercase w-12">
                         <span className="sr-only">Selecionar</span>
                       </th>
-                      <th className="p-3 text-left text-xs font-medium text-slate-700 uppercase">
+                      <th className="p-3 text-left text-xs font-semibold text-slate-700 uppercase">
                         Número
                       </th>
-                      <th className="p-3 text-left text-xs font-medium text-slate-700 uppercase hidden md:table-cell">
+                      <th className="p-3 text-left text-xs font-semibold text-slate-700 uppercase hidden md:table-cell">
                         Mensagem
                       </th>
-                      <th className="p-3 text-left text-xs font-medium text-slate-700 uppercase">
+                      <th className="p-3 text-left text-xs font-semibold text-slate-700 uppercase">
                         Status
                       </th>
-                      <th className="p-3 text-left text-xs font-medium text-slate-700 uppercase hidden lg:table-cell">
+                      <th className="p-3 text-left text-xs font-semibold text-slate-700 uppercase hidden lg:table-cell">
                         Tentativas
                       </th>
-                      <th className="p-3 text-left text-xs font-medium text-slate-700 uppercase hidden lg:table-cell">
+                      <th className="p-3 text-left text-xs font-semibold text-slate-700 uppercase hidden lg:table-cell">
                         Data Criação
                       </th>
                     </tr>
@@ -634,8 +660,8 @@ export default function WhatsApp() {
                     {mensagensFiltradas.map((mensagem) => (
                       <tr
                         key={mensagem.id}
-                        className={`hover:bg-slate-50 transition-colors ${
-                          mensagensSelecionadas.has(mensagem.id) ? 'bg-blue-50' : ''
+                        className={`hover:bg-slate-50 transition-colors duration-300 ${
+                          mensagensSelecionadas.has(mensagem.id) ? 'bg-sky-50 border-l-4 border-l-primary-600' : ''
                         }`}
                       >
                         <td className="p-3">
@@ -644,7 +670,7 @@ export default function WhatsApp() {
                             onCheckedChange={() => toggleSelecionarMensagem(mensagem.id)}
                           />
                         </td>
-                        <td className="p-3 text-sm font-mono text-slate-900">
+                        <td className="p-3 text-sm font-mono font-medium text-slate-900">
                           {mensagem.numero}
                         </td>
                         <td className="p-3 text-sm text-slate-700 hidden md:table-cell max-w-xs truncate">
@@ -654,7 +680,7 @@ export default function WhatsApp() {
                           {getStatusBadge(mensagem.status)}
                         </td>
                         <td className="p-3 text-sm text-slate-600 hidden lg:table-cell">
-                          {mensagem.attempts} / {mensagem.max_attempts}
+                          <span className="font-medium">{mensagem.attempts}</span> / {mensagem.max_attempts}
                         </td>
                         <td className="p-3 text-sm text-slate-600 hidden lg:table-cell">
                           {new Date(mensagem.created_at).toLocaleString('pt-BR')}
@@ -666,16 +692,16 @@ export default function WhatsApp() {
               </div>
 
               {/* Paginação */}
-              <div className="p-4 border-t bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="p-4 sm:p-6 border-t bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <span>Itens por página:</span>
+                  <span className="font-medium">Itens por página:</span>
                   <select
                     value={itemsPerPage}
                     onChange={(e) => {
                       setItemsPerPage(Number(e.target.value))
                       setCurrentPage(1)
                     }}
-                    className="border rounded px-2 py-1"
+                    className="border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-primary-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all duration-300"
                   >
                     <option value={25}>25</option>
                     <option value={50}>50</option>
@@ -689,10 +715,11 @@ export default function WhatsApp() {
                     size="sm"
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
+                    className="transition-colors duration-300 disabled:opacity-50"
                   >
                     Anterior
                   </Button>
-                  <span className="text-sm text-slate-600">
+                  <span className="text-sm font-medium text-slate-700 px-2">
                     Página {currentPage} de {totalPages}
                   </span>
                   <Button
@@ -700,6 +727,7 @@ export default function WhatsApp() {
                     size="sm"
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
+                    className="transition-colors duration-300 disabled:opacity-50"
                   >
                     Próxima
                   </Button>
@@ -710,8 +738,11 @@ export default function WhatsApp() {
 
           {/* Sem mensagens */}
           {!loading && !erro && mensagens.length === 0 && (
-            <div className="p-12 text-center">
-              <p className="text-slate-600">Nenhuma mensagem encontrada</p>
+            <div className="p-12 text-center space-y-3">
+              <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto">
+                <Send className="w-8 h-8 text-slate-400" />
+              </div>
+              <p className="text-sm text-slate-600">Nenhuma mensagem encontrada</p>
             </div>
           )}
         </CardContent>
@@ -720,20 +751,20 @@ export default function WhatsApp() {
       {/* Modal de Configurações */}
       {modalConfigAberto && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-6">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-6 space-y-4 sm:space-y-6 animate-in fade-in duration-300">
             {/* Header */}
-            <div className="text-center">
+            <div className="text-center space-y-2">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Settings className="w-8 h-8 text-primary-600" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900">Configurações</h2>
-              <p className="text-sm text-slate-600 mt-1">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Configurações</h2>
+              <p className="text-sm text-slate-600">
                 Ajustes de envio de mensagens
               </p>
             </div>
 
             {/* Modo Teste */}
-            <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <h3 className="font-semibold text-slate-900 flex items-center gap-2">
@@ -746,13 +777,13 @@ export default function WhatsApp() {
                 <button
                   onClick={alternarModoTeste}
                   className={`
-                    relative inline-flex h-6 w-11 items-center rounded-full transition-colors
+                    relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300
                     ${modoTesteAtivo ? 'bg-green-600' : 'bg-slate-300'}
                   `}
                 >
                   <span
                     className={`
-                      inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                      inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300
                       ${modoTesteAtivo ? 'translate-x-6' : 'translate-x-1'}
                     `}
                   />
@@ -761,10 +792,10 @@ export default function WhatsApp() {
 
               {/* Status atual */}
               <div className={`
-                rounded-lg p-3 text-sm font-medium text-center
+                rounded-lg p-3 text-sm font-semibold text-center transition-all duration-300
                 ${modoTesteAtivo
-                  ? 'bg-green-100 text-green-800 border border-green-300'
-                  : 'bg-blue-100 text-blue-800 border border-blue-300'
+                  ? 'bg-green-100 text-green-800 border-2 border-green-300'
+                  : 'bg-sky-100 text-primary-700 border-2 border-sky-300'
                 }
               `}>
                 {modoTesteAtivo ? (
@@ -788,11 +819,11 @@ export default function WhatsApp() {
             </div>
 
             {/* Informações de Segurança */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h4 className="font-semibold text-yellow-900 text-sm mb-2">
+            <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+              <h4 className="font-semibold text-yellow-900 text-sm mb-2 flex items-center gap-2">
                 ⚠️ Informações Importantes
               </h4>
-              <ul className="text-xs text-yellow-800 space-y-1">
+              <ul className="text-xs text-yellow-800 space-y-1.5">
                 <li>• Intervalo fixo de 15 segundos entre envios</li>
                 <li>• Use o modo teste antes de enviar em produção</li>
                 <li>• Evite enviar mais de 50 mensagens por vez</li>
@@ -803,7 +834,7 @@ export default function WhatsApp() {
             {/* Botão Fechar */}
             <Button
               onClick={() => setModalConfigAberto(false)}
-              className="w-full"
+              className="w-full bg-primary-600 hover:bg-primary-700 text-white transition-colors duration-300"
               size="lg"
             >
               Fechar
