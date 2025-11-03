@@ -155,13 +155,6 @@ export function ProcessingModal({
                 </div>
               ))}
             </div>
-
-            {/* Mensagem de Rodapé */}
-            <div className="text-center">
-              <p className="text-xs text-slate-500">
-                Por favor, não feche esta janela durante o processamento
-              </p>
-            </div>
           </CardContent>
         </Card>
       </DialogContent>

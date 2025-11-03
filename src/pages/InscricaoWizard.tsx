@@ -11,10 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ArrowLeft, ArrowRight, Check, User, Trophy, Shirt, Gift, FileText, Volume2, VolumeX, X } from "lucide-react"
 import Confetti from "react-confetti"
 import { useWindowSize } from "@/hooks/useWindowSize"
-import { sendWhatsAppMessage, sendWhatsAppDocument, gerarMensagemConfirmacao, gerarMensagemRetirarCesta, gerarMensagemApenasNatal } from "@/services/whatsappService"
+import { gerarMensagemConfirmacao, gerarMensagemRetirarCesta, gerarMensagemApenasNatal } from "@/services/whatsappService"
 import { salvarInscricaoSupabase } from "@/services/inscricaoCorridaSupabaseService"
-import { gerarReciboPDFInterBase64 } from "@/utils/pdfGenerator"
 import { ProcessingModal, ProcessStep } from "@/components/ProcessingModal"
+import { supabase } from "@/services/supabase"
 
 // Interface para os dados do formulário
 interface FormData {
@@ -72,6 +72,57 @@ export default function InscricaoWizard() {
 
   const totalSteps = 4
   const progress = (currentStep / totalSteps) * 100
+
+  // Função para salvar mensagem na fila de WhatsApp (tbwhatsapp_send)
+  const salvarMensagemWhatsAppNaFila = async (
+    numeroTelefone: string,
+    mensagem: string,
+    matricula: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      console.log('📱 [WhatsApp Queue] Salvando mensagem na fila...')
+      console.log('📱 [WhatsApp Queue] Matrícula:', matricula)
+
+      // Formata o número para o padrão internacional (remove caracteres especiais)
+      const numeroFormatado = numeroTelefone.replace(/\D/g, '')
+      const numeroInternacional = numeroFormatado.startsWith('55')
+        ? numeroFormatado
+        : `55${numeroFormatado}`
+
+      console.log('📱 [WhatsApp Queue] Número formatado:', numeroInternacional)
+
+      // ✅ CORRIGIDO: Usar estrutura real da tabela (sem metadata, com matricula direta)
+      const { data, error } = await supabase
+        .from('tbwhatsapp_send')
+        .insert({
+          numero: numeroInternacional,
+          message: mensagem,
+          status: 'pendente',
+          priority: 0,
+          agendado: null,
+          max_attempts: 3,
+          matricula: matricula
+        })
+        .select()
+
+      if (error) {
+        console.error('❌ [WhatsApp Queue] Erro ao salvar mensagem:', error)
+        return { success: false, error: error.message }
+      }
+
+      console.log('✅ [WhatsApp Queue] Mensagem salva na fila com sucesso!')
+      console.log('📋 [WhatsApp Queue] Dados salvos:', data)
+
+      return { success: true }
+
+    } catch (error) {
+      console.error('❌ [WhatsApp Queue] Erro inesperado:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro desconhecido'
+      }
+    }
+  }
 
   // Scroll para o topo sempre que a etapa mudar
   useEffect(() => {
@@ -280,11 +331,10 @@ export default function InscricaoWizard() {
 
     setIsSubmitting(true)
 
-    // Inicializa as etapas do processo
+    // ✅ NOVO: Apenas 2 etapas (removida geração de PDF)
     const steps: ProcessStep[] = [
       { id: 'database', label: 'Salvando inscrição no banco de dados...', status: 'pending' },
-      { id: 'whatsapp', label: 'Enviando notificação pelo WhatsApp...', status: 'pending' },
-      { id: 'pdf', label: 'Gerando e enviando formulário PDF pelo WhatsApp...', status: 'pending' }
+      { id: 'whatsapp', label: 'Preparando notificação para envio via WhatsApp...', status: 'pending' }
     ]
     setProcessingSteps(steps)
     setProcessingProgress(0)
@@ -335,12 +385,12 @@ export default function InscricaoWizard() {
 
       const numeroParticipanteRetornado = resultadoSupabase.data?.numeroParticipante || matriculaColaborador || '0000'
       setNumeroParticipante(numeroParticipanteRetornado)
-      console.log('🎫 [InscricaoWizard] Número do participante:', numeroParticipanteRetornado)
+      console.log('🎫 [InscricaoWizard] Número da Inscrição:', numeroParticipanteRetornado)
 
-      // 2. Enviar mensagem de confirmação via WhatsApp
-      console.log('📱 [InscricaoWizard] Enviando mensagem de confirmação via WhatsApp (Apenas Natal)...')
+      // 2. ✅ NOVO: Salvar mensagem na fila de WhatsApp (tbwhatsapp_send)
+      console.log('📱 [InscricaoWizard] Salvando mensagem na fila de WhatsApp (Apenas Natal)...')
       setProcessingSteps(prev => prev.map(s => s.id === 'whatsapp' ? { ...s, status: 'processing' } : s))
-      setProcessingProgress(40)
+      setProcessingProgress(50)
 
       const mensagem = gerarMensagemApenasNatal(
         formData.nome,
@@ -348,75 +398,24 @@ export default function InscricaoWizard() {
         formData.tamanho
       )
 
-      const resultado = await sendWhatsAppMessage({
-        phoneNumber: formData.whatsapp,
-        message: mensagem
-      })
+      const resultadoFila = await salvarMensagemWhatsAppNaFila(
+        formData.whatsapp,
+        mensagem,
+        matriculaColaborador
+      )
 
-      if (resultado.success) {
-        console.log('✅ [InscricaoWizard] Mensagem WhatsApp enviada com sucesso!')
+      if (resultadoFila.success) {
+        console.log('✅ [InscricaoWizard] Mensagem salva na fila de WhatsApp com sucesso!')
         setProcessingSteps(prev => prev.map(s => s.id === 'whatsapp' ? { ...s, status: 'completed' } : s))
-        setProcessingProgress(66)
+        setProcessingProgress(100)
         setWhatsappSent(true)
       } else {
-        console.error('❌ [InscricaoWizard] Erro ao enviar mensagem WhatsApp:', resultado.error)
+        console.error('❌ [InscricaoWizard] Erro ao salvar mensagem na fila:', resultadoFila.error)
         setProcessingSteps(prev => prev.map(s =>
-          s.id === 'whatsapp' ? { ...s, status: 'error', errorMessage: resultado.error } : s
-        ))
-        setWhatsappSent(false)
-      }
-
-      // 3. Gerar e enviar PDF do recibo via WhatsApp
-      try {
-        console.log('📄 [InscricaoWizard] Gerando PDF do recibo (Apenas Natal)...')
-        setProcessingSteps(prev => prev.map(s => s.id === 'pdf' ? { ...s, status: 'processing' } : s))
-        setProcessingProgress(70)
-
-        const pdfBase64String = await gerarReciboPDFInterBase64({
-          nome: formData.nome,
-          email: formData.email,
-          cpf: formData.cpf,
-          whatsapp: formData.whatsapp,
-          numeroParticipante: numeroParticipanteRetornado,
-          tipoParticipacao: 'apenas-natal',
-          tamanho: formData.tamanho,
-          whatsappSent: resultado.success
-        })
-
-        // Remove o prefixo "data:application/pdf;base64," se existir
-        const pdfBase64 = pdfBase64String.includes(',')
-          ? pdfBase64String.split(',')[1]
-          : pdfBase64String
-
-        console.log('✅ [InscricaoWizard] PDF gerado com sucesso!')
-        console.log('📤 [InscricaoWizard] Enviando PDF via WhatsApp...')
-
-        const resultadoPDF = await sendWhatsAppDocument({
-          phoneNumber: formData.whatsapp,
-          message: '📋 Aqui está o comprovante da sua inscrição em PDF!',
-          documentBase64: pdfBase64,
-          fileName: `Comprovante_Inscricao_${numeroParticipanteRetornado}.pdf`,
-          mimeType: 'application/pdf'
-        })
-
-        if (resultadoPDF.success) {
-          console.log('✅ [InscricaoWizard] PDF enviado via WhatsApp com sucesso!')
-          setProcessingSteps(prev => prev.map(s => s.id === 'pdf' ? { ...s, status: 'completed' } : s))
-          setProcessingProgress(100)
-        } else {
-          console.error('❌ [InscricaoWizard] Erro ao enviar PDF via WhatsApp:', resultadoPDF.error)
-          setProcessingSteps(prev => prev.map(s =>
-            s.id === 'pdf' ? { ...s, status: 'error', errorMessage: resultadoPDF.error } : s
-          ))
-          setProcessingProgress(100)
-        }
-      } catch (pdfError) {
-        console.error('❌ [InscricaoWizard] Erro ao gerar/enviar PDF (não crítico):', pdfError)
-        setProcessingSteps(prev => prev.map(s =>
-          s.id === 'pdf' ? { ...s, status: 'error', errorMessage: 'Erro ao gerar PDF' } : s
+          s.id === 'whatsapp' ? { ...s, status: 'error', errorMessage: resultadoFila.error } : s
         ))
         setProcessingProgress(100)
-        // Não bloqueia o fluxo - a inscrição já foi salva
+        setWhatsappSent(false)
       }
 
       console.log('🎉 [InscricaoWizard] Processo concluído com sucesso!')
@@ -450,11 +449,10 @@ export default function InscricaoWizard() {
 
     setIsSubmitting(true)
 
-    // Inicializa as etapas do processo
+    // ✅ NOVO: Apenas 2 etapas (removida geração de PDF)
     const steps: ProcessStep[] = [
       { id: 'database', label: 'Salvando solicitação no banco de dados...', status: 'pending' },
-      { id: 'whatsapp', label: 'Enviando notificação pelo WhatsApp...', status: 'pending' },
-      { id: 'pdf', label: 'Gerando e enviando comprovante PDF pelo WhatsApp...', status: 'pending' }
+      { id: 'whatsapp', label: 'Preparando notificação para envio via WhatsApp...', status: 'pending' }
     ]
     setProcessingSteps(steps)
     setProcessingProgress(0)
@@ -507,84 +505,34 @@ export default function InscricaoWizard() {
       setNumeroParticipante(numeroParticipanteRetornado)
       console.log('🎫 [InscricaoWizard] Número do participante:', numeroParticipanteRetornado)
 
-      // 2. Enviar mensagem de confirmação via WhatsApp
-      console.log('📱 [InscricaoWizard] Enviando mensagem de confirmação via WhatsApp (Retirar Cesta)...')
+      // 2. ✅ NOVO: Salvar mensagem na fila de WhatsApp (tbwhatsapp_send)
+      console.log('📱 [InscricaoWizard] Salvando mensagem na fila de WhatsApp (Retirar Cesta)...')
       setProcessingSteps(prev => prev.map(s => s.id === 'whatsapp' ? { ...s, status: 'processing' } : s))
-      setProcessingProgress(40)
+      setProcessingProgress(50)
 
       const mensagem = gerarMensagemRetirarCesta(
         formData.nome,
         numeroParticipanteRetornado
       )
 
-      const resultado = await sendWhatsAppMessage({
-        phoneNumber: formData.whatsapp,
-        message: mensagem
-      })
+      const resultadoFila = await salvarMensagemWhatsAppNaFila(
+        formData.whatsapp,
+        mensagem,
+        matriculaColaborador
+      )
 
-      if (resultado.success) {
-        console.log('✅ [InscricaoWizard] Mensagem WhatsApp enviada com sucesso!')
+      if (resultadoFila.success) {
+        console.log('✅ [InscricaoWizard] Mensagem salva na fila de WhatsApp com sucesso!')
         setProcessingSteps(prev => prev.map(s => s.id === 'whatsapp' ? { ...s, status: 'completed' } : s))
-        setProcessingProgress(66)
+        setProcessingProgress(100)
         setWhatsappSent(true)
       } else {
-        console.error('❌ [InscricaoWizard] Erro ao enviar mensagem WhatsApp:', resultado.error)
+        console.error('❌ [InscricaoWizard] Erro ao salvar mensagem na fila:', resultadoFila.error)
         setProcessingSteps(prev => prev.map(s =>
-          s.id === 'whatsapp' ? { ...s, status: 'error', errorMessage: resultado.error } : s
-        ))
-        setWhatsappSent(false)
-      }
-
-      // 3. Gerar e enviar PDF do recibo via WhatsApp
-      try {
-        console.log('📄 [InscricaoWizard] Gerando PDF do recibo (Retirar Cesta)...')
-        setProcessingSteps(prev => prev.map(s => s.id === 'pdf' ? { ...s, status: 'processing' } : s))
-        setProcessingProgress(70)
-
-        const pdfBase64String = await gerarReciboPDFInterBase64({
-          nome: formData.nome,
-          email: formData.email,
-          cpf: formData.cpf,
-          whatsapp: formData.whatsapp,
-          numeroParticipante: numeroParticipanteRetornado,
-          tipoParticipacao: 'retirar-cesta',
-          whatsappSent: resultado.success
-        })
-
-        // Remove o prefixo "data:application/pdf;base64," se existir
-        const pdfBase64 = pdfBase64String.includes(',')
-          ? pdfBase64String.split(',')[1]
-          : pdfBase64String
-
-        console.log('✅ [InscricaoWizard] PDF gerado com sucesso!')
-        console.log('📤 [InscricaoWizard] Enviando PDF via WhatsApp...')
-
-        const resultadoPDF = await sendWhatsAppDocument({
-          phoneNumber: formData.whatsapp,
-          message: '📋 Aqui está o comprovante da sua solicitação em PDF!',
-          documentBase64: pdfBase64,
-          fileName: `Comprovante_Cesta_${numeroParticipanteRetornado}.pdf`,
-          mimeType: 'application/pdf'
-        })
-
-        if (resultadoPDF.success) {
-          console.log('✅ [InscricaoWizard] PDF enviado via WhatsApp com sucesso!')
-          setProcessingSteps(prev => prev.map(s => s.id === 'pdf' ? { ...s, status: 'completed' } : s))
-          setProcessingProgress(100)
-        } else {
-          console.error('❌ [InscricaoWizard] Erro ao enviar PDF via WhatsApp:', resultadoPDF.error)
-          setProcessingSteps(prev => prev.map(s =>
-            s.id === 'pdf' ? { ...s, status: 'error', errorMessage: resultadoPDF.error } : s
-          ))
-          setProcessingProgress(100)
-        }
-      } catch (pdfError) {
-        console.error('❌ [InscricaoWizard] Erro ao gerar/enviar PDF (não crítico):', pdfError)
-        setProcessingSteps(prev => prev.map(s =>
-          s.id === 'pdf' ? { ...s, status: 'error', errorMessage: 'Erro ao gerar PDF' } : s
+          s.id === 'whatsapp' ? { ...s, status: 'error', errorMessage: resultadoFila.error } : s
         ))
         setProcessingProgress(100)
-        // Não bloqueia o fluxo - a inscrição já foi salva
+        setWhatsappSent(false)
       }
 
       console.log('🎉 [InscricaoWizard] Processo concluído com sucesso!')
@@ -618,11 +566,10 @@ export default function InscricaoWizard() {
     if (validateStep(4)) {
       setIsSubmitting(true)
 
-      // Inicializa as etapas do processo
+      // ✅ NOVO: Apenas 2 etapas (removida geração de PDF)
       const steps: ProcessStep[] = [
         { id: 'database', label: 'Salvando inscrição no banco de dados...', status: 'pending' },
-        { id: 'whatsapp', label: 'Enviando notificação pelo WhatsApp...', status: 'pending' },
-        { id: 'pdf', label: 'Gerando e enviando formulário PDF pelo WhatsApp...', status: 'pending' }
+        { id: 'whatsapp', label: 'Preparando notificação para envio via WhatsApp...', status: 'pending' }
       ]
       setProcessingSteps(steps)
       setProcessingProgress(0)
@@ -677,10 +624,10 @@ export default function InscricaoWizard() {
         setNumeroParticipante(numeroParticipanteRetornado)
         console.log('🎫 [InscricaoWizard] Número do participante:', numeroParticipanteRetornado)
 
-        // 2. Enviar mensagem de confirmação via WhatsApp
-        console.log('📱 [InscricaoWizard] Enviando mensagem de confirmação via WhatsApp...')
+        // 2. ✅ NOVO: Salvar mensagem na fila de WhatsApp (tbwhatsapp_send)
+        console.log('📱 [InscricaoWizard] Salvando mensagem na fila de WhatsApp (Corrida)...')
         setProcessingSteps(prev => prev.map(s => s.id === 'whatsapp' ? { ...s, status: 'processing' } : s))
-        setProcessingProgress(40)
+        setProcessingProgress(50)
 
         const categoriaFormatada = formData.modalidadeCorrida.toUpperCase()
 
@@ -691,77 +638,24 @@ export default function InscricaoWizard() {
           formData.tamanho
         )
 
-        const resultado = await sendWhatsAppMessage({
-          phoneNumber: formData.whatsapp,
-          message: mensagem
-        })
+        const resultadoFila = await salvarMensagemWhatsAppNaFila(
+          formData.whatsapp,
+          mensagem,
+          matriculaColaborador
+        )
 
-        if (resultado.success) {
-          console.log('✅ [InscricaoWizard] Mensagem WhatsApp enviada com sucesso!')
+        if (resultadoFila.success) {
+          console.log('✅ [InscricaoWizard] Mensagem salva na fila de WhatsApp com sucesso!')
           setProcessingSteps(prev => prev.map(s => s.id === 'whatsapp' ? { ...s, status: 'completed' } : s))
-          setProcessingProgress(66)
+          setProcessingProgress(100)
           setWhatsappSent(true)
         } else {
-          console.error('❌ [InscricaoWizard] Erro ao enviar mensagem WhatsApp:', resultado.error)
+          console.error('❌ [InscricaoWizard] Erro ao salvar mensagem na fila:', resultadoFila.error)
           setProcessingSteps(prev => prev.map(s =>
-            s.id === 'whatsapp' ? { ...s, status: 'error', errorMessage: resultado.error } : s
-          ))
-          // Mesmo com erro no WhatsApp, continua o fluxo
-          setWhatsappSent(false)
-        }
-
-        // 3. Gerar e enviar PDF do recibo via WhatsApp
-        try {
-          console.log('📄 [InscricaoWizard] Gerando PDF do recibo (Corrida)...')
-          setProcessingSteps(prev => prev.map(s => s.id === 'pdf' ? { ...s, status: 'processing' } : s))
-          setProcessingProgress(70)
-
-          const pdfBase64String = await gerarReciboPDFInterBase64({
-            nome: formData.nome,
-            email: formData.email,
-            cpf: formData.cpf,
-            whatsapp: formData.whatsapp,
-            numeroParticipante: numeroParticipanteRetornado,
-            tipoParticipacao: formData.tipoParticipacao as 'corrida-natal' | 'apenas-natal' | 'retirar-cesta',
-            modalidadeCorrida: formData.modalidadeCorrida,
-            tamanho: formData.tamanho,
-            whatsappSent: resultado.success
-          })
-
-          // Remove o prefixo "data:application/pdf;base64," se existir
-          const pdfBase64 = pdfBase64String.includes(',')
-            ? pdfBase64String.split(',')[1]
-            : pdfBase64String
-
-          console.log('✅ [InscricaoWizard] PDF gerado com sucesso!')
-          console.log('📤 [InscricaoWizard] Enviando PDF via WhatsApp...')
-
-          const resultadoPDF = await sendWhatsAppDocument({
-            phoneNumber: formData.whatsapp,
-            message: '📋 Aqui está o comprovante da sua inscrição em PDF!',
-            documentBase64: pdfBase64,
-            fileName: `Comprovante_Inscricao_${numeroParticipanteRetornado}.pdf`,
-            mimeType: 'application/pdf'
-          })
-
-          if (resultadoPDF.success) {
-            console.log('✅ [InscricaoWizard] PDF enviado via WhatsApp com sucesso!')
-            setProcessingSteps(prev => prev.map(s => s.id === 'pdf' ? { ...s, status: 'completed' } : s))
-            setProcessingProgress(100)
-          } else {
-            console.error('❌ [InscricaoWizard] Erro ao enviar PDF via WhatsApp:', resultadoPDF.error)
-            setProcessingSteps(prev => prev.map(s =>
-              s.id === 'pdf' ? { ...s, status: 'error', errorMessage: resultadoPDF.error } : s
-            ))
-            setProcessingProgress(100)
-          }
-        } catch (pdfError) {
-          console.error('❌ [InscricaoWizard] Erro ao gerar/enviar PDF (não crítico):', pdfError)
-          setProcessingSteps(prev => prev.map(s =>
-            s.id === 'pdf' ? { ...s, status: 'error', errorMessage: 'Erro ao gerar PDF' } : s
+            s.id === 'whatsapp' ? { ...s, status: 'error', errorMessage: resultadoFila.error } : s
           ))
           setProcessingProgress(100)
-          // Não bloqueia o fluxo - a inscrição já foi salva
+          setWhatsappSent(false)
         }
 
         console.log('🎉 [InscricaoWizard] Processo concluído com sucesso!')
@@ -1084,21 +978,6 @@ export default function InscricaoWizard() {
 
           {/* Corpo do Recibo */}
           <div className="space-y-2.5 py-1">
-            {/* Status - Confirmado para todos os tipos de participação */}
-            <div className="bg-green-50 border-l-4 border-green-400 p-2.5 rounded">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">✅</span>
-                <div className="flex-1">
-                  <p className="text-xs font-semibold text-green-800">Status: Confirmado</p>
-                  <p className="text-xs text-green-600">
-                    {formData.tipoParticipacao === 'retirar-cesta'
-                      ? 'Sua cesta estará disponível para retirada'
-                      : 'Sua inscrição foi confirmada com sucesso!'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Número do Participante/Registro */}
             <div className="bg-gradient-to-r from-primary-50 to-sky-50 border border-primary-200 rounded-lg p-2.5">
               <p className="text-xs text-slate-600 mb-0.5">
@@ -1230,9 +1109,6 @@ export default function InscricaoWizard() {
 
           {/* Rodapé do Recibo */}
           <div className="border-t-2 border-dashed border-slate-300 pt-3 mt-3">
-            <p className="text-center text-xs text-slate-400 mb-2">
-              II Corrida FARMACE - 2025.2
-            </p>
             <Button
               onClick={handleCloseSuccess}
               className="w-full bg-primary-600 hover:bg-primary-700 h-10 font-semibold text-sm text-white"
