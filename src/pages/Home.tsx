@@ -226,21 +226,6 @@ export default function Home() {
                   Contato
                   <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-sky-400 to-blue-500 group-hover:w-3/4 transition-all duration-300 rounded-full shadow-lg"></span>
                 </a>
-                <a
-                  href="/whatsapp"
-                  className={`px-5 py-2.5 font-light hover:font-bold transition-all duration-300 rounded-xl cursor-pointer relative group ${
-                    isOverLightBackground
-                      ? 'text-slate-900 hover:text-primary-600 hover:bg-slate-100'
-                      : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] hover:text-[#0a588a] hover:bg-white/20'
-                  }`}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    navigate('/whatsapp')
-                  }}
-                >
-                  WhatsApp
-                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-sky-400 to-blue-500 group-hover:w-3/4 transition-all duration-300 rounded-full shadow-lg"></span>
-                </a>
 
                 {/* Liquid Glass CTA Button */}
                 <div className="ml-4 relative group">
@@ -348,21 +333,6 @@ export default function Home() {
                 }}
               >
                 Contato
-              </a>
-              <a
-                href="/whatsapp"
-                className={`px-5 py-3.5 font-light hover:font-bold transition-all duration-300 rounded-xl cursor-pointer ${
-                  isOverLightBackground
-                    ? 'text-slate-900 hover:text-primary-600 hover:bg-slate-100'
-                    : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] hover:text-[#0a588a] hover:bg-white/20'
-                }`}
-                onClick={(e) => {
-                  e.preventDefault()
-                  setMobileMenuOpen(false)
-                  navigate('/whatsapp')
-                }}
-              >
-                WhatsApp
               </a>
               <div className="mt-2 relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-accent-400 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>

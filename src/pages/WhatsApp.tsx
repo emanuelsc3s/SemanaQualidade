@@ -18,16 +18,34 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { 
-  Loader2, 
-  Send, 
-  RefreshCw, 
+import { ModalWhatsAppEnvio, MensagemEnvio, EnvioStatus } from '@/components/ModalWhatsAppEnvio'
+import {
+  Loader2,
+  Send,
+  RefreshCw,
   Search,
   CheckSquare,
   Square,
   ArrowLeft,
-  AlertCircle
+  AlertCircle,
+  Settings
 } from 'lucide-react'
+
+// 🚨 CONSTANTES DE SEGURANÇA - NÃO ALTERAR
+const INTERVALO_MINIMO_SEGUNDOS = 15 // Intervalo mínimo obrigatório entre envios
+const STORAGE_KEY_MODO_TESTE = 'whatsapp_modo_teste' // Chave do localStorage
+
+// Função para obter modo teste do localStorage
+const getModoTeste = (): boolean => {
+  const stored = localStorage.getItem(STORAGE_KEY_MODO_TESTE)
+  return stored === 'true'
+}
+
+// Função para salvar modo teste no localStorage
+const setModoTeste = (valor: boolean): void => {
+  localStorage.setItem(STORAGE_KEY_MODO_TESTE, valor.toString())
+  console.log(`🔧 [Config] Modo teste ${valor ? 'ATIVADO' : 'DESATIVADO'}`)
+}
 
 export default function WhatsApp() {
   const navigate = useNavigate()
@@ -44,6 +62,17 @@ export default function WhatsApp() {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(25)
   const [totalItems, setTotalItems] = useState(0)
+
+  // Estados do Modal de Envio
+  const [modalEnvioAberto, setModalEnvioAberto] = useState(false)
+  const [mensagensEnvio, setMensagensEnvio] = useState<MensagemEnvio[]>([])
+  const [mensagemAtualIndex, setMensagemAtualIndex] = useState(0)
+  const [contadorRegressivo, setContadorRegressivo] = useState(0)
+  const [enviosConcluidos, setEnviosConcluidos] = useState(false)
+
+  // Estados de Configuração
+  const [modalConfigAberto, setModalConfigAberto] = useState(false)
+  const [modoTesteAtivo, setModoTesteAtivo] = useState(getModoTeste())
 
   // Carregar mensagens do Supabase
   const carregarMensagens = async () => {
@@ -109,104 +138,300 @@ export default function WhatsApp() {
     setMensagensSelecionadas(novasSelecoes)
   }
 
-  // Enviar mensagens selecionadas
+  // Enviar mensagens selecionadas com intervalo de 15 segundos
   const enviarMensagensSelecionadas = async () => {
     if (mensagensSelecionadas.size === 0) {
       alert('Selecione pelo menos uma mensagem para enviar')
       return
     }
 
-    const confirmacao = window.confirm(
-      `Deseja enviar ${mensagensSelecionadas.size} mensagem(ns) selecionada(s)?`
+    // Se for apenas 1 mensagem, envia direto sem modal
+    if (mensagensSelecionadas.size === 1) {
+      await enviarMensagemUnica()
+      return
+    }
+
+    // 🚨 SEGURANÇA: Confirmação dupla para envio em lote
+    const totalMensagens = mensagensSelecionadas.size
+    const tempoTotal = Math.ceil((totalMensagens - 1) * 15 / 60) // tempo em minutos
+
+    const confirmacao1 = window.confirm(
+      `⚠️ ATENÇÃO - ENVIO EM LOTE\n\n` +
+      `Você está prestes a enviar ${totalMensagens} mensagens.\n\n` +
+      `Para evitar banimento do WhatsApp:\n` +
+      `• Intervalo de 15 segundos entre cada envio\n` +
+      `• Tempo total estimado: ~${tempoTotal} minuto(s)\n` +
+      `• O processo NÃO pode ser cancelado após iniciar\n\n` +
+      `Deseja continuar?`
     )
 
-    if (!confirmacao) return
+    if (!confirmacao1) return
+
+    // Segunda confirmação
+    const confirmacao2 = window.confirm(
+      `🔒 CONFIRMAÇÃO FINAL\n\n` +
+      `Confirma o envio de ${totalMensagens} mensagens com intervalo de 15 segundos?\n\n` +
+      `Esta é sua última chance de cancelar.`
+    )
+
+    if (!confirmacao2) return
+
+    // Preparar lista de mensagens para o modal
+    const mensagensParaEnviar: MensagemEnvio[] = Array.from(mensagensSelecionadas).map(id => {
+      const mensagem = mensagens.find(m => m.id === id)
+      return {
+        id,
+        numero: mensagem?.numero || 'Desconhecido',
+        status: 'aguardando' as EnvioStatus
+      }
+    })
+
+    // Abrir modal e iniciar processo
+    setMensagensEnvio(mensagensParaEnviar)
+    setMensagemAtualIndex(0)
+    setContadorRegressivo(0)
+    setEnviosConcluidos(false)
+    setModalEnvioAberto(true)
+    setEnviando(true)
+
+    // Processar envios sequencialmente
+    await processarEnviosEmLote(mensagensParaEnviar)
+  }
+
+  // Enviar mensagem única (sem modal)
+  const enviarMensagemUnica = async () => {
+    const id = Array.from(mensagensSelecionadas)[0]
+    const mensagem = mensagens.find(m => m.id === id)
+    if (!mensagem) return
 
     try {
       setEnviando(true)
-      console.log(`📤 [WhatsApp] Enviando ${mensagensSelecionadas.size} mensagens...`)
+      console.log(`📤 [WhatsApp] Enviando mensagem única: ${id}`)
 
-      let enviadas = 0
-      let falhas = 0
-      const erros: Array<{ id: string; numero: string; error: string }> = []
+      // Atualizar status para "enviando"
+      await supabase
+        .from('tbwhatsapp_send')
+        .update({
+          status: 'enviando' as WhatsAppStatus,
+          attempts: mensagem.attempts + 1
+        })
+        .eq('id', id)
 
-      // Enviar cada mensagem selecionada
-      for (const id of mensagensSelecionadas) {
-        const mensagem = mensagens.find(m => m.id === id)
-        if (!mensagem) continue
+      // Enviar via API Evolution
+      const resultado = await sendWhatsAppMessage({
+        phoneNumber: mensagem.numero,
+        message: mensagem.message
+      })
 
-        try {
-          // Atualizar status para "enviando"
-          await supabase
-            .from('tbwhatsapp_send')
-            .update({ 
-              status: 'enviando' as WhatsAppStatus,
-              attempts: mensagem.attempts + 1
-            })
-            .eq('id', id)
-
-          // Enviar via API Evolution
-          const resultado = await sendWhatsAppMessage({
-            phoneNumber: mensagem.numero,
-            message: mensagem.message
+      if (resultado.success) {
+        await supabase
+          .from('tbwhatsapp_send')
+          .update({
+            status: 'enviado' as WhatsAppStatus,
+            sent_at: new Date().toISOString(),
+            processed_at: new Date().toISOString()
           })
+          .eq('id', id)
 
-          if (resultado.success) {
-            // Atualizar status para "enviado"
-            await supabase
-              .from('tbwhatsapp_send')
-              .update({ 
-                status: 'enviado' as WhatsAppStatus,
-                sent_at: new Date().toISOString(),
-                processed_at: new Date().toISOString()
-              })
-              .eq('id', id)
+        alert('✅ Mensagem enviada com sucesso!')
+      } else {
+        throw new Error(resultado.error || 'Erro desconhecido')
+      }
 
-            enviadas++
-            console.log(`✅ [WhatsApp] Mensagem ${id} enviada com sucesso`)
-          } else {
-            throw new Error(resultado.error || 'Erro desconhecido')
-          }
+    } catch (error: any) {
+      console.error(`❌ [WhatsApp] Erro ao enviar:`, error)
 
-        } catch (error: any) {
-          console.error(`❌ [WhatsApp] Erro ao enviar mensagem ${id}:`, error)
-          
-          // Atualizar status para "falhou"
-          await supabase
-            .from('tbwhatsapp_send')
-            .update({ 
-              status: 'falhou' as WhatsAppStatus,
-              last_error: error.message || 'Erro ao enviar',
-              processed_at: new Date().toISOString()
-            })
-            .eq('id', id)
+      await supabase
+        .from('tbwhatsapp_send')
+        .update({
+          status: 'falhou' as WhatsAppStatus,
+          last_error: error.message || 'Erro ao enviar',
+          processed_at: new Date().toISOString()
+        })
+        .eq('id', id)
 
-          falhas++
-          erros.push({
-            id,
-            numero: mensagem.numero,
-            error: error.message || 'Erro desconhecido'
-          })
+      alert(`❌ Erro ao enviar mensagem: ${error.message}`)
+    } finally {
+      setEnviando(false)
+      setMensagensSelecionadas(new Set())
+      await carregarMensagens()
+    }
+  }
+
+  // Processar envios em lote com intervalo de 15 segundos
+  const processarEnviosEmLote = async (mensagensParaEnviar: MensagemEnvio[]) => {
+    const timestampInicio = new Date().toISOString()
+    console.log(`\n${'='.repeat(80)}`)
+    console.log(`🚀 [WhatsApp] INICIANDO ENVIO EM LOTE`)
+    console.log(`📅 Timestamp: ${timestampInicio}`)
+    console.log(`📊 Total de mensagens: ${mensagensParaEnviar.length}`)
+    console.log(`⏱️  Intervalo configurado: ${INTERVALO_MINIMO_SEGUNDOS} segundos`)
+    console.log(`🧪 Modo teste: ${modoTesteAtivo ? 'SIM (não envia de verdade)' : 'NÃO (envio real)'}`)
+    console.log(`${'='.repeat(80)}\n`)
+
+    let timestampUltimoEnvio: number | null = null
+
+    for (let i = 0; i < mensagensParaEnviar.length; i++) {
+      const mensagemEnvio = mensagensParaEnviar[i]
+      setMensagemAtualIndex(i)
+
+      // 🚨 VALIDAÇÃO DE SEGURANÇA: Verificar intervalo mínimo
+      if (timestampUltimoEnvio !== null) {
+        const tempoDecorrido = (Date.now() - timestampUltimoEnvio) / 1000
+        if (tempoDecorrido < INTERVALO_MINIMO_SEGUNDOS) {
+          const tempoRestante = INTERVALO_MINIMO_SEGUNDOS - tempoDecorrido
+          console.warn(`⚠️  [SEGURANÇA] Intervalo insuficiente! Aguardando mais ${tempoRestante.toFixed(1)}s...`)
+          await new Promise(resolve => setTimeout(resolve, tempoRestante * 1000))
         }
       }
 
-      // Exibir resultado
-      let mensagemResultado = `✅ ${enviadas} mensagem(ns) enviada(s) com sucesso`
-      if (falhas > 0) {
-        mensagemResultado += `\n❌ ${falhas} mensagem(ns) falharam`
+      console.log(`\n--- Mensagem ${i + 1}/${mensagensParaEnviar.length} ---`)
+      console.log(`📞 Número: ${mensagemEnvio.numero}`)
+      console.log(`🆔 ID: ${mensagemEnvio.id}`)
+      console.log(`⏰ Timestamp: ${new Date().toISOString()}`)
+
+      // Atualizar status para "enviando"
+      setMensagensEnvio(prev =>
+        prev.map((m, idx) =>
+          idx === i ? { ...m, status: 'enviando' as EnvioStatus } : m
+        )
+      )
+
+      const mensagem = mensagens.find(m => m.id === mensagemEnvio.id)
+      if (!mensagem) {
+        console.error(`❌ [WhatsApp] Mensagem não encontrada no banco de dados`)
+        setMensagensEnvio(prev =>
+          prev.map((m, idx) =>
+            idx === i ? { ...m, status: 'falhou' as EnvioStatus, errorMessage: 'Mensagem não encontrada' } : m
+          )
+        )
+        continue
       }
-      alert(mensagemResultado)
 
-      // Limpar seleções e recarregar
-      setMensagensSelecionadas(new Set())
-      await carregarMensagens()
+      try {
+        // Atualizar status no banco para "enviando"
+        await supabase
+          .from('tbwhatsapp_send')
+          .update({
+            status: 'enviando' as WhatsAppStatus,
+            attempts: mensagem.attempts + 1
+          })
+          .eq('id', mensagemEnvio.id)
 
-    } catch (error: any) {
-      console.error('❌ [WhatsApp] Erro geral:', error)
-      alert(`Erro ao enviar mensagens: ${error.message}`)
-    } finally {
-      setEnviando(false)
+        // 🧪 MODO TESTE: Simular envio sem chamar API
+        let resultado
+        if (modoTesteAtivo) {
+          console.log(`🧪 [MODO TESTE] Simulando envio (não chama API real)`)
+          await new Promise(resolve => setTimeout(resolve, 500)) // Simula delay da API
+          resultado = { success: true }
+        } else {
+          // Enviar via API Evolution (ENVIO REAL)
+          console.log(`📤 [WhatsApp] Enviando via API Evolution...`)
+          resultado = await sendWhatsAppMessage({
+            phoneNumber: mensagem.numero,
+            message: mensagem.message
+          })
+        }
+
+        if (resultado.success) {
+          // Sucesso: atualizar banco e estado
+          await supabase
+            .from('tbwhatsapp_send')
+            .update({
+              status: 'enviado' as WhatsAppStatus,
+              sent_at: new Date().toISOString(),
+              processed_at: new Date().toISOString()
+            })
+            .eq('id', mensagemEnvio.id)
+
+          setMensagensEnvio(prev =>
+            prev.map((m, idx) =>
+              idx === i ? { ...m, status: 'enviado' as EnvioStatus } : m
+            )
+          )
+
+          timestampUltimoEnvio = Date.now()
+          console.log(`✅ [WhatsApp] Mensagem ${i + 1}/${mensagensParaEnviar.length} enviada com sucesso`)
+          console.log(`⏰ Timestamp do envio: ${new Date(timestampUltimoEnvio).toISOString()}`)
+        } else {
+          throw new Error(resultado.error || 'Erro desconhecido')
+        }
+
+      } catch (error: any) {
+        console.error(`❌ [WhatsApp] Erro ao enviar mensagem ${i + 1}:`, error)
+        console.error(`📋 Detalhes do erro:`, error.message)
+
+        // Falha: atualizar banco e estado
+        await supabase
+          .from('tbwhatsapp_send')
+          .update({
+            status: 'falhou' as WhatsAppStatus,
+            last_error: error.message || 'Erro ao enviar',
+            processed_at: new Date().toISOString()
+          })
+          .eq('id', mensagemEnvio.id)
+
+        setMensagensEnvio(prev =>
+          prev.map((m, idx) =>
+            idx === i ? {
+              ...m,
+              status: 'falhou' as EnvioStatus,
+              errorMessage: error.message || 'Erro ao enviar'
+            } : m
+          )
+        )
+      }
+
+      // Aguardar intervalo antes da próxima mensagem (exceto na última)
+      if (i < mensagensParaEnviar.length - 1) {
+        console.log(`\n⏳ [WhatsApp] Aguardando ${INTERVALO_MINIMO_SEGUNDOS} segundos antes da próxima mensagem...`)
+        console.log(`📊 Progresso: ${i + 1}/${mensagensParaEnviar.length} concluídas`)
+
+        // Contador regressivo
+        for (let segundos = INTERVALO_MINIMO_SEGUNDOS; segundos > 0; segundos--) {
+          setContadorRegressivo(segundos)
+          console.log(`⏱️  [WhatsApp] Contador: ${segundos}s restantes`)
+          await new Promise(resolve => setTimeout(resolve, 1000))
+        }
+
+        setContadorRegressivo(0)
+        console.log(`✅ [WhatsApp] Intervalo concluído. Próxima: ${i + 2}/${mensagensParaEnviar.length}`)
+      }
     }
+
+    // Finalizar processo
+    const timestampFim = new Date().toISOString()
+    console.log(`\n${'='.repeat(80)}`)
+    console.log(`🏁 [WhatsApp] ENVIO EM LOTE CONCLUÍDO`)
+    console.log(`📅 Timestamp início: ${timestampInicio}`)
+    console.log(`📅 Timestamp fim: ${timestampFim}`)
+    console.log(`📊 Total processado: ${mensagensParaEnviar.length} mensagens`)
+    console.log(`${'='.repeat(80)}\n`)
+
+    setEnviosConcluidos(true)
+    setEnviando(false)
+    setMensagensSelecionadas(new Set())
+
+    // Recarregar mensagens após 2 segundos
+    setTimeout(async () => {
+      await carregarMensagens()
+    }, 2000)
+  }
+
+  // Fechar modal de envio
+  const fecharModalEnvio = () => {
+    setModalEnvioAberto(false)
+    setMensagensEnvio([])
+    setMensagemAtualIndex(0)
+    setContadorRegressivo(0)
+    setEnviosConcluidos(false)
+  }
+
+  // Alternar modo teste
+  const alternarModoTeste = () => {
+    const novoValor = !modoTesteAtivo
+    setModoTesteAtivo(novoValor)
+    setModoTeste(novoValor)
   }
 
   // Filtrar mensagens por busca local
@@ -266,6 +491,16 @@ export default function WhatsApp() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setModalConfigAberto(true)}
+            className="flex items-center gap-2"
+            title="Configurações"
+          >
+            <Settings className="w-4 h-4" />
+            <span className="hidden sm:inline">Config</span>
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -479,6 +714,112 @@ export default function WhatsApp() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal de Configurações */}
+      {modalConfigAberto && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-6">
+            {/* Header */}
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Settings className="w-8 h-8 text-primary-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900">Configurações</h2>
+              <p className="text-sm text-slate-600 mt-1">
+                Ajustes de envio de mensagens
+              </p>
+            </div>
+
+            {/* Modo Teste */}
+            <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+                    🧪 Modo Teste
+                  </h3>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Quando ativado, simula o envio sem chamar a API real do WhatsApp
+                  </p>
+                </div>
+                <button
+                  onClick={alternarModoTeste}
+                  className={`
+                    relative inline-flex h-6 w-11 items-center rounded-full transition-colors
+                    ${modoTesteAtivo ? 'bg-green-600' : 'bg-slate-300'}
+                  `}
+                >
+                  <span
+                    className={`
+                      inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                      ${modoTesteAtivo ? 'translate-x-6' : 'translate-x-1'}
+                    `}
+                  />
+                </button>
+              </div>
+
+              {/* Status atual */}
+              <div className={`
+                rounded-lg p-3 text-sm font-medium text-center
+                ${modoTesteAtivo
+                  ? 'bg-green-100 text-green-800 border border-green-300'
+                  : 'bg-blue-100 text-blue-800 border border-blue-300'
+                }
+              `}>
+                {modoTesteAtivo ? (
+                  <>
+                    ✅ MODO TESTE ATIVO
+                    <br />
+                    <span className="text-xs font-normal">
+                      Mensagens NÃO serão enviadas de verdade
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    🚀 MODO PRODUÇÃO ATIVO
+                    <br />
+                    <span className="text-xs font-normal">
+                      Mensagens serão enviadas via API real
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Informações de Segurança */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <h4 className="font-semibold text-yellow-900 text-sm mb-2">
+                ⚠️ Informações Importantes
+              </h4>
+              <ul className="text-xs text-yellow-800 space-y-1">
+                <li>• Intervalo fixo de 15 segundos entre envios</li>
+                <li>• Use o modo teste antes de enviar em produção</li>
+                <li>• Evite enviar mais de 50 mensagens por vez</li>
+                <li>• A configuração é salva automaticamente</li>
+              </ul>
+            </div>
+
+            {/* Botão Fechar */}
+            <Button
+              onClick={() => setModalConfigAberto(false)}
+              className="w-full"
+              size="lg"
+            >
+              Fechar
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Envio em Lote */}
+      <ModalWhatsAppEnvio
+        open={modalEnvioAberto}
+        mensagens={mensagensEnvio}
+        mensagemAtualIndex={mensagemAtualIndex}
+        contadorRegressivo={contadorRegressivo}
+        concluido={enviosConcluidos}
+        onClose={fecharModalEnvio}
+        modoTeste={modoTesteAtivo}
+      />
     </div>
   )
 }
