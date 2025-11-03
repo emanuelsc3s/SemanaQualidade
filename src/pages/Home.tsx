@@ -218,6 +218,10 @@ export default function Home() {
                       ? 'text-slate-900 hover:text-primary-600 hover:bg-slate-100'
                       : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] hover:text-[#0a588a] hover:bg-white/20'
                   }`}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    document.getElementById('contato')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }}
                 >
                   Contato
                   <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-sky-400 to-blue-500 group-hover:w-3/4 transition-all duration-300 rounded-full shadow-lg"></span>
@@ -320,7 +324,13 @@ export default function Home() {
                     ? 'text-slate-900 hover:text-primary-600 hover:bg-slate-100'
                     : 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] hover:text-[#0a588a] hover:bg-white/20'
                 }`}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={(e) => {
+                  e.preventDefault()
+                  setMobileMenuOpen(false)
+                  setTimeout(() => {
+                    document.getElementById('contato')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }, 300)
+                }}
               >
                 Contato
               </a>
@@ -834,7 +844,7 @@ export default function Home() {
           </div>
 
           {/* Contact CTA */}
-          <div className="mt-10 md:mt-12">
+          <div id="contato" className="mt-10 md:mt-12 scroll-mt-24">
             {/* Layout Mobile-First: Coluna única em mobile, duas colunas em tablet/desktop */}
             <div className="max-w-4xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-8 bg-gradient-to-r from-sky-50 to-primary-50 rounded-2xl p-6 md:p-8 border-2 border-primary-100 px-4">
               {/* Coluna Esquerda: Conteúdo de Contato */}
