@@ -24,8 +24,6 @@ import {
   Send,
   RefreshCw,
   Search,
-  CheckSquare,
-  Square,
   ArrowLeft,
   AlertCircle,
   Settings
@@ -102,9 +100,10 @@ export default function WhatsApp() {
       setMensagens(data || [])
       setTotalItems(count || 0)
 
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar mensagens'
       console.error('❌ [WhatsApp] Erro:', error)
-      setErro(error.message || 'Erro ao carregar mensagens')
+      setErro(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -113,6 +112,7 @@ export default function WhatsApp() {
   // Carregar mensagens ao montar o componente
   useEffect(() => {
     carregarMensagens()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, itemsPerPage])
 
   // Selecionar/desselecionar todas as mensagens
@@ -238,19 +238,20 @@ export default function WhatsApp() {
         throw new Error(resultado.error || 'Erro desconhecido')
       }
 
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao enviar'
       console.error(`❌ [WhatsApp] Erro ao enviar:`, error)
 
       await supabase
         .from('tbwhatsapp_send')
         .update({
           status: 'falhou' as WhatsAppStatus,
-          last_error: error.message || 'Erro ao enviar',
+          last_error: errorMessage,
           processed_at: new Date().toISOString()
         })
         .eq('id', id)
 
-      alert(`❌ Erro ao enviar mensagem: ${error.message}`)
+      alert(`❌ Erro ao enviar mensagem: ${errorMessage}`)
     } finally {
       setEnviando(false)
       setMensagensSelecionadas(new Set())
@@ -357,16 +358,17 @@ export default function WhatsApp() {
           throw new Error(resultado.error || 'Erro desconhecido')
         }
 
-      } catch (error: any) {
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Erro ao enviar'
         console.error(`❌ [WhatsApp] Erro ao enviar mensagem ${i + 1}:`, error)
-        console.error(`📋 Detalhes do erro:`, error.message)
+        console.error(`📋 Detalhes do erro:`, errorMessage)
 
         // Falha: atualizar banco e estado
         await supabase
           .from('tbwhatsapp_send')
           .update({
             status: 'falhou' as WhatsAppStatus,
-            last_error: error.message || 'Erro ao enviar',
+            last_error: errorMessage,
             processed_at: new Date().toISOString()
           })
           .eq('id', mensagemEnvio.id)
@@ -376,7 +378,7 @@ export default function WhatsApp() {
             idx === i ? {
               ...m,
               status: 'falhou' as EnvioStatus,
-              errorMessage: error.message || 'Erro ao enviar'
+              errorMessage
             } : m
           )
         )

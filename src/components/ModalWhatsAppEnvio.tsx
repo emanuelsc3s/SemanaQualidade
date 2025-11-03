@@ -77,9 +77,6 @@ export function ModalWhatsAppEnvio({
   const mensagensFalhas = mensagens.filter(m => m.status === 'falhou').length
   const progresso = totalMensagens > 0 ? Math.round((mensagensEnviadas / totalMensagens) * 100) : 0
 
-  // Mensagem atual
-  const mensagemAtual = mensagens[mensagemAtualIndex]
-
   // CORREÇÃO: O contador deve aparecer quando:
   // 1. Não está concluído
   // 2. Há um contador regressivo ativo (> 0)
@@ -192,8 +189,6 @@ export function ModalWhatsAppEnvio({
             {/* Lista de Mensagens */}
             <div className="space-y-2 max-h-[300px] sm:max-h-[400px] overflow-y-auto pr-2">
               {mensagens.map((mensagem, index) => {
-                const isAtual = index === mensagemAtualIndex
-                
                 return (
                   <div
                     key={mensagem.id}
