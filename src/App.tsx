@@ -3,6 +3,7 @@ import Home from './pages/Home'
 import InscricaoWizard from './pages/InscricaoWizard'
 import LoginInscricao from './pages/LoginInscricao'
 import TestePDF from './pages/TestePDF'
+import WhatsApp from './pages/WhatsApp'
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/loginInscricao" element={<LoginInscricao />} />
         <Route path="/inscricao" element={<InscricaoWizard />} />
         <Route path="/teste-pdf" element={<TestePDF />} />
+        <Route path="/whatsapp" element={<WhatsApp />} />
       </Routes>
     </BrowserRouter>
   )
