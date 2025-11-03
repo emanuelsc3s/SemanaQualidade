@@ -100,7 +100,7 @@ export function ModalWhatsAppEnvio({
       }}
     >
       <DialogContent
-        className="max-w-md sm:max-w-lg"
+        className="max-w-md sm:max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
         onInteractOutside={(e) => {
           // Previne o fechamento ao clicar fora se não estiver concluído
           if (!concluido) {
@@ -115,10 +115,10 @@ export function ModalWhatsAppEnvio({
         }}
         hideCloseButton={!concluido}
       >
-        <Card className="border-0 shadow-none">
-          <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-            {/* Cabeçalho */}
-            <div className="text-center space-y-2">
+        <Card className="border-0 shadow-none flex flex-col overflow-hidden h-full">
+          <CardContent className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6 overflow-hidden h-full">
+            {/* Cabeçalho - Fixo (sem scroll) */}
+            <div className="flex-shrink-0 text-center space-y-2">
               <div className="flex items-center justify-center gap-2 mb-2">
                 {concluido ? (
                   <CheckCircle2 className="w-8 h-8 text-green-600" />
@@ -149,8 +149,8 @@ export function ModalWhatsAppEnvio({
               )}
             </div>
 
-            {/* Barra de Progresso Linear */}
-            <div className="space-y-2">
+            {/* Barra de Progresso Linear - Fixo (sem scroll) */}
+            <div className="flex-shrink-0 space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium text-slate-700">
                   Progresso: {mensagensEnviadas}/{totalMensagens}
@@ -167,9 +167,9 @@ export function ModalWhatsAppEnvio({
               </div>
             </div>
 
-            {/* Contador Regressivo */}
+            {/* Contador Regressivo - Fixo (sem scroll) */}
             {mostrarContador && (
-              <div className="bg-gradient-to-br from-sky-50 to-blue-50 border-2 border-sky-300 rounded-lg p-4 text-center shadow-sm">
+              <div className="flex-shrink-0 bg-gradient-to-br from-sky-50 to-blue-50 border-2 border-sky-300 rounded-lg p-4 text-center shadow-sm">
                 <div className="flex items-center justify-center gap-2 mb-3">
                   <Clock className="w-6 h-6 text-sky-600" />
                   <span className="text-sm font-semibold text-sky-800">
@@ -186,8 +186,8 @@ export function ModalWhatsAppEnvio({
               </div>
             )}
 
-            {/* Lista de Mensagens */}
-            <div className="space-y-2 max-h-[300px] sm:max-h-[400px] overflow-y-auto pr-2">
+            {/* Lista de Mensagens - COM SCROLL (área scrollável) */}
+            <div className="flex-1 overflow-y-auto pr-2 space-y-2 min-h-0">
               {mensagens.map((mensagem, index) => {
                 return (
                   <div
@@ -264,9 +264,9 @@ export function ModalWhatsAppEnvio({
               })}
             </div>
 
-            {/* Resumo Final (quando concluído) */}
+            {/* Resumo Final (quando concluído) - Fixo (sem scroll) */}
             {concluido && (
-              <div className="space-y-3 pt-2 border-t">
+              <div className="flex-shrink-0 space-y-3 pt-2 border-t">
                 <div className="grid grid-cols-2 gap-3 text-center">
                   <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                     <div className="text-2xl font-bold text-green-600">

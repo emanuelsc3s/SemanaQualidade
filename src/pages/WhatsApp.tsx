@@ -29,9 +29,23 @@ import {
   Settings
 } from 'lucide-react'
 
-// 🚨 CONSTANTES DE SEGURANÇA - NÃO ALTERAR
-const INTERVALO_MINIMO_SEGUNDOS = 15 // Intervalo mínimo obrigatório entre envios
+// 🚨 CONSTANTES DE SEGURANÇA - INTERVALOS ALEATÓRIOS
+const INTERVALO_MINIMO_SEGUNDOS = 10 // Intervalo mínimo entre envios (segundos)
+const INTERVALO_MAXIMO_SEGUNDOS = 45 // Intervalo máximo entre envios (segundos)
 const STORAGE_KEY_MODO_TESTE = 'whatsapp_modo_teste' // Chave do localStorage
+
+/**
+ * Gera um intervalo aleatório entre min e max segundos
+ * Cada chamada retorna um valor único e imprevisível
+ * @param min Intervalo mínimo em segundos (padrão: 10)
+ * @param max Intervalo máximo em segundos (padrão: 45)
+ * @returns Intervalo aleatório em segundos
+ */
+const gerarIntervaloAleatorio = (min: number = 10, max: number = 45): number => {
+  const intervalo = Math.floor(Math.random() * (max - min + 1)) + min
+  console.log(`🎲 [Randomização] Intervalo gerado: ${intervalo}s (entre ${min}s e ${max}s)`)
+  return intervalo
+}
 
 // Função para obter modo teste do localStorage
 const getModoTeste = (): boolean => {
@@ -153,14 +167,15 @@ export default function WhatsApp() {
 
     // 🚨 SEGURANÇA: Confirmação dupla para envio em lote
     const totalMensagens = mensagensSelecionadas.size
-    const tempoTotal = Math.ceil((totalMensagens - 1) * 15 / 60) // tempo em minutos
+    const tempoMedio = Math.ceil((INTERVALO_MINIMO_SEGUNDOS + INTERVALO_MAXIMO_SEGUNDOS) / 2)
+    const tempoTotal = Math.ceil((totalMensagens - 1) * tempoMedio / 60) // tempo em minutos
 
     const confirmacao1 = window.confirm(
       `⚠️ ATENÇÃO - ENVIO EM LOTE\n\n` +
       `Você está prestes a enviar ${totalMensagens} mensagens.\n\n` +
       `Para evitar banimento do WhatsApp:\n` +
-      `• Intervalo de 15 segundos entre cada envio\n` +
-      `• Tempo total estimado: ~${tempoTotal} minuto(s)\n` +
+      `• Intervalo ALEATÓRIO entre ${INTERVALO_MINIMO_SEGUNDOS}-${INTERVALO_MAXIMO_SEGUNDOS} segundos entre cada envio\n` +
+      `• Tempo total estimado: ~${tempoTotal} minuto(s) (pode variar)\n` +
       `• O processo NÃO pode ser cancelado após iniciar\n\n` +
       `Deseja continuar?`
     )
@@ -170,7 +185,7 @@ export default function WhatsApp() {
     // Segunda confirmação
     const confirmacao2 = window.confirm(
       `🔒 CONFIRMAÇÃO FINAL\n\n` +
-      `Confirma o envio de ${totalMensagens} mensagens com intervalo de 15 segundos?\n\n` +
+      `Confirma o envio de ${totalMensagens} mensagens com intervalo aleatório de ${INTERVALO_MINIMO_SEGUNDOS}-${INTERVALO_MAXIMO_SEGUNDOS} segundos?\n\n` +
       `Esta é sua última chance de cancelar.`
     )
 
@@ -259,14 +274,14 @@ export default function WhatsApp() {
     }
   }
 
-  // Processar envios em lote com intervalo de 15 segundos
+  // Processar envios em lote com intervalo aleatório entre 10-45 segundos
   const processarEnviosEmLote = async (mensagensParaEnviar: MensagemEnvio[]) => {
     const timestampInicio = new Date().toISOString()
     console.log(`\n${'='.repeat(80)}`)
     console.log(`🚀 [WhatsApp] INICIANDO ENVIO EM LOTE`)
     console.log(`📅 Timestamp: ${timestampInicio}`)
     console.log(`📊 Total de mensagens: ${mensagensParaEnviar.length}`)
-    console.log(`⏱️  Intervalo configurado: ${INTERVALO_MINIMO_SEGUNDOS} segundos`)
+    console.log(`⏱️  Intervalo configurado: ${INTERVALO_MINIMO_SEGUNDOS}-${INTERVALO_MAXIMO_SEGUNDOS} segundos (aleatório)`)
     console.log(`🧪 Modo teste: ${modoTesteAtivo ? 'SIM (não envia de verdade)' : 'NÃO (envio real)'}`)
     console.log(`${'='.repeat(80)}\n`)
 
@@ -384,20 +399,24 @@ export default function WhatsApp() {
         )
       }
 
-      // Aguardar intervalo antes da próxima mensagem (exceto na última)
+      // Aguardar intervalo ALEATÓRIO antes da próxima mensagem (exceto na última)
       if (i < mensagensParaEnviar.length - 1) {
-        console.log(`\n⏳ [WhatsApp] Aguardando ${INTERVALO_MINIMO_SEGUNDOS} segundos antes da próxima mensagem...`)
+        // 🎲 GERAR INTERVALO ALEATÓRIO para cada mensagem
+        const intervaloAleatorio = gerarIntervaloAleatorio(INTERVALO_MINIMO_SEGUNDOS, INTERVALO_MAXIMO_SEGUNDOS)
+
+        console.log(`\n⏳ [WhatsApp] Aguardando ${intervaloAleatorio} segundos antes da próxima mensagem...`)
+        console.log(`🎲 [WhatsApp] Intervalo randomizado entre ${INTERVALO_MINIMO_SEGUNDOS}-${INTERVALO_MAXIMO_SEGUNDOS}s`)
         console.log(`📊 Progresso: ${i + 1}/${mensagensParaEnviar.length} concluídas`)
 
-        // Contador regressivo
-        for (let segundos = INTERVALO_MINIMO_SEGUNDOS; segundos > 0; segundos--) {
+        // Contador regressivo com intervalo ALEATÓRIO
+        for (let segundos = intervaloAleatorio; segundos > 0; segundos--) {
           setContadorRegressivo(segundos)
-          console.log(`⏱️  [WhatsApp] Contador: ${segundos}s restantes`)
+          console.log(`⏱️  [WhatsApp] Contador: ${segundos}s restantes (intervalo: ${intervaloAleatorio}s)`)
           await new Promise(resolve => setTimeout(resolve, 1000))
         }
 
         setContadorRegressivo(0)
-        console.log(`✅ [WhatsApp] Intervalo concluído. Próxima: ${i + 2}/${mensagensParaEnviar.length}`)
+        console.log(`✅ [WhatsApp] Intervalo de ${intervaloAleatorio}s concluído. Próxima: ${i + 2}/${mensagensParaEnviar.length}`)
       }
     }
 
@@ -824,7 +843,7 @@ export default function WhatsApp() {
                 ⚠️ Informações Importantes
               </h4>
               <ul className="text-xs text-yellow-800 space-y-1.5">
-                <li>• Intervalo fixo de 15 segundos entre envios</li>
+                <li>• Intervalo aleatório de {INTERVALO_MINIMO_SEGUNDOS}-{INTERVALO_MAXIMO_SEGUNDOS} segundos entre envios</li>
                 <li>• Use o modo teste antes de enviar em produção</li>
                 <li>• Evite enviar mais de 50 mensagens por vez</li>
                 <li>• A configuração é salva automaticamente</li>
