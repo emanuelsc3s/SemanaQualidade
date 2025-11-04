@@ -705,8 +705,8 @@ export default function WhatsApp() {
       </div>
 
       {/* Card Principal */}
-      <Card className="shadow-lg border-0">
-        <CardHeader className="border-b bg-white/50 backdrop-blur p-4 sm:p-6">
+      <Card className="shadow-lg border-0 overflow-visible">
+        <CardHeader className="border-b bg-white p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {/* Total de mensagens */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
@@ -731,7 +731,7 @@ export default function WhatsApp() {
                 <SelectTrigger className="w-full sm:w-[160px] bg-white border-slate-300 hover:border-primary-400 focus:border-primary-500 transition-all duration-300">
                   <SelectValue placeholder="Buscar por..." />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper" sideOffset={0} className="z-[9999] data-[side=bottom]:translate-y-0 -mt-px bg-white border border-slate-200">
                   <SelectItem value="numero">
                     <div className="flex items-center gap-2">
                       <span className="text-sm">📱</span>
@@ -812,7 +812,7 @@ export default function WhatsApp() {
           {!loading && !erro && mensagens.length > 0 && (
             <>
               {/* Barra de ações */}
-              <div className="p-4 sm:p-6 border-b bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="p-4 sm:p-6 bg-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 relative">
                 <div className="flex items-center gap-3">
                   <Checkbox
                     checked={mensagensSelecionadas.size === mensagensFiltradas.length && mensagensFiltradas.length > 0}
