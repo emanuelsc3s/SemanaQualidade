@@ -45,8 +45,12 @@ interface ModalWhatsAppEnvioProps {
   contadorRegressivo: number
   /** Indica se o processo foi concluído */
   concluido: boolean
+  /** Indica se o processo está pausado (aguardando confirmação de cancelamento) */
+  pausado: boolean
   /** Callback para fechar o modal (só funciona quando concluído) */
   onClose: () => void
+  /** Callback para solicitar cancelamento do envio */
+  onCancelar: () => void
   /** Modo teste ativado (opcional) */
   modoTeste?: boolean
 }
@@ -68,7 +72,9 @@ export function ModalWhatsAppEnvio({
   mensagemAtualIndex,
   contadorRegressivo,
   concluido,
+  pausado,
   onClose,
+  onCancelar,
   modoTeste = false
 }: ModalWhatsAppEnvioProps) {
   // Calcular estatísticas
@@ -167,8 +173,27 @@ export function ModalWhatsAppEnvio({
               </div>
             </div>
 
+            {/* Banner de Pausado - Aparece quando o processo está pausado */}
+            {pausado && (
+              <div className="flex-shrink-0 bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-400 rounded-lg p-4 animate-pulse">
+                <div className="flex items-center justify-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center">
+                    <span className="text-2xl">⏸️</span>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-bold text-yellow-900">
+                      Processo Pausado
+                    </p>
+                    <p className="text-xs text-yellow-800">
+                      Aguardando sua decisão...
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Contador Regressivo - Fixo (sem scroll) */}
-            {mostrarContador && (
+            {mostrarContador && !pausado && (
               <div className="flex-shrink-0 bg-gradient-to-br from-sky-50 to-blue-50 border-2 border-sky-300 rounded-lg p-4 text-center shadow-sm">
                 <div className="flex items-center justify-center gap-2 mb-3">
                   <Clock className="w-6 h-6 text-sky-600" />
@@ -183,6 +208,21 @@ export function ModalWhatsAppEnvio({
                   <p>✅ Mensagem {mensagemAtualIndex + 1} enviada</p>
                   <p>⏳ Aguardando para enviar mensagem {mensagemAtualIndex + 2}</p>
                 </div>
+              </div>
+            )}
+
+            {/* Botão Cancelar - Visível apenas durante o envio (não concluído) */}
+            {!concluido && (
+              <div className="flex-shrink-0">
+                <Button
+                  onClick={onCancelar}
+                  variant="outline"
+                  className="w-full border-2 border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400 transition-all duration-300"
+                  size="lg"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Cancelar Envio
+                </Button>
               </div>
             )}
 

@@ -9,7 +9,8 @@
  * - Design responsivo mobile-first
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/services/supabase'
 import { sendWhatsAppMessage } from '@/services/whatsappService'
@@ -81,6 +82,17 @@ export default function WhatsApp() {
   const [mensagemAtualIndex, setMensagemAtualIndex] = useState(0)
   const [contadorRegressivo, setContadorRegressivo] = useState(0)
   const [enviosConcluidos, setEnviosConcluidos] = useState(false)
+
+  // Estados de Cancelamento
+  const [modalCancelarAberto, setModalCancelarAberto] = useState(false)
+
+  // 🔴 CRÍTICO: Usar useRef para flags de controle (não useState)
+  // Refs são atualizadas imediatamente e funcionam corretamente em loops assíncronos
+  const cancelarEnvioRef = useRef(false) // Flag de cancelamento
+  const processoPausadoRef = useRef(false) // Flag de pausa
+
+  // Estado visual separado para forçar re-render do componente quando pausado
+  const [processoPausadoUI, setProcessoPausadoUI] = useState(false)
 
   // Estados de Configuração
   const [modalConfigAberto, setModalConfigAberto] = useState(false)
@@ -285,9 +297,36 @@ export default function WhatsApp() {
     console.log(`🧪 Modo teste: ${modoTesteAtivo ? 'SIM (não envia de verdade)' : 'NÃO (envio real)'}`)
     console.log(`${'='.repeat(80)}\n`)
 
+    // 🚨 RESETAR flags de controle no início
+    cancelarEnvioRef.current = false
+    processoPausadoRef.current = false
+    setProcessoPausadoUI(false)
+
     let timestampUltimoEnvio: number | null = null
 
     for (let i = 0; i < mensagensParaEnviar.length; i++) {
+      // 🛑 VERIFICAR CANCELAMENTO antes de processar cada mensagem
+      if (cancelarEnvioRef.current) {
+        console.log(`\n${'='.repeat(80)}`)
+        console.log(`🛑 [WhatsApp] ENVIO CANCELADO PELO USUÁRIO`)
+        console.log(`📊 Mensagens enviadas: ${i}/${mensagensParaEnviar.length}`)
+        console.log(`📅 Timestamp cancelamento: ${new Date().toISOString()}`)
+        console.log(`${'='.repeat(80)}\n`)
+
+        // Marcar processo como concluído (mesmo que cancelado)
+        setEnviosConcluidos(true)
+        setEnviando(false)
+        setMensagensSelecionadas(new Set())
+        setModalCancelarAberto(false) // Fechar modal de confirmação
+        setModalEnvioAberto(false) // Fechar modal de progresso
+
+        // Recarregar mensagens após 2 segundos
+        setTimeout(async () => {
+          await carregarMensagens()
+        }, 2000)
+
+        return // Sair da função imediatamente
+      }
       const mensagemEnvio = mensagensParaEnviar[i]
       setMensagemAtualIndex(i)
 
@@ -408,15 +447,50 @@ export default function WhatsApp() {
         console.log(`🎲 [WhatsApp] Intervalo randomizado entre ${INTERVALO_MINIMO_SEGUNDOS}-${INTERVALO_MAXIMO_SEGUNDOS}s`)
         console.log(`📊 Progresso: ${i + 1}/${mensagensParaEnviar.length} concluídas`)
 
-        // Contador regressivo com intervalo ALEATÓRIO
-        for (let segundos = intervaloAleatorio; segundos > 0; segundos--) {
-          setContadorRegressivo(segundos)
-          console.log(`⏱️  [WhatsApp] Contador: ${segundos}s restantes (intervalo: ${intervaloAleatorio}s)`)
+        // Contador regressivo com intervalo ALEATÓRIO e suporte a PAUSA
+        let segundosRestantes = intervaloAleatorio
+
+        while (segundosRestantes > 0) {
+          // 🛑 VERIFICAR CANCELAMENTO durante o contador regressivo
+          if (cancelarEnvioRef.current) {
+            console.log(`🛑 [WhatsApp] Cancelamento detectado durante contador regressivo`)
+            setContadorRegressivo(0)
+            break // Sair do loop do contador
+          }
+
+          // ⏸️ VERIFICAR PAUSA - Aguardar enquanto estiver pausado
+          if (processoPausadoRef.current) {
+            console.log(`⏸️  [WhatsApp] Processo PAUSADO - Aguardando decisão do usuário...`)
+            console.log(`⏸️  [WhatsApp] Tempo restante salvo: ${segundosRestantes}s`)
+
+            // POLLING: Verificar a cada 100ms se ainda está pausado
+            while (processoPausadoRef.current && !cancelarEnvioRef.current) {
+              await new Promise(resolve => setTimeout(resolve, 100))
+            }
+
+            // Se foi cancelado durante a pausa, sair
+            if (cancelarEnvioRef.current) {
+              console.log(`🛑 [WhatsApp] Cancelamento confirmado durante pausa`)
+              setContadorRegressivo(0)
+              break
+            }
+
+            // Se chegou aqui, foi retomado - continuar de onde parou
+            console.log(`▶️  [WhatsApp] Processo RETOMADO - Continuando contador de ${segundosRestantes}s`)
+          }
+
+          setContadorRegressivo(segundosRestantes)
+          console.log(`⏱️  [WhatsApp] Contador: ${segundosRestantes}s restantes (intervalo: ${intervaloAleatorio}s)`)
           await new Promise(resolve => setTimeout(resolve, 1000))
+          segundosRestantes--
         }
 
         setContadorRegressivo(0)
-        console.log(`✅ [WhatsApp] Intervalo de ${intervaloAleatorio}s concluído. Próxima: ${i + 2}/${mensagensParaEnviar.length}`)
+
+        // Se foi cancelado, não logar conclusão do intervalo
+        if (!cancelarEnvioRef.current) {
+          console.log(`✅ [WhatsApp] Intervalo de ${intervaloAleatorio}s concluído. Próxima: ${i + 2}/${mensagensParaEnviar.length}`)
+        }
       }
     }
 
@@ -446,6 +520,35 @@ export default function WhatsApp() {
     setMensagemAtualIndex(0)
     setContadorRegressivo(0)
     setEnviosConcluidos(false)
+    cancelarEnvioRef.current = false // Resetar flag de cancelamento
+    processoPausadoRef.current = false // Resetar flag de pausa
+    setProcessoPausadoUI(false)
+  }
+
+  // Solicitar cancelamento (abre modal de confirmação e PAUSA o processo)
+  const solicitarCancelamento = () => {
+    console.log('⏸️  [WhatsApp] Solicitação de cancelamento - PAUSANDO processo...')
+    processoPausadoRef.current = true // 🔴 PAUSAR IMEDIATAMENTE
+    setProcessoPausadoUI(true) // Atualizar UI
+    setModalCancelarAberto(true)
+  }
+
+  // Confirmar cancelamento
+  const confirmarCancelamento = () => {
+    console.log('🛑 [WhatsApp] Usuário confirmou cancelamento - Processo será interrompido IMEDIATAMENTE')
+    cancelarEnvioRef.current = true // 🔴 CANCELAR IMEDIATAMENTE
+    processoPausadoRef.current = false // Despausar para permitir que o loop detecte o cancelamento
+    setProcessoPausadoUI(false)
+    setModalCancelarAberto(false)
+    console.log('🛑 [WhatsApp] Flags atualizadas: cancelarEnvio=true, processoPausado=false')
+  }
+
+  // Cancelar o cancelamento (continuar enviando - RETOMAR processo)
+  const cancelarCancelamento = () => {
+    console.log('▶️  [WhatsApp] Usuário optou por continuar enviando - RETOMANDO processo...')
+    processoPausadoRef.current = false // 🟢 RETOMAR processo
+    setProcessoPausadoUI(false)
+    setModalCancelarAberto(false)
   }
 
   // Alternar modo teste
@@ -869,9 +972,96 @@ export default function WhatsApp() {
         mensagemAtualIndex={mensagemAtualIndex}
         contadorRegressivo={contadorRegressivo}
         concluido={enviosConcluidos}
+        pausado={processoPausadoUI}
         onClose={fecharModalEnvio}
+        onCancelar={solicitarCancelamento}
         modoTeste={modoTesteAtivo}
       />
+
+      {/* Modal de Confirmação de Cancelamento - Renderizado via Portal */}
+      {modalCancelarAberto && createPortal(
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 pointer-events-auto"
+          onClick={(e) => {
+            // Fecha o modal se clicar no backdrop
+            if (e.target === e.currentTarget) {
+              cancelarCancelamento()
+            }
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-6 space-y-4 sm:space-y-6 animate-in fade-in duration-300 relative z-[10000] pointer-events-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="text-center space-y-2">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                  <AlertCircle className="w-6 h-6 text-red-600" />
+                </div>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                Cancelar Envio?
+              </h2>
+              <p className="text-sm text-slate-600">
+                Tem certeza que deseja cancelar o envio de mensagens?
+              </p>
+            </div>
+
+            {/* Aviso */}
+            <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+              <p className="text-sm text-yellow-800">
+                ⚠️ O processo será interrompido <strong>imediatamente</strong>.
+              </p>
+              <p className="text-xs text-yellow-700 mt-2">
+                As mensagens já enviadas não serão afetadas, mas as mensagens restantes não serão enviadas.
+              </p>
+            </div>
+
+            {/* Estatísticas */}
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <div className="grid grid-cols-2 gap-3 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {mensagensEnvio.filter(m => m.status === 'enviado').length}
+                  </div>
+                  <div className="text-xs text-slate-600 mt-1">
+                    Já enviadas
+                  </div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-slate-600">
+                    {mensagensEnvio.filter(m => m.status === 'aguardando').length}
+                  </div>
+                  <div className="text-xs text-slate-600 mt-1">
+                    Restantes
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Botões */}
+            <div className="flex flex-col-reverse sm:flex-row gap-3">
+              <Button
+                onClick={cancelarCancelamento}
+                variant="outline"
+                className="flex-1 border-2 hover:bg-slate-50 transition-colors duration-300 relative z-[10001]"
+                size="lg"
+              >
+                Não, continuar enviando
+              </Button>
+              <Button
+                onClick={confirmarCancelamento}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white transition-colors duration-300 relative z-[10001]"
+                size="lg"
+              >
+                Sim, cancelar envio
+              </Button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }
