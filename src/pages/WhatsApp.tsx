@@ -19,6 +19,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { ModalWhatsAppEnvio, MensagemEnvio, EnvioStatus } from '@/components/ModalWhatsAppEnvio'
 import {
   Loader2,
@@ -70,6 +77,7 @@ export default function WhatsApp() {
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [searchCriteria, setSearchCriteria] = useState<'numero' | 'matricula' | 'status'>('numero')
 
   // Paginação
   const [currentPage, setCurrentPage] = useState(1)
@@ -98,22 +106,52 @@ export default function WhatsApp() {
   const [modalConfigAberto, setModalConfigAberto] = useState(false)
   const [modoTesteAtivo, setModoTesteAtivo] = useState(getModoTeste())
 
-  // Carregar mensagens do Supabase
+  // Carregar mensagens do Supabase com filtros de busca
   const carregarMensagens = async () => {
     try {
       setLoading(true)
       setErro(null)
 
       console.log('📥 [WhatsApp] Carregando mensagens...')
+      console.log('🔍 [WhatsApp] Critério de busca:', searchCriteria)
+      console.log('🔍 [WhatsApp] Termo de busca:', searchTerm)
 
       // Calcular offset para paginação
       const from = (currentPage - 1) * itemsPerPage
       const to = from + itemsPerPage - 1
 
-      // Buscar mensagens com paginação
-      const { data, error, count } = await supabase
+      // Iniciar query base
+      let query = supabase
         .from('tbwhatsapp_send')
         .select('*', { count: 'exact' })
+
+      // Aplicar filtros de busca no servidor (Supabase)
+      if (searchTerm && searchTerm.trim() !== '') {
+        const termo = searchTerm.trim()
+
+        switch (searchCriteria) {
+          case 'numero':
+            // Busca por número (contém o termo)
+            query = query.ilike('numero', `%${termo}%`)
+            console.log('🔍 [WhatsApp] Filtrando por número:', termo)
+            break
+
+          case 'matricula':
+            // Busca por matrícula (contém o termo)
+            query = query.ilike('matricula', `%${termo}%`)
+            console.log('🔍 [WhatsApp] Filtrando por matrícula:', termo)
+            break
+
+          case 'status':
+            // Busca por status (contém o termo)
+            query = query.ilike('status', `%${termo}%`)
+            console.log('🔍 [WhatsApp] Filtrando por status:', termo)
+            break
+        }
+      }
+
+      // Aplicar ordenação e paginação
+      const { data, error, count } = await query
         .order('created_at', { ascending: false })
         .range(from, to)
 
@@ -123,6 +161,7 @@ export default function WhatsApp() {
       }
 
       console.log(`✅ [WhatsApp] ${data?.length || 0} mensagens carregadas`)
+      console.log(`📊 [WhatsApp] Total de registros (com filtro): ${count || 0}`)
       setMensagens(data || [])
       setTotalItems(count || 0)
 
@@ -135,11 +174,25 @@ export default function WhatsApp() {
     }
   }
 
-  // Carregar mensagens ao montar o componente
+  // Debounce para busca - aguarda 500ms após o usuário parar de digitar
   useEffect(() => {
-    carregarMensagens()
+    // Resetar para página 1 quando mudar o termo de busca ou critério
+    if (searchTerm || searchCriteria) {
+      setCurrentPage(1)
+    }
+  }, [searchTerm, searchCriteria])
+
+  // Carregar mensagens ao montar o componente e quando filtros mudarem
+  useEffect(() => {
+    // Debounce: aguardar 500ms após o usuário parar de digitar
+    const timeoutId = setTimeout(() => {
+      carregarMensagens()
+    }, 500)
+
+    // Limpar timeout se o usuário continuar digitando
+    return () => clearTimeout(timeoutId)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, itemsPerPage])
+  }, [currentPage, itemsPerPage, searchTerm, searchCriteria])
 
   // Selecionar/desselecionar todas as mensagens
   const toggleSelecionarTodas = () => {
@@ -558,17 +611,9 @@ export default function WhatsApp() {
     setModoTeste(novoValor)
   }
 
-  // Filtrar mensagens por busca local
-  const mensagensFiltradas = mensagens.filter(m => {
-    if (!searchTerm) return true
-    const termo = searchTerm.toLowerCase()
-    return (
-      m.numero.includes(termo) ||
-      m.message.toLowerCase().includes(termo) ||
-      m.status.toLowerCase().includes(termo) ||
-      (m.matricula && m.matricula.toLowerCase().includes(termo))
-    )
-  })
+  // Mensagens já vêm filtradas do servidor (Supabase)
+  // Não é necessário filtrar localmente
+  const mensagensFiltradas = mensagens
 
   // Calcular total de páginas
   const totalPages = Math.ceil(totalItems / itemsPerPage)
@@ -664,23 +709,75 @@ export default function WhatsApp() {
         <CardHeader className="border-b bg-white/50 backdrop-blur p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {/* Total de mensagens */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-slate-700">
-                Total: {totalItems} mensagem(ns)
-              </span>
-              {loading && <Loader2 className="w-4 h-4 animate-spin text-primary-600" />}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-slate-700">
+                  Total: {totalItems} mensagem(ns)
+                </span>
+                {loading && <Loader2 className="w-4 h-4 animate-spin text-primary-600" />}
+              </div>
+              {/* Indicador de filtro ativo */}
+              {searchTerm && (
+                <span className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded-full font-medium border border-primary-200">
+                  🔍 Filtro ativo
+                </span>
+              )}
             </div>
 
-            {/* Busca local */}
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input
-                type="text"
-                placeholder="Buscar..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 transition-all duration-300"
-              />
+            {/* Sistema de busca aprimorado */}
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              {/* Dropdown de critério de busca */}
+              <Select value={searchCriteria} onValueChange={(value: 'numero' | 'matricula' | 'status') => setSearchCriteria(value)}>
+                <SelectTrigger className="w-full sm:w-[160px] bg-white border-slate-300 hover:border-primary-400 focus:border-primary-500 transition-all duration-300">
+                  <SelectValue placeholder="Buscar por..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="numero">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">📱</span>
+                      <span>Número</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="matricula">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">🆔</span>
+                      <span>Matrícula</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="status">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">📊</span>
+                      <span>Status</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Campo de busca */}
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  type="text"
+                  placeholder={
+                    searchCriteria === 'numero' ? 'Digite o número...' :
+                    searchCriteria === 'matricula' ? 'Digite a matrícula...' :
+                    'Digite o status...'
+                  }
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-10 transition-all duration-300"
+                />
+                {/* Indicador de busca ativa */}
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    title="Limpar busca"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </CardHeader>
