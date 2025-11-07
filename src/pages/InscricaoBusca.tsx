@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react'
-import { supabase, TbCorrida, TipoParticipacao, StatusInscricao } from '../services/supabase'
+import { supabase, TbCorrida, StatusInscricao } from '../services/supabase'
 import { Card, CardContent } from '../components/ui/card'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
@@ -148,8 +148,8 @@ export default function InscricaoBusca() {
 
     // Ordenação
     resultado.sort((a, b) => {
-      let valorA: any
-      let valorB: any
+      let valorA: number | string
+      let valorB: number | string
 
       switch (ordenacao.campo) {
         case 'data_inscricao':
