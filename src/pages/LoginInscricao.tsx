@@ -48,6 +48,42 @@ const formatarMatricula6Digitos = (matricula: string): string => {
   return matriculaNormalizada.padStart(6, '0')
 }
 
+// Função para normalizar CPF (remove pontos, traços e espaços)
+const normalizarCPF = (cpf: string): string => {
+  return cpf.replace(/[.\-\s]/g, '')
+}
+
+// Função para detectar se o input é CPF ou matrícula
+const detectarTipoInput = (input: string): 'cpf' | 'matricula' => {
+  const inputLimpo = input.replace(/[.\-\s]/g, '')
+
+  // Se tem 11 dígitos numéricos, é CPF
+  if (/^\d{11}$/.test(inputLimpo)) {
+    return 'cpf'
+  }
+
+  // Caso contrário, é matrícula
+  return 'matricula'
+}
+
+// Função para buscar funcionário por matrícula OU CPF
+const buscarFuncionario = (input: string, funcionarios: Funcionario[]): Funcionario | undefined => {
+  const tipoInput = detectarTipoInput(input)
+
+  if (tipoInput === 'cpf') {
+    // Busca por CPF
+    const cpfNormalizado = normalizarCPF(input)
+    return funcionarios.find(f => normalizarCPF(f.CPF) === cpfNormalizado)
+  } else {
+    // Busca por matrícula
+    const matriculaNormalizada = normalizarMatricula(input)
+    return funcionarios.find(f => {
+      const matriculaFuncionarioNormalizada = normalizarMatricula(f.MATRICULA)
+      return matriculaFuncionarioNormalizada === matriculaNormalizada
+    })
+  }
+}
+
 // Função para formatar data/hora de forma legível
 const formatarDataHora = (dataISO: string): string => {
   const data = new Date(dataISO)
@@ -111,21 +147,15 @@ export default function LoginInscricao() {
     e.preventDefault()
 
     // Remove espaços em branco
-    const matriculaDigitada = formData.matricula.trim()
+    const inputDigitado = formData.matricula.trim()
     const senhaDigitada = formData.senha.trim()
 
-    // Busca o funcionário no JSON
+    // Busca o funcionário no JSON (por matrícula OU CPF)
     const funcionarios = funcionariosData.RecordSet as Funcionario[]
-    const funcionario = funcionarios.find(f => {
-      // Normaliza a matrícula (remove zeros à esquerda para comparação)
-      const matriculaNormalizada = normalizarMatricula(f.MATRICULA)
-      const matriculaDigitadaNormalizada = normalizarMatricula(matriculaDigitada)
-
-      return matriculaNormalizada === matriculaDigitadaNormalizada
-    })
+    const funcionario = buscarFuncionario(inputDigitado, funcionarios)
 
     if (!funcionario) {
-      // Matrícula não encontrada
+      // Matrícula ou CPF não encontrado
       setShowErrorDialog(true)
       return
     }
@@ -135,7 +165,8 @@ export default function LoginInscricao() {
 
     if (senhaDigitada === senhaEsperada) {
       // Login bem-sucedido - AGORA verifica se já está inscrito
-      console.log("✅ Login bem-sucedido:", funcionario.NOME, "| Email:", funcionario.EMAIL)
+      const tipoLogin = detectarTipoInput(inputDigitado)
+      console.log("✅ Login bem-sucedido:", funcionario.NOME, "| Email:", funcionario.EMAIL, "| Tipo de login:", tipoLogin === 'cpf' ? 'CPF' : 'Matrícula')
 
       // Formata a matrícula com 6 dígitos para consultar no banco
       const matriculaFormatada = formatarMatricula6Digitos(funcionario.MATRICULA)
@@ -348,10 +379,10 @@ export default function LoginInscricao() {
             </CardHeader>
             <CardContent className="login-card-content-short">
               <form onSubmit={handleSubmit} className="login-form-short space-y-6">
-                {/* Campo Matrícula */}
+                {/* Campo Matrícula ou CPF */}
                 <div className="space-y-2">
                   <Label htmlFor="matricula" className="login-label-short text-slate-700 font-medium">
-                    Matrícula
+                    Matrícula ou CPF
                   </Label>
                   <div className="relative">
                     <User className="login-input-icon-short absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -359,8 +390,8 @@ export default function LoginInscricao() {
                       id="matricula"
                       name="matricula"
                       type="text"
-                      inputMode="numeric"
-                      placeholder="Digite sua matrícula (ex: 001234 ou 1234)"
+                      inputMode="text"
+                      placeholder="Digite sua matrícula ou CPF"
                       value={formData.matricula}
                       onChange={handleChange}
                       required
@@ -439,15 +470,25 @@ export default function LoginInscricao() {
                   <div className="space-y-3">
                     <h3 className="login-help-modal-heading-short font-bold text-slate-800 flex items-center gap-2">
                       <span className="bg-primary-100 text-primary-700 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">1</span>
-                      Campo de Login - Número de Matrícula
+                      Campo de Login - Matrícula ou CPF
                     </h3>
                     <p className="login-help-modal-text-short text-slate-600 text-sm ml-8">
-                      Para fazer login, utilize seu <strong>número de Matrícula do RH</strong> (número que consta no seu crachá).
-                      Você pode digitar o número <strong>com ou sem os zeros à esquerda</strong>.
+                      Para fazer login, você pode utilizar:
                     </p>
-                    <p className="login-help-modal-text-short text-slate-600 text-sm ml-8 bg-sky-50 border border-sky-200 rounded p-2 mt-2">
-                      <strong>Exemplo:</strong> '001234' ou '1234' - ambos são aceitos
-                    </p>
+                    <ul className="login-help-modal-text-short text-slate-600 text-sm ml-8 space-y-2 list-disc list-inside">
+                      <li>
+                        <strong>Matrícula do RH</strong> (número que consta no seu crachá) - com ou sem zeros à esquerda
+                        <div className="bg-sky-50 border border-sky-200 rounded p-2 mt-1 ml-6">
+                          <strong>Exemplo:</strong> '001234' ou '1234' - ambos são aceitos
+                        </div>
+                      </li>
+                      <li className="mt-2">
+                        <strong>CPF completo</strong> - com ou sem pontos e traços
+                        <div className="bg-sky-50 border border-sky-200 rounded p-2 mt-1 ml-6">
+                          <strong>Exemplo:</strong> '123.456.789-00' ou '12345678900' - ambos são aceitos
+                        </div>
+                      </li>
+                    </ul>
                   </div>
 
                   <div className="space-y-3">
@@ -507,7 +548,7 @@ export default function LoginInscricao() {
           {/* Rodapé com Versão */}
           <div className="mt-8 text-center">
             <p className="text-xs text-slate-400">
-              Versão: 1.56
+              Versão: 1.57
             </p>
           </div>
         </div>
@@ -521,7 +562,7 @@ export default function LoginInscricao() {
                 Erro de Autenticação
               </DialogTitle>
               <DialogDescription className="text-slate-600 pt-2">
-                Matrícula ou senha incorreta. Por favor, verifique suas credenciais.
+                Matrícula/CPF ou senha incorreta. Por favor, verifique suas credenciais.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="sm:justify-center">
