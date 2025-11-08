@@ -266,31 +266,6 @@ Desktop Large:     1536px+   (2xl:)
 - Prefixos (md:, lg:, xl:) = telas maiores
 - Testar sempre em mobile primeiro
 
-### Nomenclatura
-- Componentes: PascalCase (ex: `Home.tsx`, `LoginInscricao.tsx`, `InscricaoWizard.tsx`)
-- Funções/variáveis: camelCase
-- Constantes: UPPER_SNAKE_CASE (quando aplicável)
-
-## Estado Atual do Código
-
-### Arquivos Modificados (Git Status)
-```
-M  src/App.tsx                    # Rotas atualizadas
-M  src/pages/Home.tsx             # Hero e navegação ajustados
-M  src/pages/LoginInscricao.tsx   # Página de login implementada
-M  src/pages/InscricaoWizard.tsx  # Formulário wizard ativo
-?? public/0104.mp4                # Vídeo adicionado
-```
-
-### Commits Recentes
-```
-b17d612 removeDiv valoresHome
-7650640 alteradoHero
-d3d32da docs: remove seções técnicas do README
-59d5dca docs: remove seção de estrutura do projeto do README
-529d129 docs: adiciona seção de design e inspirações ao README
-```
-
 ## Dados e Validações
 
 ### Formulário de Inscrição - Campos Obrigatórios

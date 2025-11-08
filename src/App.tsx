@@ -5,6 +5,7 @@ import LoginInscricao from './pages/LoginInscricao'
 import InscricaoBusca from './pages/InscricaoBusca'
 import TestePDF from './pages/TestePDF'
 import WhatsApp from './pages/WhatsApp'
+import DepartamentoDashboardCorrida from './pages/DepartamentoDashboardCorrida'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/inscricaobusca" element={<InscricaoBusca />} />
         <Route path="/teste-pdf" element={<TestePDF />} />
         <Route path="/whatsapp" element={<WhatsApp />} />
+        <Route path="/departamento-dashboard-corrida" element={<DepartamentoDashboardCorrida />} />
       </Routes>
     </BrowserRouter>
   )

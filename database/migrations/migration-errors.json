@@ -1,0 +1,587 @@
+[
+  {
+    "record": {
+      "cpf": "174.434.907-04",
+      "nome": "MANOEL SALVIANO SOBRINHO",
+      "matricula": "003855"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissaoesocial\"",
+    "details": "Key (admissao_tipo_esocial)=(00) is not present in table \"tbtipoadmissaoesocial\"."
+  },
+  {
+    "record": {
+      "cpf": "631.335.713-20",
+      "nome": "JOSE FRANCISCO DE LIMA SOUSA",
+      "matricula": "001280"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "027.389.163-41",
+      "nome": "DENILSON CORREIA DE SOUSA",
+      "matricula": "001281"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "632.980.743-49",
+      "nome": "FRANCISCO RANILSON DA SILVA",
+      "matricula": "001282"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "326.562.703-91",
+      "nome": "FRANCISCO HORACIO DE OLIVEIRA",
+      "matricula": "001283"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "260.540.828-09",
+      "nome": "ANTONIO FRANCOALDO ALVES SILVA",
+      "matricula": "001284"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "308.310.163-53",
+      "nome": "ANTONIO AUGUSTO DA SILVA",
+      "matricula": "001285"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "195.638.923-72",
+      "nome": "ANTONIO CORREIA GOMES",
+      "matricula": "001286"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "461.356.503-00",
+      "nome": "HELIO ANTONIO DO NASCIMENTO",
+      "matricula": "001287"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "631.039.663-34",
+      "nome": "FRANK PAULO RODRIGUES VELOZO",
+      "matricula": "001288"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "615.391.803-44",
+      "nome": "JOSE GILVAN DA SILVA",
+      "matricula": "001289"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "618.400.683-53",
+      "nome": "JOSE NILTON DO NASCIMENTO",
+      "matricula": "001290"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "348.367.483-72",
+      "nome": "CICERO BARBOSA SOBRINHO",
+      "matricula": "001291"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "038.013.663-59",
+      "nome": "THIAGO DOS SANTOS",
+      "matricula": "001292"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "001.507.923-60",
+      "nome": "MARCELO FERREIRA TORQUATO",
+      "matricula": "001293"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "008.782.663-13",
+      "nome": "ODAIL JOSE DA SILVA",
+      "matricula": "001294"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "019.384.823-60",
+      "nome": "FRANCISCO ROBERTO DE SOUSA",
+      "matricula": "001295"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "780.278.103-53",
+      "nome": "JOAO SILVINO",
+      "matricula": "001296"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "695.838.703-15",
+      "nome": "JOSE FRANCINEUDO BENTO",
+      "matricula": "001297"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "023.782.763-89",
+      "nome": "PAULO SERGIO MEDEIROS DE SOUZA",
+      "matricula": "001298"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "770.140.573-91",
+      "nome": "PAULO JOVINO DE OLIVEIRA",
+      "matricula": "001299"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "561.943.583-00",
+      "nome": "SEBASTIÃO PEREIRA AZEVEDO",
+      "matricula": "001300"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "503.513.203-00",
+      "nome": "SERGIO SANTOS DA SILVA",
+      "matricula": "001301"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "772.643.473-20",
+      "nome": "ANTONIO HELIO DA SILVA",
+      "matricula": "001302"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "741.362.673-04",
+      "nome": "LOURIVAL DOS SANTOS",
+      "matricula": "001303"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "205.169.163-00",
+      "nome": "FRANCISCO BARBOSA NETO",
+      "matricula": "001304"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "631.628.143-91",
+      "nome": "GIOVANNI JOSE DOS SANTOS",
+      "matricula": "001305"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "922.683.743-00",
+      "nome": "JOSE AUGUSTO DA SILVA",
+      "matricula": "001306"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "046.720.193-57",
+      "nome": "JOSE BARBOZA FILHO",
+      "matricula": "001307"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "173.112.923-87",
+      "nome": "HUGO DE SOUSA",
+      "matricula": "001308"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "992.524.303-34",
+      "nome": "VALTER RAIMUNDO COELHO JUNIOR",
+      "matricula": "001309"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "950.071.213-04",
+      "nome": "FRANCISCO LUCIANO BENTO",
+      "matricula": "001310"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "119.559.533-68",
+      "nome": "FRANCISCO MARQUES VIEIRA",
+      "matricula": "001311"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "010.030.744-21",
+      "nome": "FRANCISCO ARNALDO PIRES",
+      "matricula": "001312"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "012.695.513-10",
+      "nome": "ROGERIO FERREIRA DA CRUZ",
+      "matricula": "001313"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "018.368.183-51",
+      "nome": "HENRIQUE DA SILVA",
+      "matricula": "001314"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "023.422.133-01",
+      "nome": "MARCONDES FERREIRA TORQUATO",
+      "matricula": "001315"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "046.406.803-76",
+      "nome": "PAULO RICARDO SILVINO DOS SANTOS",
+      "matricula": "001316"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "043.047.493-82",
+      "nome": "ISAC LIMEIRA DE LIMA",
+      "matricula": "001317"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "022.103.373-48",
+      "nome": "GILSON DA SILVA SOUSA",
+      "matricula": "001318"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "223.639.043-20",
+      "nome": "GERALDO ARAUJO",
+      "matricula": "001319"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "039.082.853-05",
+      "nome": "ERISON CARDOSO DA SILVA",
+      "matricula": "001320"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "443.229.333-00",
+      "nome": "VICENTE PAULO LUDUGERIO",
+      "matricula": "001321"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "997.949.853-68",
+      "nome": "DAMIAO DOS SANTOS SILVA",
+      "matricula": "001322"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "544.174.903-25",
+      "nome": "ANTONIO EDMILSON DOS SANTOS",
+      "matricula": "001323"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "425.968.153-20",
+      "nome": "JOSE MOREIRA DA SILVA NETO",
+      "matricula": "001324"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "017.331.893-27",
+      "nome": "JUCELIO DE SOUZA",
+      "matricula": "001325"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "041.918.433-38",
+      "nome": "ANTONIO ADRIANO DO NASCIMENTO",
+      "matricula": "001326"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "394.678.028-80",
+      "nome": "ANTONIO MARCOS LIMA DE ANDRADE",
+      "matricula": "001327"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "047.957.783-88",
+      "nome": "EXPEDITO JOSE DOS SANTOS SILVA",
+      "matricula": "001328"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "050.441.223-00",
+      "nome": "FRANCISCO DANUBIO SILVA CELESTINO",
+      "matricula": "001329"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "600.839.343-08",
+      "nome": "JOILSON SANTOS DA SILVA",
+      "matricula": "001330"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "479.680.603-20",
+      "nome": "JOSE IVANILDO BEZERRA RAMOS",
+      "matricula": "001331"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "879.029.403-30",
+      "nome": "JOSE MARCOS ALVES SILVA",
+      "matricula": "001332"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "732.859.003-34",
+      "nome": "GERALDO SILVA DOS SANTOS",
+      "matricula": "001333"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "976.823.573-04",
+      "nome": "FRANCISCO AUGUSTO DA SILVA",
+      "matricula": "001334"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "009.050.473-97",
+      "nome": "GILVANIO JOSE SANTANA DA SILVA",
+      "matricula": "001335"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "646.677.401-59",
+      "nome": "MIGUEL BELISARIO DE LIRA",
+      "matricula": "001336"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "055.603.053-24",
+      "nome": "RICARDO DA SILVA SABINO",
+      "matricula": "001337"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "492.761.403-44",
+      "nome": "CICERO DA SILVA",
+      "matricula": "001338"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "019.965.433-69",
+      "nome": "SAMUEL MARQUES DE SOUSA",
+      "matricula": "001339"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "049.879.053-37",
+      "nome": "FRANCISCO ERENILSON DO NASCIMENTO",
+      "matricula": "001340"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "932.046.203-87",
+      "nome": "JOSE IRANILDO DOS SANTOS",
+      "matricula": "001341"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "273.003.098-01",
+      "nome": "FRANCISCO RICARDO XAVIER GONCALVES",
+      "matricula": "001342"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  },
+  {
+    "record": {
+      "cpf": "022.541.503-83",
+      "nome": "FRANCISCO RAIMUNDO DE SOUSA",
+      "matricula": "001343"
+    },
+    "error": "insert or update on table \"tbfuncionario\" violates foreign key constraint \"fk_tbfuncionario_tipoadmissao\"",
+    "details": "Key (admissao_tipo)=(40) is not present in table \"tbtipoadmissao\"."
+  }
+]

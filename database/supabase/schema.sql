@@ -3,32 +3,31 @@
 -- Script DDL para PostgreSQL 15+ (Supabase)
 -- Migrado de Firebird 2.5
 -- =====================================================
--- Nota: Este script NÃO utiliza ENUMs conforme solicitado
+-- Nota: Este script NÃO utiliza ENUMs
 -- =====================================================
 
--- Habilitar extensões úteis
+-- Extensões úteis
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pg_trgm"; -- Para busca full-text
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- =====================================================
--- 1. TABELAS AUXILIARES (DOMÍNIOS/CÓDIGOS)
+-- 1. TABELAS AUXILIARES (DOMÍNIOS / CÓDIGOS)
 -- =====================================================
 
--- Tabela de Estados Civis
+-- Estado Civil
 CREATE TABLE tbestadocivil (
     estadocivil_id SERIAL PRIMARY KEY,
     codigo VARCHAR(2) UNIQUE NOT NULL,
     descricao VARCHAR(50) NOT NULL,
     ativo BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 COMMENT ON TABLE tbestadocivil IS 'Tabela de códigos de estado civil';
 COMMENT ON COLUMN tbestadocivil.estadocivil_id IS 'ID autoincrementável do estado civil';
 COMMENT ON COLUMN tbestadocivil.codigo IS 'Código do estado civil (01-05)';
 
--- Inserir valores padrão
 INSERT INTO tbestadocivil (codigo, descricao) VALUES
 ('01', 'Solteiro'),
 ('02', 'Casado'),
@@ -36,21 +35,20 @@ INSERT INTO tbestadocivil (codigo, descricao) VALUES
 ('04', 'Separado'),
 ('05', 'Viúvo');
 
--- Tabela de Escolaridade (Grau de Instrução - padrão S-2200 eSocial)
+-- Escolaridade (eSocial S-2200)
 CREATE TABLE tbescolaridade (
     escolaridade_id SERIAL PRIMARY KEY,
     codigo VARCHAR(2) UNIQUE NOT NULL,
     descricao TEXT NOT NULL,
     ativo BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 COMMENT ON TABLE tbescolaridade IS 'Tabela de códigos de escolaridade conforme eSocial S-2200';
 COMMENT ON COLUMN tbescolaridade.escolaridade_id IS 'ID autoincrementável da escolaridade';
 COMMENT ON COLUMN tbescolaridade.codigo IS 'Código de escolaridade eSocial (01-12)';
 
--- Inserir valores padrão
 INSERT INTO tbescolaridade (codigo, descricao) VALUES
 ('01', 'Analfabeto, inclusive o que, embora tenha recebido instrução, não se alfabetizou'),
 ('02', 'Até o 5º ano incompleto do ensino fundamental (antiga 4ª série) ou que se tenha alfabetizado sem ter frequentado escola regular'),
@@ -65,41 +63,39 @@ INSERT INTO tbescolaridade (codigo, descricao) VALUES
 ('11', 'Mestrado completo'),
 ('12', 'Doutorado completo');
 
--- Tabela de Tipos de Admissão
+-- Tipo de Admissão
 CREATE TABLE tbtipoadmissao (
     tipoadmissao_id SERIAL PRIMARY KEY,
     codigo VARCHAR(2) UNIQUE NOT NULL,
     descricao VARCHAR(100) NOT NULL,
     ativo BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 COMMENT ON TABLE tbtipoadmissao IS 'Tipos de admissão de funcionários';
 COMMENT ON COLUMN tbtipoadmissao.tipoadmissao_id IS 'ID autoincrementável do tipo de admissão';
 COMMENT ON COLUMN tbtipoadmissao.codigo IS 'Código do tipo de admissão (10, 20, 35)';
 
--- Inserir valores padrão
 INSERT INTO tbtipoadmissao (codigo, descricao) VALUES
 ('10', '1º Emprego'),
 ('20', 'Reemprego'),
 ('35', 'Reintegração');
 
--- Tabela de Tipos de Admissão eSocial
+-- Tipo de Admissão eSocial
 CREATE TABLE tbtipoadmissaoesocial (
     tipoadmissaoesocial_id SERIAL PRIMARY KEY,
     codigo VARCHAR(2) UNIQUE NOT NULL,
     descricao TEXT NOT NULL,
     ativo BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 COMMENT ON TABLE tbtipoadmissaoesocial IS 'Tipos de admissão conforme eSocial';
 COMMENT ON COLUMN tbtipoadmissaoesocial.tipoadmissaoesocial_id IS 'ID autoincrementável do tipo de admissão eSocial';
 COMMENT ON COLUMN tbtipoadmissaoesocial.codigo IS 'Código do tipo de admissão eSocial (01-07)';
 
--- Inserir valores padrão
 INSERT INTO tbtipoadmissaoesocial (codigo, descricao) VALUES
 ('01', 'Admissão'),
 ('02', 'Transferência de empresa do mesmo grupo econômico ou transferência entre órgãos do mesmo Ente Federativo'),
@@ -109,73 +105,75 @@ INSERT INTO tbtipoadmissaoesocial (codigo, descricao) VALUES
 ('06', 'Mudança de CPF'),
 ('07', 'Transferência quando a empresa sucedida é considerada inapta por inexistência de fato');
 
--- Tabela de Tipos de Vínculo Empregatício
+-- Tipo de Vínculo Empregatício (eSocial)
 CREATE TABLE tbtipovinculo (
     tipovinculo_id SERIAL PRIMARY KEY,
     codigo VARCHAR(2) UNIQUE NOT NULL,
     descricao TEXT NOT NULL,
     ativo BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 COMMENT ON TABLE tbtipovinculo IS 'Tipos de vínculo empregatício conforme eSocial';
 COMMENT ON COLUMN tbtipovinculo.tipovinculo_id IS 'ID autoincrementável do tipo de vínculo';
 COMMENT ON COLUMN tbtipovinculo.codigo IS 'Código do tipo de vínculo eSocial (10-90)';
 
--- Inserir valores padrão
 INSERT INTO tbtipovinculo (codigo, descricao) VALUES
-('10', 'Trabalhador Urbano, vinculado a empregador Pessoa Jurídica, por contrato de trabalho regido pela CLT, por prazo indeterminado'),
-('15', 'Trabalhador Urbano, vinculado a empregador Pessoa Física, por contrato de trabalho regido pela CLT, por prazo indeterminado'),
-('20', 'Trabalhador Rural, vinculado a empregador Pessoa Jurídica, por contrato de trabalho regido pela CLT, por prazo indeterminado'),
-('25', 'Trabalhador Rural, vinculado a empregador Pessoa Física, por contrato de trabalho regido pela CLT, por prazo indeterminado'),
-('30', 'Servidor regido pelo Regime Jurídico Único (Federal, Estadual e Municipal) e Militar'),
-('35', 'Servidor público não-efetivo (demissível ad nutum ou admitido por legislação especial, não regida pela CLT)'),
-('40', 'Trabalhador avulso (trabalho administrado pelo sindicato da categoria ou pelo órgão gestor de mão-de-obra)'),
-('50', 'Trabalhador temporário, regido pela Lei nº 6.019, de 03/01/1974'),
+('10', 'Trabalhador Urbano, PJ, CLT, prazo indeterminado'),
+('15', 'Trabalhador Urbano, PF, CLT, prazo indeterminado'),
+('20', 'Trabalhador Rural, PJ, CLT, prazo indeterminado'),
+('25', 'Trabalhador Rural, PF, CLT, prazo indeterminado'),
+('30', 'Servidor RJU / Militar'),
+('35', 'Servidor público não-efetivo'),
+('40', 'Trabalhador avulso'),
+('50', 'Trabalhador temporário (Lei 6.019/74)'),
 ('55', 'Menor aprendiz'),
-('60', 'Trabalhador Urbano, vinculado a empregador Pessoa Jurídica, por contrato de trabalho regido pela CLT, por tempo determinado ou obra certa'),
-('65', 'Trabalhador Urbano, vinculado a empregador Pessoa Física, por contrato de trabalho regido pela CLT, por tempo determinado ou obra certa'),
-('70', 'Trabalhador Rural, vinculado a empregador Pessoa Jurídica, por contrato de trabalho regido pela Lei nº 5.889/73, por tempo determinado'),
-('75', 'Trabalhador Rural, vinculado a empregador Pessoa Física, por contrato de trabalho regido pela Lei nº 5.889/73, por tempo determinado'),
+('60', 'Trabalhador Urbano, PJ, CLT, prazo determinado'),
+('65', 'Trabalhador Urbano, PF, CLT, prazo determinado'),
+('70', 'Trabalhador Rural, PJ, prazo determinado'),
+('75', 'Trabalhador Rural, PF, prazo determinado'),
 ('79', 'Aposentadoria especial'),
-('80', 'Diretor, sem vínculo empregatício, para o qual a empresa/entidade tenha optado por recolhimento do FGTS'),
-('90', 'Contrato de trabalho por prazo determinado, regido pela Lei nº 9.601, de 21/01/1998');
+('80', 'Diretor sem vínculo, com FGTS'),
+('90', 'Contrato prazo determinado (Lei 9.601/98)');
 
 -- =====================================================
 -- 2. TABELAS BASE (EMPRESAS, GEOGRAFIA)
 -- =====================================================
 
--- Tabela de Empresas
+-- Empresas
 CREATE TABLE tbempresa (
-    empresa_id SERIAL NOT NULL,
+    empresa_id SERIAL PRIMARY KEY,
     codigo TEXT,
     razao_social TEXT,
     nome_fantasia TEXT,
     cnpj TEXT,
     ativo BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ
 );
 
 COMMENT ON TABLE tbempresa IS 'Tabela de empresas do grupo';
 
--- Tabela de Unidades Federativas (Estados)
+-- Garante integridade para referências por código
+ALTER TABLE tbempresa
+    ADD CONSTRAINT uk_tbempresa_codigo UNIQUE (codigo);
+
+-- Unidades Federativas
 CREATE TABLE tbuf (
     uf_id SERIAL PRIMARY KEY,
     uf VARCHAR(2) UNIQUE NOT NULL,
     nome VARCHAR(50) NOT NULL,
     codigo_ibge VARCHAR(2) UNIQUE,
     regiao VARCHAR(20),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 COMMENT ON TABLE tbuf IS 'Unidades Federativas (Estados) do Brasil';
 COMMENT ON COLUMN tbuf.uf_id IS 'ID autoincrementável do estado';
 COMMENT ON COLUMN tbuf.uf IS 'Sigla da UF (AC, AL, AM, etc.)';
 
--- Inserir UFs
 INSERT INTO tbuf (uf, nome, codigo_ibge, regiao) VALUES
 ('AC', 'Acre', '12', 'Norte'),
 ('AL', 'Alagoas', '27', 'Nordeste'),
@@ -205,25 +203,24 @@ INSERT INTO tbuf (uf, nome, codigo_ibge, regiao) VALUES
 ('SE', 'Sergipe', '28', 'Nordeste'),
 ('TO', 'Tocantins', '17', 'Norte');
 
--- Tabela de Cidades/Municípios
+-- Cidades / Municípios
 CREATE TABLE tbcidade (
-    cidade_id SERIAL NOT NULL,
+    cidade_id SERIAL PRIMARY KEY,
     uf VARCHAR(2) NOT NULL,
     codigo INTEGER NOT NULL,
     nome VARCHAR(100) NOT NULL,
     codigo_ibge VARCHAR(7) UNIQUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
     CONSTRAINT fk_tbcidade_uf FOREIGN KEY (uf)
         REFERENCES tbuf(uf) ON DELETE RESTRICT,
     CONSTRAINT uk_tbcidade_uf_codigo UNIQUE (uf, codigo)
 );
 
 COMMENT ON TABLE tbcidade IS 'Municípios brasileiros';
-COMMENT ON COLUMN tbcidade.cidade_id IS 'Identificador único da cidade (ex: CE-1, SP-1)';
+COMMENT ON COLUMN tbcidade.cidade_id IS 'ID único da cidade';
 
--- Índices para busca de municípios
-CREATE INDEX idx_tbcidade_nome ON tbcidade USING gin(nome gin_trgm_ops);
+CREATE INDEX idx_tbcidade_nome ON tbcidade USING gin (nome gin_trgm_ops);
 CREATE INDEX idx_tbcidade_codigo_ibge ON tbcidade(codigo_ibge);
 CREATE INDEX idx_tbcidade_uf ON tbcidade(uf);
 
@@ -231,17 +228,17 @@ CREATE INDEX idx_tbcidade_uf ON tbcidade(uf);
 -- 3. TABELAS DE RH (CARGOS, FUNÇÕES, LOTAÇÕES)
 -- =====================================================
 
--- Tabela de Cargos
+-- Cargos
 CREATE TABLE tbcargo (
     cargo_id SERIAL PRIMARY KEY,
     emp_codigo TEXT NOT NULL,
     codigo INTEGER NOT NULL,
     nome VARCHAR(100) NOT NULL,
     descricao TEXT,
-    cbo VARCHAR(10), -- Código Brasileiro de Ocupações
+    cbo VARCHAR(10),
     ativo BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
     CONSTRAINT fk_tbcargo_empresa FOREIGN KEY (emp_codigo)
         REFERENCES tbempresa(codigo) ON DELETE RESTRICT,
     CONSTRAINT uk_tbcargo_emp_codigo UNIQUE (emp_codigo, codigo)
@@ -251,12 +248,11 @@ COMMENT ON TABLE tbcargo IS 'Cargos disponíveis nas empresas';
 COMMENT ON COLUMN tbcargo.cargo_id IS 'ID único autoincrementável do cargo';
 COMMENT ON COLUMN tbcargo.codigo IS 'Código do cargo dentro da empresa (legado)';
 
--- Índices
-CREATE INDEX idx_tbcargo_nome ON tbcargo USING gin(nome gin_trgm_ops);
+CREATE INDEX idx_tbcargo_nome ON tbcargo USING gin (nome gin_trgm_ops);
 CREATE INDEX idx_tbcargo_ativo ON tbcargo(ativo);
 CREATE INDEX idx_tbcargo_emp_codigo ON tbcargo(emp_codigo);
 
--- Tabela de Funções
+-- Funções
 CREATE TABLE tbfuncao (
     funcao_id SERIAL PRIMARY KEY,
     emp_codigo TEXT NOT NULL,
@@ -264,8 +260,8 @@ CREATE TABLE tbfuncao (
     nome VARCHAR(100) NOT NULL,
     descricao TEXT,
     ativo BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
     CONSTRAINT fk_tbfuncao_empresa FOREIGN KEY (emp_codigo)
         REFERENCES tbempresa(codigo) ON DELETE RESTRICT,
     CONSTRAINT uk_tbfuncao_emp_codigo UNIQUE (emp_codigo, codigo)
@@ -275,12 +271,11 @@ COMMENT ON TABLE tbfuncao IS 'Funções que podem ser exercidas pelos funcionár
 COMMENT ON COLUMN tbfuncao.funcao_id IS 'ID único autoincrementável da função';
 COMMENT ON COLUMN tbfuncao.codigo IS 'Código da função dentro da empresa (legado)';
 
--- Índices
-CREATE INDEX idx_tbfuncao_nome ON tbfuncao USING gin(nome gin_trgm_ops);
+CREATE INDEX idx_tbfuncao_nome ON tbfuncao USING gin (nome gin_trgm_ops);
 CREATE INDEX idx_tbfuncao_ativo ON tbfuncao(ativo);
 CREATE INDEX idx_tbfuncao_emp_codigo ON tbfuncao(emp_codigo);
 
--- Tabela de Lotações
+-- Lotações
 CREATE TABLE tblotacao (
     lotacao_id SERIAL PRIMARY KEY,
     emp_codigo TEXT NOT NULL,
@@ -288,8 +283,8 @@ CREATE TABLE tblotacao (
     nome VARCHAR(100) NOT NULL,
     descricao TEXT,
     ativo BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
     CONSTRAINT fk_tblotacao_empresa FOREIGN KEY (emp_codigo)
         REFERENCES tbempresa(codigo) ON DELETE RESTRICT,
     CONSTRAINT uk_tblotacao_emp_codigo UNIQUE (emp_codigo, codigo)
@@ -299,8 +294,7 @@ COMMENT ON TABLE tblotacao IS 'Lotações/departamentos das empresas';
 COMMENT ON COLUMN tblotacao.lotacao_id IS 'ID único autoincrementável da lotação';
 COMMENT ON COLUMN tblotacao.codigo IS 'Código da lotação dentro da empresa (legado)';
 
--- Índices
-CREATE INDEX idx_tblotacao_nome ON tblotacao USING gin(nome gin_trgm_ops);
+CREATE INDEX idx_tblotacao_nome ON tblotacao USING gin (nome gin_trgm_ops);
 CREATE INDEX idx_tblotacao_ativo ON tblotacao(ativo);
 CREATE INDEX idx_tblotacao_emp_codigo ON tblotacao(emp_codigo);
 
@@ -310,9 +304,9 @@ CREATE INDEX idx_tblotacao_emp_codigo ON tblotacao(emp_codigo);
 
 CREATE TABLE tbfuncionario (
     -- Identificação
-    funcionario_id SERIAL NOT NULL,
+    funcionario_id SERIAL PRIMARY KEY,
     emp_codigo TEXT,
-    matricula TEXT, -- Matrícula
+    matricula TEXT,
     nome TEXT,
     nome_social TEXT,
 
@@ -370,7 +364,7 @@ CREATE TABLE tbfuncionario (
     -- Demissão/Rescisão
     dt_rescisao DATE,
 
-    -- PCD (Pessoa com Deficiência)
+    -- PCD
     tem_deficiencia BOOLEAN DEFAULT FALSE,
     preenche_cota_deficiencia BOOLEAN DEFAULT FALSE,
     deficiencia_fisica BOOLEAN DEFAULT FALSE,
@@ -384,11 +378,10 @@ CREATE TABLE tbfuncionario (
 
     -- Metadados
     ativo BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ,
 
-    -- Constraints
-    PRIMARY KEY (funcionario_id),
+    -- CONSTRAINTS
     CONSTRAINT fk_tbfuncionario_empresa FOREIGN KEY (emp_codigo)
         REFERENCES tbempresa(codigo) ON DELETE RESTRICT,
     CONSTRAINT fk_tbfuncionario_estadocivil FOREIGN KEY (estadocivil_id)
@@ -405,27 +398,26 @@ CREATE TABLE tbfuncionario (
         REFERENCES tbtipovinculo(codigo) ON DELETE RESTRICT,
     CONSTRAINT fk_tbfuncionario_escolaridade FOREIGN KEY (grau_instrucao)
         REFERENCES tbescolaridade(codigo) ON DELETE RESTRICT,
-    CONSTRAINT uk_tbfuncionario_emp_matricula UNIQUE (emp_codigo, matricula),
-    CONSTRAINT chk_tbfuncionario_cpf CHECK (cpf ~ '^\d{3}\.\d{3}\.\d{3}-\d{2}$'),
-    CONSTRAINT chk_tbfuncionario_email CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+
+    CONSTRAINT uk_tbfuncionario_emp_matricula UNIQUE (emp_codigo, matricula)
 );
 
 COMMENT ON TABLE tbfuncionario IS 'Tabela principal de funcionários (Empregados)';
 COMMENT ON COLUMN tbfuncionario.funcionario_id IS 'ID único autoincrementável do funcionário';
 COMMENT ON COLUMN tbfuncionario.matricula IS 'Matrícula do funcionário (código legado)';
-COMMENT ON COLUMN tbfuncionario.nome_social IS 'Nome social (para pessoas trans/não-binárias)';
-COMMENT ON COLUMN tbfuncionario.estadocivil_id IS 'ID do estado civil (FK para tbestadocivil.estadocivil_id)';
-COMMENT ON COLUMN tbfuncionario.estadocivil_descricao IS 'Descrição do estado civil (desnormalizado para performance)';
-COMMENT ON COLUMN tbfuncionario.cidade_id IS 'ID da cidade (FK para tbcidade.cidade_id)';
-COMMENT ON COLUMN tbfuncionario.cidade_nome IS 'Nome da cidade (desnormalizado para performance)';
-COMMENT ON COLUMN tbfuncionario.cidade_uf IS 'UF da cidade (desnormalizado para performance)';
-COMMENT ON COLUMN tbfuncionario.tem_deficiencia IS 'Indica se o funcionário possui alguma deficiência';
-COMMENT ON COLUMN tbfuncionario.preenche_cota_deficiencia IS 'Indica se preenche cota PCD da empresa';
+COMMENT ON COLUMN tbfuncionario.nome_social IS 'Nome social';
+COMMENT ON COLUMN tbfuncionario.estadocivil_id IS 'ID do estado civil (FK tbestadocivil)';
+COMMENT ON COLUMN tbfuncionario.estadocivil_descricao IS 'Estado civil desnormalizado';
+COMMENT ON COLUMN tbfuncionario.cidade_id IS 'ID da cidade (FK tbcidade)';
+COMMENT ON COLUMN tbfuncionario.cidade_nome IS 'Nome da cidade (desnormalizado)';
+COMMENT ON COLUMN tbfuncionario.cidade_uf IS 'UF da cidade (desnormalizado)';
+COMMENT ON COLUMN tbfuncionario.tem_deficiencia IS 'Indica se o funcionário possui deficiência';
+COMMENT ON COLUMN tbfuncionario.preenche_cota_deficiencia IS 'Indica se preenche cota PCD';
 
--- Índices importantes para performance
+-- Índices
 CREATE UNIQUE INDEX idx_tbfuncionario_cpf ON tbfuncionario(cpf);
-CREATE INDEX idx_tbfuncionario_nome ON tbfuncionario USING gin(nome gin_trgm_ops);
-CREATE INDEX idx_tbfuncionario_nome_social ON tbfuncionario USING gin(nome_social gin_trgm_ops);
+CREATE INDEX idx_tbfuncionario_nome ON tbfuncionario USING gin (nome gin_trgm_ops);
+CREATE INDEX idx_tbfuncionario_nome_social ON tbfuncionario USING gin (nome_social gin_trgm_ops);
 CREATE INDEX idx_tbfuncionario_email ON tbfuncionario(email);
 CREATE INDEX idx_tbfuncionario_admissao_data ON tbfuncionario(admissao_data);
 CREATE INDEX idx_tbfuncionario_ativo ON tbfuncionario(ativo);
