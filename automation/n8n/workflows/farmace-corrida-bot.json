@@ -1,0 +1,262 @@
+{
+  "name": "FARMACE II Corrida – Bot WhatsApp (n8n)",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "farmace/whatsapp/inbound",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": { "binaryData": false }
+      },
+      "id": "Webhook_1",
+      "name": "Webhook – WA Inbound (Evolution)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [20, 260]
+    },
+
+    {
+      "parameters": {
+        "functionCode": "const body = items[0].json || {};\n// Tenta extrair texto da maior variedade de payloads possíveis (Evolution / Baileys)\nconst text = body?.message?.text || body?.message?.conversation || body?.text || body?.body || body?.data?.message?.conversation || '';\nconst remoteJid = body?.key?.remoteJid || body?.remoteJid || body?.from || body?.data?.key?.remoteJid || '';\nlet number = (remoteJid || body?.number || '').toString().replace(/@.*/,'');\nnumber = number.replace(/\D/g,'');\nif (number && !number.startsWith('55') && number.length === 11) number = '55' + number;\nreturn [{ json: { text: (text || '').trim(), number, raw: body } }];"
+      },
+      "id": "Function_Extract",
+      "name": "Extract Message",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [260, 260]
+    },
+
+    {
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o-mini",
+        "systemMessage": "Você é o FARMACE Corrida Bot, um atendente virtual educado e objetivo para a 2ª Corrida FARMACE (2025). Responda sempre em pt-BR, tom amigável, frases curtas, e liste passos quando útil.\n\nINFORMAÇÕES CONHECIDAS (BASE DE CONHECIMENTO):\n- Público: exclusivo para colaboradores FARMACE (é obrigatório ser colaborador).\n- Modalidades: 3KM (sem premiação), 5KM (com premiação), 10KM (com premiação).\n- Investimento/Taxa: Gratuito para colaboradores.\n- Data do evento: 21/12/2025 (domingo). Concentração: 06h30. Largada: 07h00.\n- Local: FARMACE – Av. Dr. Antonio Lyrio Callou, S/N, Km 02.\n- Período de inscrição: 31/10 a 10/11/2025. Vagas limitadas.\n- Kit do atleta: Camiseta + Número de peito. Retirada do kit: 18 e 19/12/2025, na FARMACE.\n- Requisitos: somente colaboradores. Login/Autenticação é obrigatório antes da inscrição.\n- Como se inscrever: acessar /loginInscricao e autenticar-se (matrícula ou CPF). Senha padrão: 3 últimos dígitos do CPF + dia e mês de nascimento (DDMM). Ex.: CPF *123 e nasc. 05/07 -> senha 1230507.\n- Status de inscrição confirmado é gravado na tabela tbcorrida (Supabase).\n- Canal principal: WhatsApp via Evolution API.\n\nINSTRUÇÕES DE ATENDIMENTO:\n1) Se a mensagem pedir informações gerais (data, horário, local, modalidades, kit, valor, requisitos), responda com base no bloco acima.\n2) Se o usuário pedir como se inscrever, forneça passos claros e o link relativo: /loginInscricao.\n3) Se o usuário pedir o STATUS da própria inscrição, proceda assim:\n   - Se a mensagem JÁ contém CPF (11 dígitos) ou matrícula (6 dígitos), extraia-os e defina needs_db=true.\n   - Caso contrário, pergunte educadamente por CPF ou matrícula (6 dígitos), defina needs_db=false e produza uma resposta orientando a enviar.\n4) Se detectar intenção de falar com humano, defina answer_type=\"handoff\" e escreva uma resposta curta avisando que vamos encaminhar para um atendente.\n5) Se a pergunta não for do escopo, diga que pode ajudar apenas com dúvidas do evento e convide a reformular.\n\nSAÍDA SEMPRE EM JSON (chaves fixas):\n{\n  needs_db: boolean,\n  cpf: string | null,           // apenas números, se encontrado\n  matricula: string | null,     // 6 dígitos, se encontrado\n  answer_type: 'status' | 'faq' | 'handoff' | 'other',\n  reply: string                 // mensagem final ao usuário (pt-BR)\n}\n\nDETECÇÃO DE CAMPOS:\n- CPF: sequência de 11 dígitos.\n- Matrícula: 6 dígitos (preencher zeros à esquerda se vier menor).\n- Não inclua dados pessoais sensíveis do usuário na resposta.\n- Quando convidar para autenticar, cite /loginInscricao.\n",
+        "messages": [
+          {
+            "role": "user",
+            "message": "Mensagem: {{$json.text}} | Telefone: {{$json.number}}"
+          }
+        ],
+        "temperature": 0.2,
+        "responseFormat": "jsonObject"
+      },
+      "id": "OpenAI_AI",
+      "name": "AI Decide/Answer (JSON)",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 4,
+      "position": [520, 260],
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI API (configure)"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "functionCode": "const payload = items[0].json;\nconst content = payload?.data?.[0]?.message?.content || payload?.choices?.[0]?.message?.content || payload?.text || JSON.stringify(payload);\nlet ai;\ntry { ai = typeof content === 'string' ? JSON.parse(content) : content; } catch(e) {\n  ai = { needs_db: false, cpf: null, matricula: null, answer_type: 'faq', reply: 'Desculpe, não entendi. Poderia reformular sua pergunta sobre a Corrida FARMACE?' };\n}\n// Normaliza matrícula: garantir 6 dígitos com zeros à esquerda\nif (ai?.matricula && /^\d{1,6}$/.test(ai.matricula)) { ai.matricula = ai.matricula.padStart(6,'0'); }\n// Normaliza cpf: manter apenas números de 11 dígitos\nif (ai?.cpf) { const d = (ai.cpf+'').replace(/\D/g,''); ai.cpf = d.length===11 ? d : null; }\nreturn [{ json: { ai, number: $json.number } }];"
+      },
+      "id": "Function_ParseAI",
+      "name": "Parse AI JSON",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [760, 260]
+    },
+
+    {
+      "parameters": {
+        "conditions": { "boolean": [ { "value1": "={{$json.ai.needs_db}}" } ] }
+      },
+      "id": "IF_NeedsDB",
+      "name": "IF Needs DB?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1000, 260]
+    },
+
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.SUPABASE_URL}}/rest/v1/tbcorrida",
+        "jsonParameters": false,
+        "responseFormat": "json",
+        "queryParametersUi": {
+          "parameter": [
+            { "name": "select", "value": "corrida_id,status,tipo_participacao,modalidade,tamanho_camiseta,nome" },
+            { "name": "deleted_at", "value": "is.null" },
+            { "name": "status", "value": "eq.Confirmada" },
+            { "name": "or", "value": "={{ '(' + [$json.ai.cpf ? 'cpf.eq.' + $json.ai.cpf : '', $json.ai.matricula ? 'matricula.eq.' + $json.ai.matricula : ''].filter(Boolean).join(',') + ')' }}" }
+          ]
+        },
+        "headerParametersUi": {
+          "parameter": [
+            { "name": "apikey", "value": "={{$env.SUPABASE_SERVICE_KEY}}" },
+            { "name": "Authorization", "value": "={{'Bearer ' + $env.SUPABASE_SERVICE_KEY}}" },
+            { "name": "Accept-Profile", "value": "public" }
+          ]
+        }
+      },
+      "id": "HTTP_Supabase",
+      "name": "Supabase – Buscar Inscrição",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1240, 120]
+    },
+
+    {
+      "parameters": {
+        "functionCode": "const data = items[0].json;\nconst lista = Array.isArray(data) ? data : (data.data || []);\nconst r = lista[0];\nlet reply;\nif (r) {\n  const num = String(r.corrida_id).padStart(4,'0');\n  const mod = r.modalidade ? String(r.modalidade).toUpperCase() : null;\n  const cam = r.tamanho_camiseta || null;\n  reply = `✅ Sua inscrição está ${r.status}.\\nParticipante: ${r.nome}.` + (mod?` Categoria: ${mod}.`:``) + (cam?` Camiseta: ${cam}.`:``) + `\\nNúmero do participante: ${num}.\\nNos vemos no dia 21/12/2025 às 07h!`;\n} else {\n  reply = '❌ Não encontrei uma inscrição confirmada com os dados informados. Envie seu CPF (11 dígitos) ou sua matrícula (6 dígitos) para eu localizar. Se ainda não se inscreveu, acesse /loginInscricao.';\n}\nreturn [{ json: { reply, number: $json.number } }];"
+      },
+      "id": "Function_ComposeStatus",
+      "name": "Compose Status Reply",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1460, 120]
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.EVOLUTION_API_URL}}/message/sendText/{{$env.EVOLUTION_INSTANCE}}",
+        "jsonParameters": true,
+        "responseFormat": "json",
+        "headerParametersUi": { "parameter": [
+          { "name": "Content-Type", "value": "application/json" },
+          { "name": "apikey", "value": "={{$env.EVOLUTION_TOKEN}}" }
+        ]},
+        "bodyParametersJson": "={{ JSON.stringify({ number: $json.number, text: $json.reply }) }}"
+      },
+      "id": "HTTP_SendWA_Status",
+      "name": "WA – Enviar (Status)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1680, 120]
+    },
+
+    {
+      "parameters": {
+        "responseBody": "={{ JSON.stringify({ ok: true }) }}",
+        "responseCode": 200
+      },
+      "id": "Respond_OK_Status",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1900, 120]
+    },
+
+    {
+      "parameters": {
+        "functionCode": "return [{ json: { reply: $json.ai.reply, number: $json.number, answer_type: $json.ai.answer_type } }];"
+      },
+      "id": "Function_PassReply",
+      "name": "Use AI Reply",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1240, 380]
+    },
+
+    {
+      "parameters": {
+        "conditions": { "string": [ { "value1": "={{$json.answer_type}}", "operation": "equals", "value2": "handoff" } ] }
+      },
+      "id": "IF_Handoff",
+      "name": "IF Handoff?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1380, 380]
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.EVOLUTION_API_URL}}/message/sendText/{{$env.EVOLUTION_INSTANCE}}",
+        "jsonParameters": true,
+        "responseFormat": "json",
+        "headerParametersUi": { "parameter": [
+          { "name": "Content-Type", "value": "application/json" },
+          { "name": "apikey", "value": "={{$env.EVOLUTION_TOKEN}}" }
+        ]},
+        "bodyParametersJson": "={{ JSON.stringify({ number: $json.number, text: $json.reply }) }}"
+      },
+      "id": "HTTP_SendWA_FAQ",
+      "name": "WA – Enviar (FAQ/Outros)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1560, 320]
+    },
+
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.SUPABASE_URL}}/rest/v1/tbwhatsapp_send",
+        "jsonParameters": true,
+        "responseFormat": "json",
+        "headerParametersUi": { "parameter": [
+          { "name": "Content-Type", "value": "application/json" },
+          { "name": "apikey", "value": "={{$env.SUPABASE_SERVICE_KEY}}" },
+          { "name": "Authorization", "value": "={{'Bearer ' + $env.SUPABASE_SERVICE_KEY}}" }
+        ]},
+        "bodyParametersJson": "={{ JSON.stringify({ numero: $json.number, message: 'Atendimento humano solicitado via bot.', status: 'pendente', priority: 10, max_attempts: 3 }) }}"
+      },
+      "id": "HTTP_Queue_Handoff",
+      "name": "Escalonar para Humano",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1560, 440]
+    },
+
+    {
+      "parameters": {
+        "responseBody": "={{ JSON.stringify({ ok: true, handoff: true }) }}",
+        "responseCode": 200
+      },
+      "id": "Respond_OK_Handoff",
+      "name": "Respond 200 (Handoff)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1780, 440]
+    },
+
+    {
+      "parameters": {
+        "responseBody": "={{ JSON.stringify({ ok: true }) }}",
+        "responseCode": 200
+      },
+      "id": "Respond_OK_FAQ",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1780, 320]
+    }
+  ],
+  "connections": {
+    "Webhook – WA Inbound (Evolution)": { "main": [ [ { "node": "Extract Message", "type": "main", "index": 0 } ] ] },
+    "Extract Message": { "main": [ [ { "node": "AI Decide/Answer (JSON)", "type": "main", "index": 0 } ] ] },
+    "AI Decide/Answer (JSON)": { "main": [ [ { "node": "Parse AI JSON", "type": "main", "index": 0 } ] ] },
+    "Parse AI JSON": { "main": [ [ { "node": "IF Needs DB?", "type": "main", "index": 0 } ] ] },
+    "IF Needs DB?": {
+      "main": [
+        [ { "node": "Supabase – Buscar Inscrição", "type": "main", "index": 0 } ],
+        [ { "node": "Use AI Reply", "type": "main", "index": 0 } ]
+      ]
+    },
+    "Supabase – Buscar Inscrição": { "main": [ [ { "node": "Compose Status Reply", "type": "main", "index": 0 } ] ] },
+    "Compose Status Reply": { "main": [ [ { "node": "WA – Enviar (Status)", "type": "main", "index": 0 } ] ] },
+    "WA – Enviar (Status)": { "main": [ [ { "node": "Respond 200", "type": "main", "index": 0 } ] ] },
+
+    "Use AI Reply": { "main": [ [ { "node": "IF Handoff?", "type": "main", "index": 0 } ] ] },
+    "IF Handoff?": {
+      "main": [
+        [ { "node": "WA – Enviar (FAQ/Outros)", "type": "main", "index": 0 }, { "node": "Escalonar para Humano", "type": "main", "index": 0 } ],
+        [ { "node": "WA – Enviar (FAQ/Outros)", "type": "main", "index": 0 } ]
+      ]
+    },
+    "WA – Enviar (FAQ/Outros)": { "main": [ [ { "node": "Respond 200", "type": "main", "index": 0 } ] ] },
+    "Escalonar para Humano": { "main": [ [ { "node": "Respond 200 (Handoff)", "type": "main", "index": 0 } ] ] }
+  },
+  "active": false,
+  "settings": { "saveExecutionProgress": true, "executionOrder": "v1" },
+  "version": 2
+}
+

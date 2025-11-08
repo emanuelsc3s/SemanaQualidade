@@ -460,115 +460,32 @@ export interface DadosInscritosPorDepartamento {
  * Busca dados de inscritos vs total de funcionários por departamento
  * Compara quantos funcionários cada departamento tem vs quantos se inscreveram
  *
- * IMPLEMENTAÇÃO: Usa queries Supabase nativas (.from()) sem criar função no banco
- * Faz o processamento da agregação em JavaScript
+ * IMPLEMENTAÇÃO: Usa RPC (Remote Procedure Call) para executar função PostgreSQL
+ * A função SQL realiza LEFT JOIN nativo e agregação no banco de dados
  *
  * @returns Promise com array de dados comparativos por departamento
  */
 export async function buscarDadosInscritosPorDepartamento(): Promise<DadosInscritosPorDepartamento[]> {
   try {
-    console.log('🔍 [Dashboard Inscritos/Departamento] Buscando dados...')
+    console.log('🔍 [Dashboard Inscritos/Departamento] Buscando dados via RPC...')
 
-    // Query 1: Busca TODOS os funcionários ativos
-    const { data: funcionarios, error: errorFuncionarios } = await supabase
-      .from('tbfuncionario')
-      .select('matricula, lotacao')
-      .or('ativo.is.true,ativo.is.null')
-      .not('lotacao', 'is', null)
+    const { data, error } = await supabase
+      .rpc('fn_inscritos_por_departamento')
 
-    if (errorFuncionarios) {
-      console.error('❌ [Dashboard Inscritos/Departamento] Erro ao buscar funcionários:', errorFuncionarios)
-      throw new Error(`Erro ao buscar funcionários: ${errorFuncionarios.message}`)
+    if (error) {
+      console.error('❌ [Dashboard Inscritos/Departamento] Erro ao buscar dados:', error)
+      throw new Error(`Erro ao buscar dados: ${error.message}`)
     }
 
-    console.log(`✅ [Dashboard Inscritos/Departamento] ${funcionarios?.length || 0} funcionários encontrados`)
+    console.log(`✅ [Dashboard Inscritos/Departamento] ${data?.length || 0} departamentos retornados`)
 
-    // Query 2: Busca inscrições confirmadas
-    const { data: inscricoes, error: errorInscricoes } = await supabase
-      .from('tbcorrida')
-      .select('matricula')
-      .is('deleted_at', null)
-      .eq('status', 'Confirmada')
-
-    if (errorInscricoes) {
-      console.error('❌ [Dashboard Inscritos/Departamento] Erro ao buscar inscrições:', errorInscricoes)
-      throw new Error(`Erro ao buscar inscrições: ${errorInscricoes.message}`)
+    if (data && data.length > 0) {
+      console.log('📈 [Dashboard Inscritos/Departamento] Top 3 departamentos:',
+        data.slice(0, 3).map(d => `${d.lotacao}: ${d.total_funcionarios} funcionários, ${d.total_inscritos} inscritos, ${d.percentual_adesao}% adesão`)
+      )
     }
 
-    console.log(`✅ [Dashboard Inscritos/Departamento] ${inscricoes?.length || 0} inscrições encontradas`)
-
-    // Cria Map de matrículas inscritas
-    const matriculasInscritas = new Set<string>()
-    inscricoes?.forEach((insc: InscricaoMatriculaRow) => {
-      if (insc.matricula) {
-        matriculasInscritas.add(insc.matricula.trim())
-      }
-    })
-
-    // Agrupa por departamento e calcula estatísticas
-    const agrupamento: Record<string, {
-      total_funcionarios: Set<string>
-      total_inscritos: Set<string>
-    }> = {}
-
-    funcionarios?.forEach((func: FuncionarioBasico) => {
-      const lotacao = (func.lotacao || 'Não informado').toUpperCase()
-      const matricula = func.matricula?.trim()
-
-      if (!matricula) return
-
-      if (!agrupamento[lotacao]) {
-        agrupamento[lotacao] = {
-          total_funcionarios: new Set(),
-          total_inscritos: new Set()
-        }
-      }
-
-      agrupamento[lotacao].total_funcionarios.add(matricula)
-
-      if (matriculasInscritas.has(matricula)) {
-        agrupamento[lotacao].total_inscritos.add(matricula)
-      }
-    })
-
-    console.log(`✅ [Dashboard Inscritos/Departamento] ${Object.keys(agrupamento).length} departamentos processados`)
-
-    // Transforma em array e calcula percentuais
-    const resultado: DadosInscritosPorDepartamento[] = Object.entries(agrupamento).map(
-      ([lotacao, stats]) => {
-        const total_funcionarios = stats.total_funcionarios.size
-        const total_inscritos = stats.total_inscritos.size
-        const sem_inscricao = total_funcionarios - total_inscritos
-        const percentual_adesao = total_funcionarios > 0
-          ? Math.round((total_inscritos / total_funcionarios) * 1000) / 10
-          : 0
-
-        return {
-          lotacao,
-          total_funcionarios,
-          total_inscritos,
-          sem_inscricao,
-          percentual_adesao
-        }
-      }
-    )
-
-    // Ordena por percentual de adesão (desc), depois por total de funcionários (desc)
-    resultado.sort((a, b) => {
-      if (b.percentual_adesao !== a.percentual_adesao) {
-        return b.percentual_adesao - a.percentual_adesao
-      }
-      if (b.total_funcionarios !== a.total_funcionarios) {
-        return b.total_funcionarios - a.total_funcionarios
-      }
-      return a.lotacao.localeCompare(b.lotacao)
-    })
-
-    console.log('📈 [Dashboard Inscritos/Departamento] Top 3 departamentos por adesão:',
-      resultado.slice(0, 3).map(d => `${d.lotacao}: ${d.percentual_adesao}%`)
-    )
-
-    return resultado
+    return data || []
 
   } catch (error) {
     console.error('❌ [Dashboard Inscritos/Departamento] Erro inesperado:', error)
