@@ -14718,15 +14718,22 @@
 			"MATRICULA": "D00001",
 			"NOME": "CLARICE MARIA PINHEIRO CALLOU",
 			"CPF": "86556487368",
-			"NASCIMENTO": "13032006 00:00",
+			"NASCIMENTO": "13.03.2006 00:00",
 			"EMAIL": "claricecallou@gmail.com"
 		},
 		{
 			"MATRICULA": "T00001",
 			"NOME": "WBERLANIO DA COSTA SOARES",
 			"CPF": "02107289301",
-			"NASCIMENTO": "14031987 00:00",
+			"NASCIMENTO": "14.03.1987 00:00",
 			"EMAIL": "wber.bio.cs@gmail.com"
+		},
+		{
+			"MATRICULA": "T00002",
+			"NOME": "MARILIA LOPES PERNAMBUCO",
+			"CPF": "65724658372",
+			"NASCIMENTO": "23.12.1981 00:00",
+			"EMAIL": "marilia.lopes@farmace.com.br"			
 		}		
 	]
 }
