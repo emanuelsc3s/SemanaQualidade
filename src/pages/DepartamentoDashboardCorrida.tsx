@@ -7,7 +7,10 @@ import {
   type DadosTipoParticipacao,
   type DadosInscritosPorDepartamento
 } from '@/services/inscricaoCorridaSupabaseService'
-import { gerarRelatorioDepartamentosPDFBase64 } from '@/utils/pdfGenerator'
+import {
+  gerarRelatorioDepartamentosPDFBase64,
+  gerarRelatorioInscritosPDFBase64
+} from '@/utils/pdfGenerator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -104,7 +107,7 @@ const DepartamentoDashboardCorrida: React.FC = () => {
   const [direcaoOrdenacaoTipo, setDirecaoOrdenacaoTipo] = useState<DirecaoOrdenacao>('desc')
 
   // Estados de ordenação - Tab 3: Inscritos
-  const [colunaOrdenacaoInscritos, setColunaOrdenacaoInscritos] = useState<OrdenacaoColunaInscritos>('percentual_adesao')
+  const [colunaOrdenacaoInscritos, setColunaOrdenacaoInscritos] = useState<OrdenacaoColunaInscritos>('total_funcionarios')
   const [direcaoOrdenacaoInscritos, setDirecaoOrdenacaoInscritos] = useState<DirecaoOrdenacao>('desc')
 
   // Estados de paginação
@@ -471,13 +474,38 @@ const DepartamentoDashboardCorrida: React.FC = () => {
 
   /**
    * Gera PDF e abre modal de preview
+   * Gera o PDF de acordo com a aba atualmente selecionada
    */
   const handleExportarPDF = async () => {
     try {
       setGerandoPDF(true)
 
-      // Gera PDF em Base64 com todos os dados (não paginados)
-      const pdfBase64 = await gerarRelatorioDepartamentosPDFBase64(dadosOrdenados)
+      let pdfBase64: string
+
+      // Verifica qual aba está ativa e gera o PDF apropriado
+      switch (abaAtiva) {
+        case 'modalidade':
+          // Tab 1: Modalidade por Corrida
+          pdfBase64 = await gerarRelatorioDepartamentosPDFBase64(dadosOrdenados)
+          break
+
+        case 'tipo':
+          // Tab 2: Tipo de Participação
+          // TODO: Implementar geração de PDF para Tipo de Participação
+          console.warn('PDF de Tipo de Participação ainda não implementado')
+          alert('Relatório PDF para "Tipo de Participação" ainda não está disponível.')
+          return
+
+        case 'inscritos':
+          // Tab 3: Inscritos por Departamento
+          pdfBase64 = await gerarRelatorioInscritosPDFBase64(dadosOrdenadosInscritos)
+          break
+
+        default:
+          console.error('Aba desconhecida:', abaAtiva)
+          alert('Erro: aba desconhecida.')
+          return
+      }
 
       setPdfDataUrl(pdfBase64)
       setModalPDFAberto(true)
@@ -491,6 +519,7 @@ const DepartamentoDashboardCorrida: React.FC = () => {
 
   /**
    * Faz download do PDF
+   * Nome do arquivo varia de acordo com a aba ativa
    */
   const handleDownloadPDF = () => {
     if (!pdfDataUrl) return
@@ -504,12 +533,29 @@ const DepartamentoDashboardCorrida: React.FC = () => {
     const byteArray = new Uint8Array(byteNumbers)
     const blob = new Blob([byteArray], { type: 'application/pdf' })
 
+    // Define nome do arquivo baseado na aba ativa
+    const dataAtual = new Date().toISOString().split('T')[0]
+    let nomeArquivo: string
+
+    switch (abaAtiva) {
+      case 'modalidade':
+        nomeArquivo = `Relatorio_Modalidades_${dataAtual}.pdf`
+        break
+      case 'tipo':
+        nomeArquivo = `Relatorio_Tipo_Participacao_${dataAtual}.pdf`
+        break
+      case 'inscritos':
+        nomeArquivo = `Relatorio_Inscritos_Departamento_${dataAtual}.pdf`
+        break
+      default:
+        nomeArquivo = `Relatorio_Departamentos_${dataAtual}.pdf`
+    }
+
     // Cria URL e faz download
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    const dataAtual = new Date().toISOString().split('T')[0]
-    link.download = `Relatorio_Departamentos_${dataAtual}.pdf`
+    link.download = nomeArquivo
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)

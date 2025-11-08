@@ -3,9 +3,10 @@ import { ReciboDocument } from '@/components/ReciboPDF'
 import { ReciboDocumentModerno } from '@/components/ReciboPDFModerno'
 import ReciboPDFInter from '@/components/ReciboPDFInter'
 import RelatorioDepartamentosPDF from '@/components/RelatorioDepartamentosPDF'
+import RelatorioInscritosPDF from '@/components/RelatorioInscritosPDF'
 import QRCode from 'qrcode'
 import React from 'react'
-import type { DadosDepartamento } from '@/services/inscricaoCorridaSupabaseService'
+import type { DadosDepartamento, DadosInscritosPorDepartamento } from '@/services/inscricaoCorridaSupabaseService'
 
 /**
  * Interface para os dados necessários para gerar o recibo em PDF
@@ -611,6 +612,142 @@ export async function downloadRelatorioDepartamentosPDF(
 
   } catch (error) {
     console.error('❌ [PDF Generator Departamentos] Erro ao fazer download do PDF:', error)
+    throw error
+  }
+}
+
+// ============================================================================
+// FUNÇÕES PARA RELATÓRIO DE INSCRITOS POR DEPARTAMENTO
+// ============================================================================
+
+/**
+ * Gera o PDF do relatório de inscritos por departamento como Blob
+ *
+ * @param inscritos - Array com dados de inscritos por departamento
+ * @returns Promise com o PDF em formato Blob
+ */
+export async function gerarRelatorioInscritosPDF(
+  inscritos: DadosInscritosPorDepartamento[]
+): Promise<Blob> {
+  console.log('📄 [PDF Generator Inscritos] Iniciando geração do PDF...')
+  console.log(`📊 [PDF Generator Inscritos] ${inscritos.length} departamentos`)
+
+  try {
+    // Formata a data/hora atual no padrão brasileiro
+    const dataGeracao = new Date().toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+
+    // Cria o componente React-PDF com os dados
+    const documento = React.createElement(RelatorioInscritosPDF, {
+      dados: {
+        inscritos,
+        dataGeracao
+      }
+    })
+
+    console.log('🔄 [PDF Generator Inscritos] Renderizando documento PDF...')
+
+    // Gera o PDF como Blob
+    // @ts-expect-error - React.createElement retorna o tipo correto mas TypeScript não infere corretamente
+    const blob = await pdf(documento).toBlob()
+
+    console.log('✅ [PDF Generator Inscritos] PDF gerado com sucesso!')
+    console.log('📦 [PDF Generator Inscritos] Tamanho do blob:', blob.size, 'bytes')
+
+    return blob
+
+  } catch (error) {
+    console.error('❌ [PDF Generator Inscritos] Erro ao gerar PDF:', error)
+    throw error
+  }
+}
+
+/**
+ * Gera o PDF do relatório de inscritos por departamento em formato Base64
+ *
+ * @param inscritos - Array com dados de inscritos por departamento
+ * @returns Promise com o PDF em formato Base64 (data URL)
+ */
+export async function gerarRelatorioInscritosPDFBase64(
+  inscritos: DadosInscritosPorDepartamento[]
+): Promise<string> {
+  console.log('📄 [PDF Generator Inscritos] Iniciando geração do PDF em Base64...')
+
+  try {
+    // Gera o PDF como Blob
+    const blob = await gerarRelatorioInscritosPDF(inscritos)
+
+    console.log('🔄 [PDF Generator Inscritos] Convertendo Blob para Base64...')
+
+    // Converte o Blob para Base64
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const result = reader.result as string
+        resolve(result)
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+
+    console.log('✅ [PDF Generator Inscritos] PDF convertido para Base64 com sucesso!')
+    console.log('📏 [PDF Generator Inscritos] Tamanho do Base64:', base64.length, 'caracteres')
+
+    return base64
+
+  } catch (error) {
+    console.error('❌ [PDF Generator Inscritos] Erro ao gerar PDF em Base64:', error)
+    throw error
+  }
+}
+
+/**
+ * Faz o download do PDF do relatório de inscritos por departamento
+ *
+ * @param inscritos - Array com dados de inscritos por departamento
+ * @param nomeArquivo - Nome do arquivo (opcional, padrão: Relatorio_Inscritos_[data].pdf)
+ */
+export async function downloadRelatorioInscritosPDF(
+  inscritos: DadosInscritosPorDepartamento[],
+  nomeArquivo?: string
+): Promise<void> {
+  console.log('📥 [PDF Generator Inscritos] Iniciando download do PDF...')
+
+  try {
+    // Gera o PDF como Blob
+    const blob = await gerarRelatorioInscritosPDF(inscritos)
+
+    // Define o nome do arquivo
+    const dataAtual = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+    const nome = nomeArquivo || `Relatorio_Inscritos_${dataAtual}.pdf`
+
+    console.log('📝 [PDF Generator Inscritos] Nome do arquivo:', nome)
+
+    // Cria uma URL temporária para o blob
+    const url = URL.createObjectURL(blob)
+
+    // Cria um link temporário e simula o clique para download
+    const link = document.createElement('a')
+    link.href = url
+    link.download = nome
+
+    // Adiciona o link ao DOM, clica nele e remove
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    // Libera a URL do objeto
+    URL.revokeObjectURL(url)
+
+    console.log('✅ [PDF Generator Inscritos] Download iniciado com sucesso!')
+
+  } catch (error) {
+    console.error('❌ [PDF Generator Inscritos] Erro ao fazer download do PDF:', error)
     throw error
   }
 }
