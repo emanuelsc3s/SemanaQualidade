@@ -38,9 +38,12 @@ import {
 } from 'lucide-react'
 
 // 🚨 CONSTANTES DE SEGURANÇA - INTERVALOS ALEATÓRIOS
-const INTERVALO_MINIMO_SEGUNDOS = 10 // Intervalo mínimo entre envios (segundos)
-const INTERVALO_MAXIMO_SEGUNDOS = 45 // Intervalo máximo entre envios (segundos)
+const INTERVALO_MINIMO_SEGUNDOS_PADRAO = 10 // Intervalo mínimo padrão entre envios (segundos)
+const INTERVALO_MAXIMO_SEGUNDOS_PADRAO = 45 // Intervalo máximo padrão entre envios (segundos)
+const INTERVALO_MINIMO_ABSOLUTO = 10 // Mínimo absoluto permitido (SEGURANÇA - NÃO ALTERAR)
 const STORAGE_KEY_MODO_TESTE = 'whatsapp_modo_teste' // Chave do localStorage
+const STORAGE_KEY_INTERVALO_MIN = 'whatsapp_intervalo_min' // Chave do localStorage para intervalo mínimo
+const STORAGE_KEY_INTERVALO_MAX = 'whatsapp_intervalo_max' // Chave do localStorage para intervalo máximo
 
 /**
  * Gera um intervalo aleatório entre min e max segundos
@@ -65,6 +68,32 @@ const getModoTeste = (): boolean => {
 const setModoTeste = (valor: boolean): void => {
   localStorage.setItem(STORAGE_KEY_MODO_TESTE, valor.toString())
   console.log(`🔧 [Config] Modo teste ${valor ? 'ATIVADO' : 'DESATIVADO'}`)
+}
+
+// Função para obter configuração de intervalo do localStorage
+const getIntervaloConfig = (): { min: number; max: number } => {
+  const storedMin = localStorage.getItem(STORAGE_KEY_INTERVALO_MIN)
+  const storedMax = localStorage.getItem(STORAGE_KEY_INTERVALO_MAX)
+
+  const min = storedMin ? parseInt(storedMin, 10) : INTERVALO_MINIMO_SEGUNDOS_PADRAO
+  const max = storedMax ? parseInt(storedMax, 10) : INTERVALO_MAXIMO_SEGUNDOS_PADRAO
+
+  // Validação de segurança
+  const minValido = Math.max(min, INTERVALO_MINIMO_ABSOLUTO)
+  const maxValido = Math.max(max, minValido + 1)
+
+  return { min: minValido, max: maxValido }
+}
+
+// Função para salvar configuração de intervalo no localStorage
+const setIntervaloConfig = (min: number, max: number): void => {
+  // Validação de segurança
+  const minValido = Math.max(Math.floor(min), INTERVALO_MINIMO_ABSOLUTO)
+  const maxValido = Math.max(Math.floor(max), minValido + 1)
+
+  localStorage.setItem(STORAGE_KEY_INTERVALO_MIN, minValido.toString())
+  localStorage.setItem(STORAGE_KEY_INTERVALO_MAX, maxValido.toString())
+  console.log(`🔧 [Config] Intervalo atualizado: ${minValido}-${maxValido} segundos`)
 }
 
 export default function WhatsApp() {
@@ -105,6 +134,12 @@ export default function WhatsApp() {
   // Estados de Configuração
   const [modalConfigAberto, setModalConfigAberto] = useState(false)
   const [modoTesteAtivo, setModoTesteAtivo] = useState(getModoTeste())
+  const [intervaloMinimo, setIntervaloMinimo] = useState(getIntervaloConfig().min)
+  const [intervaloMaximo, setIntervaloMaximo] = useState(getIntervaloConfig().max)
+
+  // Estados temporários para o modal de configuração (permitem digitação livre)
+  const [intervaloMinimoTemp, setIntervaloMinimoTemp] = useState(getIntervaloConfig().min)
+  const [intervaloMaximoTemp, setIntervaloMaximoTemp] = useState(getIntervaloConfig().max)
 
   // Carregar mensagens do Supabase com filtros de busca
   const carregarMensagens = async () => {
@@ -232,14 +267,14 @@ export default function WhatsApp() {
 
     // 🚨 SEGURANÇA: Confirmação dupla para envio em lote
     const totalMensagens = mensagensSelecionadas.size
-    const tempoMedio = Math.ceil((INTERVALO_MINIMO_SEGUNDOS + INTERVALO_MAXIMO_SEGUNDOS) / 2)
+    const tempoMedio = Math.ceil((intervaloMinimo + intervaloMaximo) / 2)
     const tempoTotal = Math.ceil((totalMensagens - 1) * tempoMedio / 60) // tempo em minutos
 
     const confirmacao1 = window.confirm(
       `⚠️ ATENÇÃO - ENVIO EM LOTE\n\n` +
       `Você está prestes a enviar ${totalMensagens} mensagens.\n\n` +
       `Para evitar banimento do WhatsApp:\n` +
-      `• Intervalo ALEATÓRIO entre ${INTERVALO_MINIMO_SEGUNDOS}-${INTERVALO_MAXIMO_SEGUNDOS} segundos entre cada envio\n` +
+      `• Intervalo ALEATÓRIO entre ${intervaloMinimo}-${intervaloMaximo} segundos entre cada envio\n` +
       `• Tempo total estimado: ~${tempoTotal} minuto(s) (pode variar)\n` +
       `• O processo NÃO pode ser cancelado após iniciar\n\n` +
       `Deseja continuar?`
@@ -250,7 +285,7 @@ export default function WhatsApp() {
     // Segunda confirmação
     const confirmacao2 = window.confirm(
       `🔒 CONFIRMAÇÃO FINAL\n\n` +
-      `Confirma o envio de ${totalMensagens} mensagens com intervalo aleatório de ${INTERVALO_MINIMO_SEGUNDOS}-${INTERVALO_MAXIMO_SEGUNDOS} segundos?\n\n` +
+      `Confirma o envio de ${totalMensagens} mensagens com intervalo aleatório de ${intervaloMinimo}-${intervaloMaximo} segundos?\n\n` +
       `Esta é sua última chance de cancelar.`
     )
 
@@ -339,14 +374,14 @@ export default function WhatsApp() {
     }
   }
 
-  // Processar envios em lote com intervalo aleatório entre 10-45 segundos
+  // Processar envios em lote com intervalo aleatório personalizado
   const processarEnviosEmLote = async (mensagensParaEnviar: MensagemEnvio[]) => {
     const timestampInicio = new Date().toISOString()
     console.log(`\n${'='.repeat(80)}`)
     console.log(`🚀 [WhatsApp] INICIANDO ENVIO EM LOTE`)
     console.log(`📅 Timestamp: ${timestampInicio}`)
     console.log(`📊 Total de mensagens: ${mensagensParaEnviar.length}`)
-    console.log(`⏱️  Intervalo configurado: ${INTERVALO_MINIMO_SEGUNDOS}-${INTERVALO_MAXIMO_SEGUNDOS} segundos (aleatório)`)
+    console.log(`⏱️  Intervalo configurado: ${intervaloMinimo}-${intervaloMaximo} segundos (aleatório)`)
     console.log(`🧪 Modo teste: ${modoTesteAtivo ? 'SIM (não envia de verdade)' : 'NÃO (envio real)'}`)
     console.log(`${'='.repeat(80)}\n`)
 
@@ -386,8 +421,8 @@ export default function WhatsApp() {
       // 🚨 VALIDAÇÃO DE SEGURANÇA: Verificar intervalo mínimo
       if (timestampUltimoEnvio !== null) {
         const tempoDecorrido = (Date.now() - timestampUltimoEnvio) / 1000
-        if (tempoDecorrido < INTERVALO_MINIMO_SEGUNDOS) {
-          const tempoRestante = INTERVALO_MINIMO_SEGUNDOS - tempoDecorrido
+        if (tempoDecorrido < intervaloMinimo) {
+          const tempoRestante = intervaloMinimo - tempoDecorrido
           console.warn(`⚠️  [SEGURANÇA] Intervalo insuficiente! Aguardando mais ${tempoRestante.toFixed(1)}s...`)
           await new Promise(resolve => setTimeout(resolve, tempoRestante * 1000))
         }
@@ -494,10 +529,10 @@ export default function WhatsApp() {
       // Aguardar intervalo ALEATÓRIO antes da próxima mensagem (exceto na última)
       if (i < mensagensParaEnviar.length - 1) {
         // 🎲 GERAR INTERVALO ALEATÓRIO para cada mensagem
-        const intervaloAleatorio = gerarIntervaloAleatorio(INTERVALO_MINIMO_SEGUNDOS, INTERVALO_MAXIMO_SEGUNDOS)
+        const intervaloAleatorio = gerarIntervaloAleatorio(intervaloMinimo, intervaloMaximo)
 
         console.log(`\n⏳ [WhatsApp] Aguardando ${intervaloAleatorio} segundos antes da próxima mensagem...`)
-        console.log(`🎲 [WhatsApp] Intervalo randomizado entre ${INTERVALO_MINIMO_SEGUNDOS}-${INTERVALO_MAXIMO_SEGUNDOS}s`)
+        console.log(`🎲 [WhatsApp] Intervalo randomizado entre ${intervaloMinimo}-${intervaloMaximo}s`)
         console.log(`📊 Progresso: ${i + 1}/${mensagensParaEnviar.length} concluídas`)
 
         // Contador regressivo com intervalo ALEATÓRIO e suporte a PAUSA
@@ -611,6 +646,56 @@ export default function WhatsApp() {
     setModoTeste(novoValor)
   }
 
+  // Restaurar intervalos padrão
+  const restaurarIntervaloPadrao = () => {
+    setIntervaloMinimo(INTERVALO_MINIMO_SEGUNDOS_PADRAO)
+    setIntervaloMaximo(INTERVALO_MAXIMO_SEGUNDOS_PADRAO)
+    setIntervaloMinimoTemp(INTERVALO_MINIMO_SEGUNDOS_PADRAO)
+    setIntervaloMaximoTemp(INTERVALO_MAXIMO_SEGUNDOS_PADRAO)
+    setIntervaloConfig(INTERVALO_MINIMO_SEGUNDOS_PADRAO, INTERVALO_MAXIMO_SEGUNDOS_PADRAO)
+  }
+
+  // Validar e fechar modal de configuração
+  const validarEFecharModalConfig = () => {
+    // Validar intervalo mínimo
+    if (intervaloMinimoTemp < INTERVALO_MINIMO_ABSOLUTO) {
+      alert(
+        `❌ Intervalo mínimo inválido!\n\n` +
+        `O intervalo mínimo deve ser no mínimo ${INTERVALO_MINIMO_ABSOLUTO} segundos.\n\n` +
+        `Valor digitado: ${intervaloMinimoTemp}s`
+      )
+      return // Não fechar modal
+    }
+
+    // Validar que máximo > mínimo
+    if (intervaloMaximoTemp <= intervaloMinimoTemp) {
+      alert(
+        `❌ Intervalo máximo inválido!\n\n` +
+        `O intervalo máximo (${intervaloMaximoTemp}s) deve ser maior que o mínimo (${intervaloMinimoTemp}s).\n\n` +
+        `Por favor, ajuste os valores.`
+      )
+      return // Não fechar modal
+    }
+
+    // Se passou nas validações, aplicar valores
+    console.log(`✅ [Config] Valores válidos - Aplicando: ${intervaloMinimoTemp}-${intervaloMaximoTemp}s`)
+    setIntervaloMinimo(intervaloMinimoTemp)
+    setIntervaloMaximo(intervaloMaximoTemp)
+    setIntervaloConfig(intervaloMinimoTemp, intervaloMaximoTemp)
+
+    // Fechar modal
+    setModalConfigAberto(false)
+  }
+
+  // Abrir modal de configuração (resetar valores temporários)
+  const abrirModalConfig = () => {
+    // Carregar valores atuais salvos
+    const config = getIntervaloConfig()
+    setIntervaloMinimoTemp(config.min)
+    setIntervaloMaximoTemp(config.max)
+    setModalConfigAberto(true)
+  }
+
   // Mensagens já vêm filtradas do servidor (Supabase)
   // Não é necessário filtrar localmente
   const mensagensFiltradas = mensagens
@@ -684,7 +769,7 @@ export default function WhatsApp() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setModalConfigAberto(true)}
+            onClick={abrirModalConfig}
             className="flex items-center gap-2 hover:bg-slate-100 transition-colors"
             title="Configurações"
           >
@@ -970,7 +1055,7 @@ export default function WhatsApp() {
       {/* Modal de Configurações */}
       {modalConfigAberto && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-6 space-y-4 sm:space-y-6 animate-in fade-in duration-300">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 animate-in fade-in duration-300">
             {/* Header */}
             <div className="text-center space-y-2">
               <div className="flex items-center justify-center gap-2 mb-2">
@@ -982,81 +1067,195 @@ export default function WhatsApp() {
               </p>
             </div>
 
-            {/* Modo Teste */}
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-slate-900 flex items-center gap-2">
-                    🧪 Modo Teste
-                  </h3>
-                  <p className="text-sm text-slate-600 mt-1">
-                    Quando ativado, simula o envio sem chamar a API real do WhatsApp
-                  </p>
-                </div>
-                <button
-                  onClick={alternarModoTeste}
-                  className={`
-                    relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300
-                    ${modoTesteAtivo ? 'bg-green-600' : 'bg-slate-300'}
-                  `}
-                >
-                  <span
+            {/* Grid de Configurações - 2 colunas em desktop, 1 em mobile */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Modo Teste */}
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+                      🧪 Modo Teste
+                    </h3>
+                    <p className="text-sm text-slate-600 mt-1">
+                      Quando ativado, simula o envio sem chamar a API real do WhatsApp
+                    </p>
+                  </div>
+                  <button
+                    onClick={alternarModoTeste}
                     className={`
-                      inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300
-                      ${modoTesteAtivo ? 'translate-x-6' : 'translate-x-1'}
+                      relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300
+                      ${modoTesteAtivo ? 'bg-green-600' : 'bg-slate-300'}
                     `}
-                  />
-                </button>
+                  >
+                    <span
+                      className={`
+                        inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300
+                        ${modoTesteAtivo ? 'translate-x-6' : 'translate-x-1'}
+                      `}
+                    />
+                  </button>
+                </div>
+
+                {/* Status atual */}
+                <div className={`
+                  rounded-lg p-3 text-sm font-semibold text-center transition-all duration-300
+                  ${modoTesteAtivo
+                    ? 'bg-green-100 text-green-800 border-2 border-green-300'
+                    : 'bg-sky-100 text-primary-700 border-2 border-sky-300'
+                  }
+                `}>
+                  {modoTesteAtivo ? (
+                    <>
+                      ✅ MODO TESTE ATIVO
+                      <br />
+                      <span className="text-xs font-normal">
+                        Mensagens NÃO serão enviadas de verdade
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      🚀 MODO PRODUÇÃO ATIVO
+                      <br />
+                      <span className="text-xs font-normal">
+                        Mensagens serão enviadas via API real
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {/* Informações de Segurança */}
+                <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
+                  <h4 className="font-semibold text-yellow-900 text-sm mb-2 flex items-center gap-2">
+                    ⚠️ Informações Importantes
+                  </h4>
+                  <ul className="text-xs text-yellow-800 space-y-1.5">
+                    <li>• Intervalo aleatório configurado: {intervaloMinimo}-{intervaloMaximo} segundos</li>
+                    <li>• Intervalo mínimo de segurança: {INTERVALO_MINIMO_ABSOLUTO} segundos (não alterável)</li>
+                    <li>• Use o modo teste antes de enviar em produção</li>
+                    <li>• Evite enviar mais de 50 mensagens por vez</li>
+                    <li>• Todas as configurações são salvas automaticamente</li>
+                  </ul>
+                </div>
               </div>
 
-              {/* Status atual */}
-              <div className={`
-                rounded-lg p-3 text-sm font-semibold text-center transition-all duration-300
-                ${modoTesteAtivo
-                  ? 'bg-green-100 text-green-800 border-2 border-green-300'
-                  : 'bg-sky-100 text-primary-700 border-2 border-sky-300'
-                }
-              `}>
-                {modoTesteAtivo ? (
-                  <>
-                    ✅ MODO TESTE ATIVO
-                    <br />
-                    <span className="text-xs font-normal">
-                      Mensagens NÃO serão enviadas de verdade
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    🚀 MODO PRODUÇÃO ATIVO
-                    <br />
-                    <span className="text-xs font-normal">
-                      Mensagens serão enviadas via API real
-                    </span>
-                  </>
+              {/* Intervalo de Envio */}
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-slate-900 flex items-center gap-2">
+                      ⏱️ Intervalo de Envio
+                    </h3>
+                    <p className="text-sm text-slate-600 mt-1">
+                      Tempo aleatório entre envios (mínimo: {INTERVALO_MINIMO_ABSOLUTO}s)
+                    </p>
+                  </div>
+                  <Button
+                    onClick={restaurarIntervaloPadrao}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs hover:bg-slate-100"
+                  >
+                    Restaurar Padrão
+                  </Button>
+                </div>
+
+                {/* Inputs de intervalo */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-medium text-slate-700 mb-1 block">
+                      Mínimo (segundos)
+                    </label>
+                    <Input
+                      type="number"
+                      value={intervaloMinimoTemp}
+                      onChange={(e) => setIntervaloMinimoTemp(Number(e.target.value))}
+                      className={`text-center font-semibold transition-all duration-300 ${
+                        intervaloMinimoTemp < INTERVALO_MINIMO_ABSOLUTO
+                          ? 'border-red-500 focus:ring-red-500'
+                          : 'border-green-500 focus:ring-green-500'
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-slate-700 mb-1 block">
+                      Máximo (segundos)
+                    </label>
+                    <Input
+                      type="number"
+                      value={intervaloMaximoTemp}
+                      onChange={(e) => setIntervaloMaximoTemp(Number(e.target.value))}
+                      className={`text-center font-semibold transition-all duration-300 ${
+                        intervaloMaximoTemp <= intervaloMinimoTemp
+                          ? 'border-red-500 focus:ring-red-500'
+                          : 'border-green-500 focus:ring-green-500'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {/* Feedback de validação em tempo real */}
+                {(intervaloMinimoTemp < INTERVALO_MINIMO_ABSOLUTO || intervaloMaximoTemp <= intervaloMinimoTemp) && (
+                  <div className="bg-red-50 border-2 border-red-400 rounded-lg p-3 animate-in fade-in duration-300">
+                    <p className="text-xs font-semibold text-red-900 flex items-center gap-2">
+                      ❌ Valores inválidos
+                    </p>
+                    <ul className="text-xs text-red-800 mt-2 space-y-1">
+                      {intervaloMinimoTemp < INTERVALO_MINIMO_ABSOLUTO && (
+                        <li>• Mínimo deve ser no mínimo {INTERVALO_MINIMO_ABSOLUTO}s (atual: {intervaloMinimoTemp}s)</li>
+                      )}
+                      {intervaloMaximoTemp <= intervaloMinimoTemp && (
+                        <li>• Máximo ({intervaloMaximoTemp}s) deve ser maior que mínimo ({intervaloMinimoTemp}s)</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Confirmação de valores válidos */}
+                {intervaloMinimoTemp >= INTERVALO_MINIMO_ABSOLUTO && intervaloMaximoTemp > intervaloMinimoTemp && (
+                  <div className="bg-green-50 border-2 border-green-400 rounded-lg p-3 animate-in fade-in duration-300">
+                    <p className="text-xs font-semibold text-green-900 flex items-center gap-2">
+                      ✅ Valores válidos
+                    </p>
+                    <p className="text-xs text-green-800 mt-1">
+                      Os valores estão corretos e podem ser salvos.
+                    </p>
+                  </div>
+                )}
+
+                {/* Preview do intervalo */}
+                <div className="bg-primary-50 border-2 border-primary-300 rounded-lg p-3 text-center">
+                  <p className="text-sm font-semibold text-primary-900">
+                    🎲 Intervalo Configurado
+                  </p>
+                  <p className="text-2xl font-bold text-primary-700 mt-1">
+                    {intervaloMinimoTemp} - {intervaloMaximoTemp}s
+                  </p>
+                  <p className="text-xs text-primary-600 mt-1">
+                    (aleatório a cada envio)
+                  </p>
+                </div>
+
+                {/* Aviso de segurança */}
+                {intervaloMinimoTemp < 15 && (
+                  <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-3">
+                    <p className="text-xs font-semibold text-yellow-900 flex items-center gap-2">
+                      ⚠️ Atenção: Intervalo Curto
+                    </p>
+                    <p className="text-xs text-yellow-800 mt-1">
+                      Intervalos menores que 15 segundos aumentam o risco de banimento do WhatsApp.
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
 
-            {/* Informações de Segurança */}
-            <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4">
-              <h4 className="font-semibold text-yellow-900 text-sm mb-2 flex items-center gap-2">
-                ⚠️ Informações Importantes
-              </h4>
-              <ul className="text-xs text-yellow-800 space-y-1.5">
-                <li>• Intervalo aleatório de {INTERVALO_MINIMO_SEGUNDOS}-{INTERVALO_MAXIMO_SEGUNDOS} segundos entre envios</li>
-                <li>• Use o modo teste antes de enviar em produção</li>
-                <li>• Evite enviar mais de 50 mensagens por vez</li>
-                <li>• A configuração é salva automaticamente</li>
-              </ul>
-            </div>
-
             {/* Botão Fechar */}
             <Button
-              onClick={() => setModalConfigAberto(false)}
+              onClick={validarEFecharModalConfig}
               className="w-full bg-primary-600 hover:bg-primary-700 text-white transition-colors duration-300"
               size="lg"
             >
-              Fechar
+              Salvar e Fechar
             </Button>
           </div>
         </div>

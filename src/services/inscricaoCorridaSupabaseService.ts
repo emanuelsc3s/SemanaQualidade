@@ -335,7 +335,7 @@ export interface DadosTipoParticipacao {
 // Tipos auxiliares para resultados de queries Supabase
 type FuncionarioBasico = { matricula: string | null; lotacao: string | null; ativo?: boolean | null };
 
-type InscricaoMatriculaRow = { matricula: string | null };
+
 type InscricaoComModalidadeRow = { matricula: string | null; modalidade: string | null };
 
 /**
@@ -481,7 +481,7 @@ export async function buscarDadosInscritosPorDepartamento(): Promise<DadosInscri
 
     if (data && data.length > 0) {
       console.log('📈 [Dashboard Inscritos/Departamento] Top 3 departamentos:',
-        data.slice(0, 3).map(d => `${d.lotacao}: ${d.total_funcionarios} funcionários, ${d.total_inscritos} inscritos, ${d.percentual_adesao}% adesão`)
+        (data as DadosInscritosPorDepartamento[]).slice(0, 3).map((d: DadosInscritosPorDepartamento) => `${d.lotacao}: ${d.total_funcionarios} funcionários, ${d.total_inscritos} inscritos, ${d.percentual_adesao}% adesão`)
       )
     }
 
