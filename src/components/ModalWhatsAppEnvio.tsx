@@ -106,7 +106,7 @@ export function ModalWhatsAppEnvio({
       }}
     >
       <DialogContent
-        className="max-w-md sm:max-w-lg max-h-[90vh] flex flex-col overflow-hidden"
+        className="max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
         onInteractOutside={(e) => {
           // Previne o fechamento ao clicar fora se não estiver concluído
           if (!concluido) {
@@ -123,8 +123,14 @@ export function ModalWhatsAppEnvio({
       >
         <Card className="border-0 shadow-none flex flex-col overflow-hidden h-full">
           <CardContent className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6 overflow-hidden h-full">
-            {/* Cabeçalho - Fixo (sem scroll) */}
-            <div className="flex-shrink-0 text-center space-y-2">
+            {/* Grid de Duas Colunas - Mobile: coluna única, Desktop: 50/50 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 flex-1 overflow-hidden min-h-0">
+
+              {/* COLUNA ESQUERDA - Controles e Informações */}
+              <div className="flex flex-col gap-4 overflow-y-auto pr-2">
+
+                {/* Cabeçalho - Fixo (sem scroll) */}
+                <div className="flex-shrink-0 text-center space-y-2">
               <div className="flex items-center justify-center gap-2 mb-2">
                 {concluido ? (
                   <CheckCircle2 className="w-8 h-8 text-green-600" />
@@ -226,14 +232,25 @@ export function ModalWhatsAppEnvio({
               </div>
             )}
 
+              </div>
+              {/* FIM COLUNA ESQUERDA */}
+
+              {/* COLUNA DIREITA - Lista de Contatos */}
+              <div className="flex flex-col gap-4 overflow-y-auto pr-2 min-h-0">
+                <div className="flex-shrink-0 border-b pb-2 mb-2">
+                  <h3 className="text-lg font-semibold text-slate-700 text-center">
+                    Lista de Contatos
+                  </h3>
+                </div>
+
             {/* Lista de Mensagens - COM SCROLL (área scrollável) */}
-            <div className="flex-1 overflow-y-auto pr-2 space-y-2 min-h-0">
+            <div className="flex-1 overflow-y-auto pr-2 space-y-2 min-h-0 flex flex-col items-center px-4">
               {mensagens.map((mensagem, index) => {
                 return (
                   <div
                     key={mensagem.id}
                     className={cn(
-                      "flex items-start gap-3 p-3 rounded-lg transition-all duration-300 border",
+                      "flex items-start gap-3 p-3 rounded-lg transition-all duration-300 border w-full max-w-sm",
                       mensagem.status === 'aguardando' && "bg-slate-50 border-slate-200",
                       mensagem.status === 'enviando' && "bg-sky-50 border-sky-300 shadow-sm",
                       mensagem.status === 'enviado' && "bg-green-50 border-green-200",
@@ -304,7 +321,13 @@ export function ModalWhatsAppEnvio({
               })}
             </div>
 
-            {/* Resumo Final (quando concluído) - Fixo (sem scroll) */}
+              </div>
+              {/* FIM COLUNA DIREITA */}
+
+            </div>
+            {/* FIM DO GRID DE DUAS COLUNAS */}
+
+            {/* Resumo Final (quando concluído) - Full-width embaixo das colunas */}
             {concluido && (
               <div className="flex-shrink-0 space-y-3 pt-2 border-t">
                 <div className="grid grid-cols-2 gap-3 text-center">
