@@ -3,16 +3,16 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Calendar, MapPin, Award, Users, Clock, DollarSign, Menu, X, Volume2, VolumeX, HelpCircle, ChevronUp, ChevronDown } from "lucide-react"
-import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useRef } from "react"
 
 export default function Home() {
-  const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isMuted, setIsMuted] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
+  const [inscricoesEncerradasOpen, setInscricoesEncerradasOpen] = useState(false)
+
   const [isOverLightBackground, setIsOverLightBackground] = useState(false)
   const [showScrollToTop, setShowScrollToTop] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
@@ -231,10 +231,10 @@ export default function Home() {
                 <div className="ml-4 relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-accent-400 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
                   <Button
-                    onClick={() => navigate('/loginInscricao')}
+                    onClick={() => setInscricoesEncerradasOpen(true)}
                     className="relative bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-bold px-8 py-2.5 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-0 backdrop-blur-sm"
                   >
-                    INSCREVA-SE
+                    INSCRIÇÕES ENCERRADAS
                   </Button>
                 </div>
 
@@ -339,11 +339,11 @@ export default function Home() {
                 <Button
                   onClick={() => {
                     setMobileMenuOpen(false)
-                    navigate('/loginInscricao')
+                    setInscricoesEncerradasOpen(true)
                   }}
                   className="relative w-full bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-bold py-3 shadow-lg border-0"
                 >
-                  Inscreva-se
+                  INSCRIÇÕES ENCERRADAS
                 </Button>
               </div>
 
@@ -437,10 +437,10 @@ export default function Home() {
 
               <div className="hero-buttons-short flex flex-col sm:flex-row gap-2 max-[639px]:!gap-3 sm:gap-4 pt-3 max-[639px]:!pt-4 sm:pt-6 md:pt-8 lg:pt-10 justify-center md:justify-start w-full sm:w-auto">
                 <Button
-                  onClick={() => navigate('/loginInscricao')}
+                  onClick={() => setInscricoesEncerradasOpen(true)}
                   className="hero-button-short h-11 max-[639px]:!min-h-[48px] max-[639px]:!h-12 sm:h-14 md:h-16 px-5 max-[639px]:!px-6 sm:px-8 md:px-12 text-sm max-[639px]:!text-base sm:text-lg md:text-xl bg-accent-400 hover:bg-accent-500 text-slate-900 font-bold shadow-2xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto"
                 >
-                  INSCREVA-SE AGORA
+                  INSCRIÇÕES ENCERRADAS
                 </Button>
                 <Button
                   variant="outline"
@@ -519,11 +519,11 @@ export default function Home() {
             <Button
               onClick={() => {
                 setModalOpen(false)
-                navigate('/loginInscricao')
+                setInscricoesEncerradasOpen(true)
               }}
               className="w-full sm:flex-1 h-10 sm:h-12 md:h-14 text-sm sm:text-base md:text-lg bg-gradient-to-r from-accent-400 to-accent-500 hover:from-accent-500 hover:to-accent-600 text-slate-900 font-bold shadow-lg transform hover:scale-105 transition-all duration-300"
             >
-              INSCREVA-SE AGORA
+              INSCRIÇÕES ENCERRADAS
             </Button>
             <Button
               variant="outline"
@@ -531,6 +531,29 @@ export default function Home() {
               className="w-full sm:w-auto h-10 sm:h-12 md:h-14 px-4 sm:px-6 md:px-8 text-sm sm:text-base md:text-lg border-2 border-primary-300 text-primary-700 hover:bg-primary-50 font-semibold"
             >
               Fechar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+
+      {/* Modal "Inscricoes Encerradas" */}
+      <Dialog open={inscricoesEncerradasOpen} onOpenChange={setInscricoesEncerradasOpen}>
+        <DialogContent className="w-[90vw] sm:w-[85vw] md:w-[70vw] max-w-md sm:max-w-lg bg-white/95 backdrop-blur-xl border-2 border-primary-200/50 shadow-2xl rounded-2xl p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle className="text-xl sm:text-2xl font-extrabold text-slate-900 text-center" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+              Inscrições Encerradas
+            </DialogTitle>
+            <DialogDescription className="text-slate-700 text-sm sm:text-base text-center leading-relaxed">
+              As inscricoes para a II Corrida e Caminhada da Qualidade FARMACE foram encerradas no dia 10/11/2025 as 17h.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center pt-2">
+            <Button
+              className="h-10 sm:h-11 px-5 sm:px-6 bg-accent-400 hover:bg-accent-500 text-slate-900 font-bold shadow-md"
+              onClick={() => setInscricoesEncerradasOpen(false)}
+            >
+              Entendi
             </Button>
           </div>
         </DialogContent>
@@ -897,25 +920,26 @@ export default function Home() {
           <div className="relative z-10 px-6 py-16 md:px-12 md:py-20 lg:px-16 lg:py-24 text-center">
             {/* Main Heading - Montserrat Typography like Hero */}
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)] mb-4 md:mb-6" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-              <span style={{ fontWeight: 800 }}>GARANTA SUA VAGA</span>
+              <span style={{ fontWeight: 800 }}>INSCRIÇÕES</span>
               <br />
-              <span style={{ fontWeight: 200 }} className="text-white/90">AGORA</span>
+              <span style={{ fontWeight: 200 }} className="text-white/90">ENCERRADAS</span>
             </h2>
 
             {/* Subheading */}
             <p className="text-base sm:text-lg md:text-xl text-white/80 max-w-3xl mx-auto mb-10 md:mb-12 leading-relaxed" style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 300 }}>
-              Inscrições limitadas para colaboradores FARMACE.<br className="hidden sm:block" />
-              Celebre a qualidade e a saúde com toda a equipe.
+              As inscrições para a 2ª Corrida e Caminhada da Qualidade FARMACE foram encerradas no dia 10/11/2025 às 17h.
+              <br className="hidden sm:block" />
+              Agradecemos o interesse! Acompanhe nossos canais oficiais para futuras novidades.
             </p>
 
             {/* CTA Buttons - Same style as Hero */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 md:mb-16">
               <Button
-                onClick={() => navigate('/loginInscricao')}
+                onClick={() => setInscricoesEncerradasOpen(true)}
                 className="h-12 sm:h-14 md:h-16 px-8 sm:px-10 md:px-12 text-base sm:text-lg md:text-xl bg-accent-400 hover:bg-accent-500 text-slate-900 font-bold shadow-2xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto"
                 style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700 }}
               >
-                FAZER INSCRIÇÃO
+                INSCRIÇÕES ENCERRADAS
               </Button>
               <Button
                 variant="outline"
