@@ -13,76 +13,79 @@ import {
 import { useNavigate } from "react-router-dom"
 import { useState, useRef, useEffect } from "react"
 import { ArrowLeft, User, Lock, HelpCircle, Volume2, VolumeX, AlertCircle } from "lucide-react"
-import funcionariosData from "../../data/funcionarios.json"
-import { supabase } from "@/services/supabase"
+// ⚠️ IMPORTS COMENTADOS - Necessários apenas quando o sistema de login estiver ativo
+// import funcionariosData from "../../data/funcionarios.json"
+// import { supabase } from "@/services/supabase"
 
+// ⚠️ INTERFACE COMENTADA - Necessária apenas quando o sistema de login estiver ativo
 // Tipo para os dados do funcionário
-interface Funcionario {
-  MATRICULA: string
-  NOME: string
-  CPF: string
-  NASCIMENTO: string
-  EMAIL: string // ✅ NOVO: Campo de email do funcionário
-}
+// interface Funcionario {
+//   MATRICULA: string
+//   NOME: string
+//   CPF: string
+//   NASCIMENTO: string
+//   EMAIL: string // ✅ NOVO: Campo de email do funcionário
+// }
 
+// ⚠️ FUNÇÕES COMENTADAS - Necessárias apenas quando o sistema de login estiver ativo
 // Função para gerar a senha esperada baseada no CPF e data de nascimento
-const gerarSenha = (cpf: string, dataNascimento: string): string => {
-  // Pega os 3 últimos dígitos do CPF
-  const ultimosDigitosCPF = cpf.slice(-3)
+// const gerarSenha = (cpf: string, dataNascimento: string): string => {
+//   // Pega os 3 últimos dígitos do CPF
+//   const ultimosDigitosCPF = cpf.slice(-3)
 
-  // Extrai dia e mês da data de nascimento (formato: DD.MM.YYYY HH:MM)
-  const [dia, mes] = dataNascimento.split('.')
-  const ddmm = `${dia}${mes}`
+//   // Extrai dia e mês da data de nascimento (formato: DD.MM.YYYY HH:MM)
+//   const [dia, mes] = dataNascimento.split('.')
+//   const ddmm = `${dia}${mes}`
 
-  return `${ultimosDigitosCPF}${ddmm}`
-}
+//   return `${ultimosDigitosCPF}${ddmm}`
+// }
 
 // Função para normalizar matrícula (remove zeros à esquerda)
-const normalizarMatricula = (matricula: string): string => {
-  return matricula.replace(/^0+/, '') || '0'
-}
+// const normalizarMatricula = (matricula: string): string => {
+//   return matricula.replace(/^0+/, '') || '0'
+// }
 
 // Função para formatar matrícula com 6 dígitos (adiciona zeros à esquerda)
-const formatarMatricula6Digitos = (matricula: string): string => {
-  const matriculaNormalizada = normalizarMatricula(matricula)
-  return matriculaNormalizada.padStart(6, '0')
-}
+// const formatarMatricula6Digitos = (matricula: string): string => {
+//   const matriculaNormalizada = normalizarMatricula(matricula)
+//   return matriculaNormalizada.padStart(6, '0')
+// }
 
 // Função para normalizar CPF (remove pontos, traços e espaços)
-const normalizarCPF = (cpf: string): string => {
-  return cpf.replace(/[.\-\s]/g, '')
-}
+// const normalizarCPF = (cpf: string): string => {
+//   return cpf.replace(/[.\-\s]/g, '')
+// }
 
 // Função para detectar se o input é CPF ou matrícula
-const detectarTipoInput = (input: string): 'cpf' | 'matricula' => {
-  const inputLimpo = input.replace(/[.\-\s]/g, '')
+// const detectarTipoInput = (input: string): 'cpf' | 'matricula' => {
+//   const inputLimpo = input.replace(/[.\-\s]/g, '')
 
-  // Se tem 11 dígitos numéricos, é CPF
-  if (/^\d{11}$/.test(inputLimpo)) {
-    return 'cpf'
-  }
+//   // Se tem 11 dígitos numéricos, é CPF
+//   if (/^\d{11}$/.test(inputLimpo)) {
+//     return 'cpf'
+//   }
 
-  // Caso contrário, é matrícula
-  return 'matricula'
-}
+//   // Caso contrário, é matrícula
+//   return 'matricula'
+// }
 
 // Função para buscar funcionário por matrícula OU CPF
-const buscarFuncionario = (input: string, funcionarios: Funcionario[]): Funcionario | undefined => {
-  const tipoInput = detectarTipoInput(input)
+// const buscarFuncionario = (input: string, funcionarios: Funcionario[]): Funcionario | undefined => {
+//   const tipoInput = detectarTipoInput(input)
 
-  if (tipoInput === 'cpf') {
-    // Busca por CPF
-    const cpfNormalizado = normalizarCPF(input)
-    return funcionarios.find(f => normalizarCPF(f.CPF) === cpfNormalizado)
-  } else {
-    // Busca por matrícula
-    const matriculaNormalizada = normalizarMatricula(input)
-    return funcionarios.find(f => {
-      const matriculaFuncionarioNormalizada = normalizarMatricula(f.MATRICULA)
-      return matriculaFuncionarioNormalizada === matriculaNormalizada
-    })
-  }
-}
+//   if (tipoInput === 'cpf') {
+//     // Busca por CPF
+//     const cpfNormalizado = normalizarCPF(input)
+//     return funcionarios.find(f => normalizarCPF(f.CPF) === cpfNormalizado)
+//   } else {
+//     // Busca por matrícula
+//     const matriculaNormalizada = normalizarMatricula(input)
+//     return funcionarios.find(f => {
+//       const matriculaFuncionarioNormalizada = normalizarMatricula(f.MATRICULA)
+//       return matriculaFuncionarioNormalizada === matriculaNormalizada
+//     })
+//   }
+// }
 
 // Função para formatar data/hora de forma legível
 const formatarDataHora = (dataISO: string): string => {
@@ -110,7 +113,8 @@ export default function LoginInscricao() {
     dataInscricao: string
     matricula: string
   } | null>(null)
-  const [isCheckingRegistration, setIsCheckingRegistration] = useState(false)
+  // ⚠️ Estado comentado - Necessário apenas quando o sistema de login estiver ativo
+  // const [isCheckingRegistration, setIsCheckingRegistration] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
   const videoRef = useRef<HTMLVideoElement>(null)
   const hasUnmutedRef = useRef(false)
@@ -147,126 +151,134 @@ export default function LoginInscricao() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Exibe modal de inscrições encerradas IMEDIATAMENTE
+    // ⚠️ INSCRIÇÕES ENCERRADAS - Exibe modal imediatamente
     setInscricoesEncerradasOpen(true)
     return // Bloqueia a execução da lógica de validação
 
-    // Remove espaços em branco
-    const inputDigitado = formData.matricula.trim()
-    const senhaDigitada = formData.senha.trim()
+    /* ========================================================================
+     * CÓDIGO DE VALIDAÇÃO DE LOGIN - TEMPORARIAMENTE DESABILITADO
+     * ========================================================================
+     * Este código está comentado porque as inscrições foram encerradas.
+     * Para reativar o sistema de login, remova o return acima (linha 152)
+     * e descomente todo o bloco abaixo.
+     * ======================================================================== */
 
-    // Busca o funcionário no JSON (por matrícula OU CPF)
-    const funcionarios = funcionariosData.RecordSet as Funcionario[]
-    const funcionario = buscarFuncionario(inputDigitado, funcionarios)
+    // // Remove espaços em branco
+    // const inputDigitado = formData.matricula.trim()
+    // const senhaDigitada = formData.senha.trim()
 
-    if (!funcionario) {
-      // Matrícula ou CPF não encontrado
-      setShowErrorDialog(true)
-      return
-    }
+    // // Busca o funcionário no JSON (por matrícula OU CPF)
+    // const funcionarios = funcionariosData.RecordSet as Funcionario[]
+    // const funcionario = buscarFuncionario(inputDigitado, funcionarios)
 
-    // Gera a senha esperada baseada no CPF e data de nascimento
-    const senhaEsperada = gerarSenha(funcionario.CPF, funcionario.NASCIMENTO)
+    // if (!funcionario) {
+    //   // Matrícula ou CPF não encontrado
+    //   setShowErrorDialog(true)
+    //   return
+    // }
 
-    if (senhaDigitada === senhaEsperada) {
-      // Login bem-sucedido - AGORA verifica se já está inscrito
-      const tipoLogin = detectarTipoInput(inputDigitado)
-      console.log("✅ Login bem-sucedido:", funcionario.NOME, "| Email:", funcionario.EMAIL, "| Tipo de login:", tipoLogin === 'cpf' ? 'CPF' : 'Matrícula')
+    // // Gera a senha esperada baseada no CPF e data de nascimento
+    // const senhaEsperada = gerarSenha(funcionario.CPF, funcionario.NASCIMENTO)
 
-      // Formata a matrícula com 6 dígitos para consultar no banco
-      const matriculaFormatada = formatarMatricula6Digitos(funcionario.MATRICULA)
-      console.log("🔍 [Login] Verificando inscrição para matrícula:", matriculaFormatada)
-      console.log("🔍 [Login] Matrícula original do funcionário:", funcionario.MATRICULA)
+    // if (senhaDigitada === senhaEsperada) {
+    //   // Login bem-sucedido - AGORA verifica se já está inscrito
+    //   const tipoLogin = detectarTipoInput(inputDigitado)
+    //   console.log("✅ Login bem-sucedido:", funcionario.NOME, "| Email:", funcionario.EMAIL, "| Tipo de login:", tipoLogin === 'cpf' ? 'CPF' : 'Matrícula')
 
-      setIsCheckingRegistration(true)
+    //   // Formata a matrícula com 6 dígitos para consultar no banco
+    //   const matriculaFormatada = formatarMatricula6Digitos(funcionario.MATRICULA)
+    //   console.log("🔍 [Login] Verificando inscrição para matrícula:", matriculaFormatada)
+    //   console.log("🔍 [Login] Matrícula original do funcionário:", funcionario.MATRICULA)
 
-      try {
-        // Consulta o Supabase para verificar se já existe inscrição
-        console.log("📡 [Login] Iniciando consulta ao Supabase...")
-        console.log("📡 [Login] Filtros: matricula =", matriculaFormatada, "AND deleted_at IS NULL AND status = 'Confirmada'")
+    //   setIsCheckingRegistration(true)
 
-        const { data, error, count } = await supabase
-          .from('tbcorrida')
-          .select('corrida_id, data_inscricao, matricula, created_at, deleted_at, status', { count: 'exact' })
-          .eq('matricula', matriculaFormatada)
-          .is('deleted_at', null)
-          .eq('status', 'Confirmada')
+    //   try {
+    //     // Consulta o Supabase para verificar se já existe inscrição
+    //     console.log("📡 [Login] Iniciando consulta ao Supabase...")
+    //     console.log("📡 [Login] Filtros: matricula =", matriculaFormatada, "AND deleted_at IS NULL AND status = 'Confirmada'")
 
-        console.log("📡 [Login] Resposta do Supabase:")
-        console.log("  - Total de registros encontrados:", count)
-        console.log("  - Dados retornados:", data)
-        console.log("  - Erro:", error)
+    //     const { data, error, count } = await supabase
+    //       .from('tbcorrida')
+    //       .select('corrida_id, data_inscricao, matricula, created_at, deleted_at, status', { count: 'exact' })
+    //       .eq('matricula', matriculaFormatada)
+    //       .is('deleted_at', null)
+    //       .eq('status', 'Confirmada')
 
-        setIsCheckingRegistration(false)
+    //     console.log("📡 [Login] Resposta do Supabase:")
+    //     console.log("  - Total de registros encontrados:", count)
+    //     console.log("  - Dados retornados:", data)
+    //     console.log("  - Erro:", error)
 
-        if (error) {
-          console.error('❌ [Login] Erro ao consultar Supabase:', error)
-          console.error('❌ [Login] Detalhes do erro:', {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code
-          })
-          // Em caso de erro na consulta, BLOQUEIA o prosseguimento para segurança
-          alert('Erro ao verificar inscrição. Por favor, tente novamente.')
-          return
-        }
+    //     setIsCheckingRegistration(false)
 
-        // Query já filtra deleted_at IS NULL e status = 'Confirmada'
-        console.log("🔍 [Login] Inscrições confirmadas encontradas:", count)
+    //     if (error) {
+    //       console.error('❌ [Login] Erro ao consultar Supabase:', error)
+    //       console.error('❌ [Login] Detalhes do erro:', {
+    //         message: error.message,
+    //         details: error.details,
+    //         hint: error.hint,
+    //         code: error.code
+    //       })
+    //       // Em caso de erro na consulta, BLOQUEIA o prosseguimento para segurança
+    //       alert('Erro ao verificar inscrição. Por favor, tente novamente.')
+    //       return
+    //     }
 
-        if (data && data.length > 0) {
-          // JÁ EXISTE INSCRIÇÃO CONFIRMADA - Mostra modal de alerta
-          const inscricao = data[0]
-          console.log('⚠️ [Login] Inscrição confirmada encontrada:', inscricao)
-          setInscricaoExistente({
-            dataInscricao: inscricao.data_inscricao || inscricao.created_at || new Date().toISOString(),
-            matricula: inscricao.matricula || matriculaFormatada
-          })
-          setShowAlreadyRegisteredDialog(true)
-          return // NÃO redireciona
-        }
+    //     // Query já filtra deleted_at IS NULL e status = 'Confirmada'
+    //     console.log("🔍 [Login] Inscrições confirmadas encontradas:", count)
 
-        // NÃO existe inscrição confirmada - Prossegue normalmente
-        console.log('✅ [Login] Nenhuma inscrição confirmada encontrada, prosseguindo...')
+    //     if (data && data.length > 0) {
+    //       // JÁ EXISTE INSCRIÇÃO CONFIRMADA - Mostra modal de alerta
+    //       const inscricao = data[0]
+    //       console.log('⚠️ [Login] Inscrição confirmada encontrada:', inscricao)
+    //       setInscricaoExistente({
+    //         dataInscricao: inscricao.data_inscricao || inscricao.created_at || new Date().toISOString(),
+    //         matricula: inscricao.matricula || matriculaFormatada
+    //       })
+    //       setShowAlreadyRegisteredDialog(true)
+    //       return // NÃO redireciona
+    //     }
 
-        const colaboradorData = {
-          matricula: funcionario.MATRICULA,
-          nome: funcionario.NOME,
-          cpf: funcionario.CPF,
-          dataNascimento: funcionario.NASCIMENTO,
-          email: funcionario.EMAIL || '',
-          loginTimestamp: new Date().toISOString()
-        }
+    //     // NÃO existe inscrição confirmada - Prossegue normalmente
+    //     console.log('✅ [Login] Nenhuma inscrição confirmada encontrada, prosseguindo...')
 
-        localStorage.setItem('colaboradorLogado', JSON.stringify(colaboradorData))
+    //     const colaboradorData = {
+    //       matricula: funcionario.MATRICULA,
+    //       nome: funcionario.NOME,
+    //       cpf: funcionario.CPF,
+    //       dataNascimento: funcionario.NASCIMENTO,
+    //       email: funcionario.EMAIL || '',
+    //       loginTimestamp: new Date().toISOString()
+    //     }
 
-        // Redireciona para página de inscrição
-        navigate('/inscricao')
+    //     localStorage.setItem('colaboradorLogado', JSON.stringify(colaboradorData))
 
-      } catch (error) {
-        console.error('❌ Erro inesperado ao verificar inscrição:', error)
-        setIsCheckingRegistration(false)
-        // Em caso de erro, permite prosseguir (fail-safe)
-        console.warn('⚠️ Erro inesperado, permitindo prosseguir...')
+    //     // Redireciona para página de inscrição
+    //     navigate('/inscricao')
 
-        const colaboradorData = {
-          matricula: funcionario.MATRICULA,
-          nome: funcionario.NOME,
-          cpf: funcionario.CPF,
-          dataNascimento: funcionario.NASCIMENTO,
-          email: funcionario.EMAIL || '',
-          loginTimestamp: new Date().toISOString()
-        }
+    //   } catch (error) {
+    //     console.error('❌ Erro inesperado ao verificar inscrição:', error)
+    //     setIsCheckingRegistration(false)
+    //     // Em caso de erro, permite prosseguir (fail-safe)
+    //     console.warn('⚠️ Erro inesperado, permitindo prosseguir...')
 
-        localStorage.setItem('colaboradorLogado', JSON.stringify(colaboradorData))
-        navigate('/inscricao')
-      }
-    } else {
-      // Senha incorreta
-      console.log("Senha esperada:", senhaEsperada, "Senha digitada:", senhaDigitada)
-      setShowErrorDialog(true)
-    }
+    //     const colaboradorData = {
+    //       matricula: funcionario.MATRICULA,
+    //       nome: funcionario.NOME,
+    //       cpf: funcionario.CPF,
+    //       dataNascimento: funcionario.NASCIMENTO,
+    //       email: funcionario.EMAIL || '',
+    //       loginTimestamp: new Date().toISOString()
+    //     }
+
+    //     localStorage.setItem('colaboradorLogado', JSON.stringify(colaboradorData))
+    //     navigate('/inscricao')
+    //   }
+    // } else {
+    //   // Senha incorreta
+    //   console.log("Senha esperada:", senhaEsperada, "Senha digitada:", senhaDigitada)
+    //   setShowErrorDialog(true)
+    // }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -429,10 +441,9 @@ export default function LoginInscricao() {
                 {/* Botão de Login */}
                 <Button
                   type="submit"
-                  disabled={isCheckingRegistration}
                   className="login-submit-button-short w-full h-12 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isCheckingRegistration ? 'Verificando...' : 'Entrar'}
+                  Entrar
                 </Button>
 
                 {/* Link de Ajuda abaixo do botão Entrar */}
