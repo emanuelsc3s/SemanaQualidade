@@ -17,7 +17,7 @@
 
     {
       "parameters": {
-        "functionCode": "const body = items[0].json || {};\n// Tenta extrair texto da maior variedade de payloads possíveis (Evolution / Baileys)\nconst text = body?.message?.text || body?.message?.conversation || body?.text || body?.body || body?.data?.message?.conversation || '';\nconst remoteJid = body?.key?.remoteJid || body?.remoteJid || body?.from || body?.data?.key?.remoteJid || '';\nlet number = (remoteJid || body?.number || '').toString().replace(/@.*/,'');\nnumber = number.replace(/\D/g,'');\nif (number && !number.startsWith('55') && number.length === 11) number = '55' + number;\nreturn [{ json: { text: (text || '').trim(), number, raw: body } }];"
+        "functionCode": "const body = items[0].json || {};\n// Tenta extrair texto da maior variedade de payloads possíveis (Evolution / Baileys)\nconst text = body?.message?.text || body?.message?.conversation || body?.text || body?.body || body?.data?.message?.conversation || '';\nconst remoteJid = body?.key?.remoteJid || body?.remoteJid || body?.from || body?.data?.key?.remoteJid || '';\nlet number = (remoteJid || body?.number || '').toString().replace(/@.*/,'');\nnumber = number.replace(/\\D/g,'');\nif (number && !number.startsWith('55') && number.length === 11) number = '55' + number;\nreturn [{ json: { text: (text || '').trim(), number, raw: body } }];"
       },
       "id": "Function_Extract",
       "name": "Extract Message",
@@ -54,7 +54,7 @@
 
     {
       "parameters": {
-        "functionCode": "const payload = items[0].json;\nconst content = payload?.data?.[0]?.message?.content || payload?.choices?.[0]?.message?.content || payload?.text || JSON.stringify(payload);\nlet ai;\ntry { ai = typeof content === 'string' ? JSON.parse(content) : content; } catch(e) {\n  ai = { needs_db: false, cpf: null, matricula: null, answer_type: 'faq', reply: 'Desculpe, não entendi. Poderia reformular sua pergunta sobre a Corrida FARMACE?' };\n}\n// Normaliza matrícula: garantir 6 dígitos com zeros à esquerda\nif (ai?.matricula && /^\d{1,6}$/.test(ai.matricula)) { ai.matricula = ai.matricula.padStart(6,'0'); }\n// Normaliza cpf: manter apenas números de 11 dígitos\nif (ai?.cpf) { const d = (ai.cpf+'').replace(/\D/g,''); ai.cpf = d.length===11 ? d : null; }\nreturn [{ json: { ai, number: $json.number } }];"
+        "functionCode": "const payload = items[0].json;\nconst content = payload?.data?.[0]?.message?.content || payload?.choices?.[0]?.message?.content || payload?.text || JSON.stringify(payload);\nlet ai;\ntry { ai = typeof content === 'string' ? JSON.parse(content) : content; } catch(e) {\n  ai = { needs_db: false, cpf: null, matricula: null, answer_type: 'faq', reply: 'Desculpe, não entendi. Poderia reformular sua pergunta sobre a Corrida FARMACE?' };\n}\n// Normaliza matrícula: garantir 6 dígitos com zeros à esquerda\nif (ai?.matricula && /^\\d{1,6}$/.test(ai.matricula)) { ai.matricula = ai.matricula.padStart(6,'0'); }\n// Normaliza cpf: manter apenas números de 11 dígitos\nif (ai?.cpf) { const d = (ai.cpf+'').replace(/\\D/g,''); ai.cpf = d.length===11 ? d : null; }\nreturn [{ json: { ai, number: $json.number } }];"
       },
       "id": "Function_ParseAI",
       "name": "Parse AI JSON",

@@ -364,11 +364,6 @@ const RelatorioInscritosPDFPage: React.FC<{ dados: DadosRelatorio }> = ({ dados 
           <Text style={styles.summaryText}>
             • Percentual geral de adesão: {percentualGeralAdesao.toFixed(1)}%
           </Text>
-          {inscritos.length > 0 && (
-            <Text style={styles.summaryText}>
-              • Departamento com maior adesão: {inscritos[0].lotacao} ({inscritos[0].percentual_adesao.toFixed(1)}%)
-            </Text>
-          )}
         </View>
 
         {/* Rodapé Superior */}
