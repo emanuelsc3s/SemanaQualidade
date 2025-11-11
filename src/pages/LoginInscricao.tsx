@@ -105,6 +105,7 @@ export default function LoginInscricao() {
   const [showHelp, setShowHelp] = useState(false)
   const [showErrorDialog, setShowErrorDialog] = useState(false)
   const [showAlreadyRegisteredDialog, setShowAlreadyRegisteredDialog] = useState(false)
+  const [inscricoesEncerradasOpen, setInscricoesEncerradasOpen] = useState(false)
   const [inscricaoExistente, setInscricaoExistente] = useState<{
     dataInscricao: string
     matricula: string
@@ -145,6 +146,10 @@ export default function LoginInscricao() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Exibe modal de inscrições encerradas IMEDIATAMENTE
+    setInscricoesEncerradasOpen(true)
+    return // Bloqueia a execução da lógica de validação
 
     // Remove espaços em branco
     const inputDigitado = formData.matricula.trim()
@@ -634,6 +639,28 @@ export default function LoginInscricao() {
                 Entendi
               </Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal de Inscrições Encerradas */}
+        <Dialog open={inscricoesEncerradasOpen} onOpenChange={setInscricoesEncerradasOpen}>
+          <DialogContent className="w-[90vw] sm:w-[85vw] md:w-[70vw] max-w-md sm:max-w-lg bg-white/95 backdrop-blur-xl border-2 border-primary-200/50 shadow-2xl rounded-2xl p-4 sm:p-6">
+            <DialogHeader>
+              <DialogTitle className="text-xl sm:text-2xl font-extrabold text-slate-900 text-center" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+                Inscrições Encerradas
+              </DialogTitle>
+              <DialogDescription className="text-slate-700 text-sm sm:text-base text-center leading-relaxed">
+                As inscrições para a II Corrida e Caminhada da Qualidade FARMACE foram encerradas no dia 10/11/2025 às 17h.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-center pt-2">
+              <Button
+                className="h-10 sm:h-11 px-5 sm:px-6 bg-accent-400 hover:bg-accent-500 text-slate-900 font-bold shadow-md"
+                onClick={() => setInscricoesEncerradasOpen(false)}
+              >
+                Entendi
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
